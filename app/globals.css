@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f7f4;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: #ffffff;
+  --soft: #f2f3ef;
+  --line: rgba(17, 24, 39, 0.09);
+  --ink: #171717;
+  --muted: #616161;
+  --accent: #111111;
+  --accent-strong: #000000;
+  --success: #0f766e;
+  --warning: #a16207;
+  --danger: #b91c1c;
+  --font-latin: "Avenir Next", "Avenir", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-arabic-sans: "Noto Sans Arabic", "Geeza Pro", "Tahoma", sans-serif;
+  --font-arabic-serif: "Noto Naskh Arabic", "Amiri", "Times New Roman", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(0, 0, 0, 0.025), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.025), transparent 24%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-latin), var(--font-arabic-sans), sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.locale-shell {
+  min-height: 100vh;
+}
+
+.arabic-copy {
+  font-family: var(--font-arabic-sans), sans-serif;
+}
+
+.arabic-display {
+  font-family: var(--font-arabic-serif), serif;
+}
+
+.surface-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.04);
+}
+
+.input-base {
+  width: 100%;
+  min-height: 3.25rem;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  padding: 0.875rem 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.input-base:focus {
+  border-color: rgba(17, 17, 17, 0.24);
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.06);
+}
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  padding: 0 1.25rem;
+  color: white;
+  font-weight: 700;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.button-primary:hover {
+  transform: translateY(-1px);
+}
+
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 0 1.25rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.chip-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.7rem 1rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.83rem;
+  font-weight: 700;
+}
+
+.status-pill--verified {
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--success);
+}
+
+.status-pill--pending {
+  background: rgba(161, 98, 7, 0.12);
+  color: var(--warning);
+}
+
+.status-pill--danger {
+  background: rgba(185, 28, 28, 0.1);
+  color: var(--danger);
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.gradient-frame {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 248, 246, 0.94)),
+    radial-gradient(circle at top right, rgba(0, 0, 0, 0.03), transparent 30%);
+}

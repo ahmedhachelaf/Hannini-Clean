@@ -1,0 +1,179 @@
+"use client";
+
+import { useState } from "react";
+import type { BookingSubmissionResult, Category, Locale, Provider, Zone } from "@/lib/types";
+
+type BookingFormProps = {
+  locale: Locale;
+  provider: Provider;
+  categories: Category[];
+  zones: Zone[];
+  labels: {
+    title: string;
+    description: string;
+    successTitle: string;
+    successDescription: string;
+    openWhatsapp: string;
+    fields: {
+      fullName: string;
+      phoneNumber: string;
+      selectedService: string;
+      date: string;
+      time: string;
+      zone: string;
+      address: string;
+      mapsLink: string;
+      issueDescription: string;
+      preferredContactMethod: string;
+    };
+  };
+};
+
+export function BookingForm({ locale, provider, categories, zones, labels }: BookingFormProps) {
+  const [pending, setPending] = useState(false);
+  const [result, setResult] = useState<BookingSubmissionResult | null>(null);
+  const minimumDate = new Date().toISOString().slice(0, 10);
+
+  async function handleSubmit(formData: FormData) {
+    setPending(true);
+    setResult(null);
+
+    const payload = {
+      providerId: provider.id,
+      providerSlug: provider.slug,
+      customerName: String(formData.get("customerName") ?? ""),
+      phoneNumber: String(formData.get("phoneNumber") ?? ""),
+      selectedService: String(formData.get("selectedService") ?? ""),
+      date: String(formData.get("date") ?? ""),
+      time: String(formData.get("time") ?? ""),
+      zoneSlug: String(formData.get("zoneSlug") ?? ""),
+      address: String(formData.get("address") ?? ""),
+      googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
+      issueDescription: String(formData.get("issueDescription") ?? ""),
+      preferredContactMethod: String(formData.get("preferredContactMethod") ?? ""),
+    };
+
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = (await response.json()) as BookingSubmissionResult;
+      setResult(data);
+    } catch (error) {
+      setResult({
+        ok: false,
+        message: locale === "ar" ? "تعذر إرسال الطلب حالياً." : "Impossible d'envoyer la demande pour le moment.",
+      });
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (result?.ok) {
+    return (
+      <div className="surface-card rounded-[1.75rem] p-6">
+        <div className="status-pill status-pill--verified mb-4 inline-flex">{locale === "ar" ? "تم" : "OK"}</div>
+        <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.successTitle}</h2>
+        <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">{labels.successDescription}</p>
+        <p className="mt-3 text-sm text-[var(--muted)]">{result.message}</p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          {result.whatsappUrl ? (
+            <a href={result.whatsappUrl} target="_blank" rel="noreferrer" className="button-primary">
+              {labels.openWhatsapp}
+            </a>
+          ) : null}
+          <a href={`/${locale}/providers/${provider.slug}`} className="button-secondary">
+            {locale === "ar" ? "العودة إلى الملف" : "Retour au profil"}
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      action={handleSubmit}
+      className="surface-card flex flex-col gap-5 rounded-[1.75rem] p-6"
+    >
+      <div>
+        <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
+        <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.fullName}</span>
+          <input name="customerName" required className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.phoneNumber}</span>
+          <input name="phoneNumber" required type="tel" className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.selectedService}</span>
+          <select name="selectedService" defaultValue={provider.categorySlug} className="input-base">
+            {categories.map((category) => (
+              <option key={category.slug} value={category.slug}>
+                {category.name[locale]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.zone}</span>
+          <select name="zoneSlug" className="input-base" required>
+            {zones.map((zone) => (
+              <option key={zone.slug} value={zone.slug}>
+                {zone.name[locale]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.date}</span>
+          <input name="date" type="date" min={minimumDate} required className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.time}</span>
+          <input name="time" type="time" required className="input-base" />
+        </label>
+      </div>
+
+      <label>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.address}</span>
+        <input name="address" required className="input-base" />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.mapsLink}</span>
+        <input name="googleMapsUrl" type="url" required className="input-base" placeholder="https://maps.google.com/..." />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.issueDescription}</span>
+        <textarea name="issueDescription" required rows={5} className="input-base min-h-32 resize-y" />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.preferredContactMethod}</span>
+        <select name="preferredContactMethod" className="input-base">
+          <option value="whatsapp">WhatsApp</option>
+          <option value="phone">{locale === "ar" ? "مكالمة هاتفية" : "Téléphone"}</option>
+        </select>
+      </label>
+
+      {result?.message ? (
+        <p className={`text-sm ${result.ok ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>{result.message}</p>
+      ) : null}
+
+      <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit">
+        {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : locale === "ar" ? "إرسال الحجز" : "Envoyer la réservation"}
+      </button>
+    </form>
+  );
+}
