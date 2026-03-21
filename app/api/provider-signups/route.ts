@@ -48,6 +48,16 @@ export async function POST(request: Request) {
         .map((photo) => photo.name),
       verificationDocumentName:
         verificationDocument instanceof File && verificationDocument.size > 0 ? verificationDocument.name : undefined,
+      facebookUrl: String(formData.get("facebookUrl") ?? ""),
+      instagramUrl: String(formData.get("instagramUrl") ?? ""),
+      tiktokUrl: String(formData.get("tiktokUrl") ?? ""),
+      whatsappBusinessUrl: String(formData.get("whatsappBusinessUrl") ?? ""),
+      websiteUrl: String(formData.get("websiteUrl") ?? ""),
+      availableForBulkOrders: String(formData.get("availableForBulkOrders") ?? "") === "on",
+      minimumOrderQuantity: String(formData.get("minimumOrderQuantity") ?? ""),
+      productionCapacity: String(formData.get("productionCapacity") ?? ""),
+      leadTime: String(formData.get("leadTime") ?? ""),
+      deliveryArea: String(formData.get("deliveryArea") ?? ""),
     });
 
     const primaryPhone = payload.phoneNumber || payload.whatsappNumber;
@@ -103,36 +113,60 @@ export async function POST(request: Request) {
       { onConflict: "slug" },
     );
 
-    const { data: providerRecord, error: providerError } = await supabase
+    const providerInsertBase = {
+      slug: generatedSlug,
+      display_name: payload.fullName,
+      workshop_name: payload.workshopName || null,
+      phone_number: primaryPhone,
+      whatsapp_number: primaryWhatsapp,
+      hourly_rate: payload.hourlyRate ?? 0,
+      travel_fee: payload.travelFee ?? 0,
+      years_experience: payload.yearsExperience ?? 0,
+      bio_ar: payload.shortDescription,
+      bio_fr: payload.shortDescription,
+      tagline_ar: payload.workshopName || payload.fullName,
+      tagline_fr: payload.workshopName || payload.fullName,
+      google_maps_url: fallbackMapsUrl,
+      response_time_minutes: 60,
+      completed_jobs_count: 0,
+      rating_average: 0,
+      review_count: 0,
+      approval_status: "pending" as const,
+      is_verified: false,
+      featured: false,
+      profile_photo_url: "/placeholders/provider-avatar.svg",
+    };
+
+    let { data: providerRecord, error: providerError } = await supabase
       .from("providers")
       .insert({
-        slug: generatedSlug,
-        display_name: payload.fullName,
-        workshop_name: payload.workshopName || null,
-        phone_number: primaryPhone,
-        whatsapp_number: primaryWhatsapp,
-        hourly_rate: payload.hourlyRate ?? 0,
-        travel_fee: payload.travelFee ?? 0,
-        years_experience: payload.yearsExperience ?? 0,
-        bio_ar: payload.shortDescription,
-        bio_fr: payload.shortDescription,
-        tagline_ar: payload.workshopName || payload.fullName,
-        tagline_fr: payload.workshopName || payload.fullName,
-        google_maps_url: fallbackMapsUrl,
-        response_time_minutes: 60,
-        completed_jobs_count: 0,
-        rating_average: 0,
-        review_count: 0,
-        approval_status: "pending",
-        is_verified: false,
-        featured: false,
-        profile_photo_url: "/placeholders/provider-avatar.svg",
+        ...providerInsertBase,
+        facebook_url: payload.facebookUrl || null,
+        instagram_url: payload.instagramUrl || null,
+        tiktok_url: payload.tiktokUrl || null,
+        whatsapp_business_url: payload.whatsappBusinessUrl || null,
+        website_url: payload.websiteUrl || null,
+        available_for_bulk_orders: payload.availableForBulkOrders ?? false,
+        minimum_order_quantity: payload.minimumOrderQuantity || null,
+        production_capacity: payload.productionCapacity || null,
+        lead_time: payload.leadTime || null,
+        delivery_area: payload.deliveryArea || null,
       })
       .select("id")
       .single();
 
     if (providerError) {
-      throw providerError;
+      const fallbackInsert = await supabase
+        .from("providers")
+        .insert(providerInsertBase)
+        .select("id")
+        .single();
+      providerRecord = fallbackInsert.data;
+      providerError = fallbackInsert.error;
+    }
+
+    if (providerError || !providerRecord) {
+      throw providerError ?? new Error("Unable to create provider.");
     }
 
     const providerId = providerRecord.id;
@@ -183,6 +217,14 @@ export async function POST(request: Request) {
       notes: [
         payload.profilePhotoName ? `Profile photo: ${payload.profilePhotoName}` : "",
         payload.workPhotoNames.length > 0 ? `Work photos: ${payload.workPhotoNames.join(", ")}` : "",
+        payload.facebookUrl ? `Facebook: ${payload.facebookUrl}` : "",
+        payload.instagramUrl ? `Instagram: ${payload.instagramUrl}` : "",
+        payload.tiktokUrl ? `TikTok: ${payload.tiktokUrl}` : "",
+        payload.whatsappBusinessUrl ? `WhatsApp Business: ${payload.whatsappBusinessUrl}` : "",
+        payload.websiteUrl ? `Website: ${payload.websiteUrl}` : "",
+        payload.availableForBulkOrders
+          ? `Bulk orders: yes${payload.minimumOrderQuantity ? ` | MOQ ${payload.minimumOrderQuantity}` : ""}${payload.productionCapacity ? ` | Capacity ${payload.productionCapacity}` : ""}${payload.leadTime ? ` | Lead time ${payload.leadTime}` : ""}${payload.deliveryArea ? ` | Delivery ${payload.deliveryArea}` : ""}`
+          : "",
       ]
         .filter(Boolean)
         .join(" | "),

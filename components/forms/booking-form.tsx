@@ -28,6 +28,13 @@ type BookingFormProps = {
       notificationOption: string;
       notificationHint: string;
       preferredContactMethod: string;
+      businessBuyerTitle: string;
+      businessBuyerHint: string;
+      isBusinessBuyer: string;
+      quantityNeeded: string;
+      productionNeed: string;
+      requestedLeadTime: string;
+      deliveryAreaNeeded: string;
     };
   };
 };
@@ -160,6 +167,37 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.issueDescription}</span>
         <textarea name="issueDescription" required rows={5} className="input-base min-h-32 resize-y" />
       </label>
+
+      {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
+        <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(180deg,rgba(214,230,255,0.72),rgba(255,255,255,0.95))] p-5">
+          <div>
+            <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{labels.fields.businessBuyerTitle}</h3>
+            <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{labels.fields.businessBuyerHint}</p>
+          </div>
+          <label className="mt-4 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
+            <input name="isBusinessBuyer" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <span className="text-sm font-semibold text-[var(--ink)]">{labels.fields.isBusinessBuyer}</span>
+          </label>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.quantityNeeded}</span>
+              <input name="quantityNeeded" className="input-base" />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.productionNeed}</span>
+              <input name="productionNeed" className="input-base" />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.requestedLeadTime}</span>
+              <input name="requestedLeadTime" className="input-base" />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.deliveryAreaNeeded}</span>
+              <input name="deliveryAreaNeeded" className="input-base" />
+            </label>
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <label>

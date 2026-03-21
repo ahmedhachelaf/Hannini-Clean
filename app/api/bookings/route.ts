@@ -19,6 +19,11 @@ export async function POST(request: Request) {
     const issueSummary = [
       payload.issueDescription,
       payload.notificationRequested ? "Notification requested: yes" : null,
+      payload.isBusinessBuyer ? "Business buyer inquiry: yes" : null,
+      payload.quantityNeeded ? `Quantity needed: ${payload.quantityNeeded}` : null,
+      payload.productionNeed ? `Production need: ${payload.productionNeed}` : null,
+      payload.requestedLeadTime ? `Lead time requested: ${payload.requestedLeadTime}` : null,
+      payload.deliveryAreaNeeded ? `Delivery area needed: ${payload.deliveryAreaNeeded}` : null,
       payload.issuePhotoNames.length > 0 ? `Issue photos: ${payload.issuePhotoNames.join(", ")}` : null,
     ]
       .filter(Boolean)
@@ -121,6 +126,11 @@ async function readFormPayload(request: Request) {
     googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
     issueDescription: String(formData.get("issueDescription") ?? ""),
     notificationRequested: String(formData.get("notificationRequested") ?? "") === "on",
+    isBusinessBuyer: String(formData.get("isBusinessBuyer") ?? "") === "on",
+    quantityNeeded: String(formData.get("quantityNeeded") ?? ""),
+    productionNeed: String(formData.get("productionNeed") ?? ""),
+    requestedLeadTime: String(formData.get("requestedLeadTime") ?? ""),
+    deliveryAreaNeeded: String(formData.get("deliveryAreaNeeded") ?? ""),
     issuePhotoNames: files,
     preferredContactMethod: String(formData.get("preferredContactMethod") ?? ""),
   };

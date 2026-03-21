@@ -52,6 +52,20 @@ type FormCopy = {
   startingPrice: string;
   extraFee: string;
   maps: string;
+  socialTitle: string;
+  socialHint: string;
+  facebook: string;
+  instagram: string;
+  tiktok: string;
+  whatsappBusiness: string;
+  website: string;
+  buyerAccessTitle: string;
+  buyerAccessHint: string;
+  bulkAvailable: string;
+  minimumOrderQuantity: string;
+  productionCapacity: string;
+  leadTime: string;
+  deliveryArea: string;
   languages: string;
   weekdays: string;
   startTime: string;
@@ -93,6 +107,20 @@ function getCopy(locale: Locale): FormCopy {
       startingPrice: "السعر الأساسي أو سعر البداية",
       extraFee: "رسوم التنقل أو التوصيل",
       maps: "رابط Google Maps",
+      socialTitle: "الحضور الرقمي والروابط",
+      socialHint: "اختياري: يساعد هنيني على إظهار قنواتك الرقمية الموثوقة بجانب ملفك.",
+      facebook: "رابط Facebook",
+      instagram: "رابط Instagram",
+      tiktok: "رابط TikTok",
+      whatsappBusiness: "رابط WhatsApp Business",
+      website: "الموقع الإلكتروني",
+      buyerAccessTitle: "الوصول إلى المشترين وطلبات الجملة",
+      buyerAccessHint: "خيار مفيد خصوصاً للطبخ المنزلي، الحلويات، الخياطة، والمنتجات اليدوية أو الإنتاج الصغير.",
+      bulkAvailable: "متاح لطلبات الجملة أو المشترين المهنيين",
+      minimumOrderQuantity: "الحد الأدنى للطلب",
+      productionCapacity: "القدرة الإنتاجية",
+      leadTime: "مدة التحضير",
+      deliveryArea: "منطقة التوصيل أو التسليم",
       languages: "اللغات",
       weekdays: "أيام التوفر",
       startTime: "بداية التوفر",
@@ -133,6 +161,20 @@ function getCopy(locale: Locale): FormCopy {
     startingPrice: "Tarif de base ou prix de départ",
     extraFee: "Frais de déplacement ou livraison",
     maps: "Lien Google Maps",
+    socialTitle: "Présence digitale",
+    socialHint: "Optionnel : permet d'afficher vos canaux numériques de façon propre sur votre profil Henini.",
+    facebook: "Lien Facebook",
+    instagram: "Lien Instagram",
+    tiktok: "Lien TikTok",
+    whatsappBusiness: "Lien WhatsApp Business",
+    website: "Site web",
+    buyerAccessTitle: "Accès acheteurs et commandes en volume",
+    buyerAccessHint: "Utile surtout pour cuisine maison, pâtisseries, couture, créations locales et petites productions.",
+    bulkAvailable: "Disponible pour commandes en volume / acheteurs pro",
+    minimumOrderQuantity: "Commande minimale",
+    productionCapacity: "Capacité de production",
+    leadTime: "Délai de préparation",
+    deliveryArea: "Zone de livraison ou remise",
     languages: "Langues",
     weekdays: "Jours de disponibilité",
     startTime: "Début",
@@ -362,6 +404,66 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <input name="googleMapsUrl" type="url" className="input-base" placeholder="https://maps.google.com/..." />
           </label>
         </div>
+
+        <div className="mt-6 rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] p-4">
+          <div className="flex flex-col gap-1">
+            <h4 className="text-sm font-extrabold text-[var(--ink)]">{copy.socialTitle}</h4>
+            <p className="text-sm leading-7 text-[var(--muted)]">{copy.socialHint}</p>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.facebook}</span>
+              <input name="facebookUrl" type="url" className="input-base" placeholder="https://facebook.com/..." />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.instagram}</span>
+              <input name="instagramUrl" type="url" className="input-base" placeholder="https://instagram.com/..." />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.tiktok}</span>
+              <input name="tiktokUrl" type="url" className="input-base" placeholder="https://tiktok.com/..." />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.whatsappBusiness}</span>
+              <input name="whatsappBusinessUrl" type="url" className="input-base" placeholder="https://wa.me/..." />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.website}</span>
+              <input name="websiteUrl" type="url" className="input-base" placeholder="https://example.com" />
+            </label>
+          </div>
+        </div>
+
+        {profileType === "home_business" ? (
+          <div className="mt-6 rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-[linear-gradient(180deg,rgba(214,230,255,0.72),rgba(255,255,255,0.95))] p-4">
+            <div className="flex flex-col gap-1">
+              <h4 className="text-sm font-extrabold text-[var(--ink)]">{copy.buyerAccessTitle}</h4>
+              <p className="text-sm leading-7 text-[var(--muted)]">{copy.buyerAccessHint}</p>
+            </div>
+            <label className="mt-4 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
+              <input name="availableForBulkOrders" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+              <span className="text-sm font-semibold text-[var(--ink)]">{copy.bulkAvailable}</span>
+            </label>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label>
+                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.minimumOrderQuantity}</span>
+                <input name="minimumOrderQuantity" className="input-base" />
+              </label>
+              <label>
+                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.productionCapacity}</span>
+                <input name="productionCapacity" className="input-base" />
+              </label>
+              <label>
+                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.leadTime}</span>
+                <input name="leadTime" className="input-base" />
+              </label>
+              <label>
+                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.deliveryArea}</span>
+                <input name="deliveryArea" className="input-base" />
+              </label>
+            </div>
+          </div>
+        ) : null}
 
         <fieldset className="mt-5 space-y-3">
           <legend className="text-sm font-semibold text-[var(--muted)]">{copy.languages}</legend>

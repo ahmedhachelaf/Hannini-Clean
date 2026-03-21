@@ -15,6 +15,11 @@ export const bookingSchema = z.object({
   notificationRequested: z.boolean().default(false),
   issuePhotoNames: z.array(z.string()).default([]),
   preferredContactMethod: z.enum(["whatsapp", "phone"]),
+  isBusinessBuyer: z.boolean().default(false),
+  quantityNeeded: z.string().optional().or(z.literal("")).default(""),
+  productionNeed: z.string().optional().or(z.literal("")).default(""),
+  requestedLeadTime: z.string().optional().or(z.literal("")).default(""),
+  deliveryAreaNeeded: z.string().optional().or(z.literal("")).default(""),
 });
 
 export const reviewSchema = z.object({
@@ -84,6 +89,16 @@ export const providerSignupSchema = z.object({
   profilePhotoName: z.string().optional(),
   workPhotoNames: z.array(z.string()).default([]),
   verificationDocumentName: z.string().optional(),
+  facebookUrl: z.string().url().optional().or(z.literal("")).default(""),
+  instagramUrl: z.string().url().optional().or(z.literal("")).default(""),
+  tiktokUrl: z.string().url().optional().or(z.literal("")).default(""),
+  whatsappBusinessUrl: z.string().url().optional().or(z.literal("")).default(""),
+  websiteUrl: z.string().url().optional().or(z.literal("")).default(""),
+  availableForBulkOrders: z.boolean().default(false),
+  minimumOrderQuantity: z.string().optional().or(z.literal("")).default(""),
+  productionCapacity: z.string().optional().or(z.literal("")).default(""),
+  leadTime: z.string().optional().or(z.literal("")).default(""),
+  deliveryArea: z.string().optional().or(z.literal("")).default(""),
 }).superRefine((value, ctx) => {
   if (!value.phoneNumber && !value.whatsappNumber) {
     ctx.addIssue({

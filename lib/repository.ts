@@ -45,6 +45,16 @@ type ProviderRow = {
   phone_number: string;
   whatsapp_number: string;
   google_maps_url: string;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  tiktok_url?: string | null;
+  whatsapp_business_url?: string | null;
+  website_url?: string | null;
+  available_for_bulk_orders?: boolean | null;
+  minimum_order_quantity?: string | null;
+  production_capacity?: string | null;
+  lead_time?: string | null;
+  delivery_area?: string | null;
   bio_ar: string;
   bio_fr: string;
   tagline_ar: string;
@@ -298,6 +308,20 @@ function mapProviderRow(row: ProviderRow): Provider {
     phoneNumber: row.phone_number,
     whatsappNumber: row.whatsapp_number,
     googleMapsUrl: row.google_maps_url,
+    socialLinks: {
+      facebook: row.facebook_url ?? undefined,
+      instagram: row.instagram_url ?? undefined,
+      tiktok: row.tiktok_url ?? undefined,
+      whatsappBusiness: row.whatsapp_business_url ?? undefined,
+      website: row.website_url ?? undefined,
+    },
+    bulkOrders: {
+      available: Boolean(row.available_for_bulk_orders),
+      minimumOrderQuantity: row.minimum_order_quantity ?? undefined,
+      productionCapacity: row.production_capacity ?? undefined,
+      leadTime: row.lead_time ?? undefined,
+      deliveryArea: row.delivery_area ?? undefined,
+    },
     bio: {
       ar: row.bio_ar,
       fr: row.bio_fr,
@@ -410,10 +434,7 @@ async function fetchSupabaseProviders() {
     return null;
   }
 
-  const { data, error } = await supabase
-    .from("providers")
-    .select(
-      `
+  const baseSelect = `
         id,
         slug,
         display_name,
@@ -441,12 +462,61 @@ async function fetchSupabaseProviders() {
         availability ( day_key, label_ar, label_fr, start_time, end_time ),
         provider_photos ( url, alt_text, sort_order ),
         provider_verifications ( status, document_name, notes )
+      `;
+
+  const { data, error } = await supabase
+    .from("providers")
+    .select(
+      `
+        id,
+        slug,
+        display_name,
+        workshop_name,
+        rating_average,
+        review_count,
+        completed_jobs_count,
+        response_time_minutes,
+        is_verified,
+        approval_status,
+        featured,
+        years_experience,
+        hourly_rate,
+        travel_fee,
+        phone_number,
+        whatsapp_number,
+        google_maps_url,
+        facebook_url,
+        instagram_url,
+        tiktok_url,
+        whatsapp_business_url,
+        website_url,
+        available_for_bulk_orders,
+        minimum_order_quantity,
+        production_capacity,
+        lead_time,
+        delivery_area,
+        bio_ar,
+        bio_fr,
+        tagline_ar,
+        tagline_fr,
+        profile_photo_url,
+        provider_services ( category_slug ),
+        service_areas ( zone_slug ),
+        availability ( day_key, label_ar, label_fr, start_time, end_time ),
+        provider_photos ( url, alt_text, sort_order ),
+        provider_verifications ( status, document_name, notes )
       `,
     )
     .order("created_at", { ascending: false });
 
   if (error) {
-    return null;
+    const { data: fallbackData, error: fallbackError } = await supabase.from("providers").select(baseSelect).order("created_at", { ascending: false });
+
+    if (fallbackError) {
+      return null;
+    }
+
+    return (fallbackData as ProviderRow[]).map(mapProviderRow);
   }
 
   return (data as ProviderRow[]).map(mapProviderRow);

@@ -54,6 +54,22 @@ export type AvailabilitySlot = {
   endTime: string;
 };
 
+export type SocialLinks = {
+  facebook?: string;
+  instagram?: string;
+  tiktok?: string;
+  whatsappBusiness?: string;
+  website?: string;
+};
+
+export type BulkOrderProfile = {
+  available: boolean;
+  minimumOrderQuantity?: string;
+  productionCapacity?: string;
+  leadTime?: string;
+  deliveryArea?: string;
+};
+
 export type Review = {
   id: string;
   providerId: string;
@@ -92,6 +108,8 @@ export type Provider = {
   profilePhotoUrl: string;
   gallery: string[];
   galleryCaptions?: string[];
+  socialLinks?: SocialLinks;
+  bulkOrders?: BulkOrderProfile;
   availability: AvailabilitySlot[];
   verification: {
     status: "pending" | "verified" | "rejected";
@@ -170,6 +188,16 @@ export type ProviderSignupInput = {
   profilePhotoName?: string;
   workPhotoNames: string[];
   verificationDocumentName?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  tiktokUrl?: string;
+  whatsappBusinessUrl?: string;
+  websiteUrl?: string;
+  availableForBulkOrders?: boolean;
+  minimumOrderQuantity?: string;
+  productionCapacity?: string;
+  leadTime?: string;
+  deliveryArea?: string;
 };
 
 export type BookingInput = {
@@ -187,6 +215,11 @@ export type BookingInput = {
   notificationRequested: boolean;
   issuePhotoNames: string[];
   preferredContactMethod: ContactMethod;
+  isBusinessBuyer?: boolean;
+  quantityNeeded?: string;
+  productionNeed?: string;
+  requestedLeadTime?: string;
+  deliveryAreaNeeded?: string;
 };
 
 export type ReviewInput = {
