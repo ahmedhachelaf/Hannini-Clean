@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { categories as seedCategories, zones as seedZones } from "@/data/seed";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { providerSignupSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
+import { ZodError } from "zod";
 
 const weekdayLabels: Record<string, { ar: string; fr: string }> = {
   sat: { ar: "السبت", fr: "Samedi" },
@@ -13,13 +15,17 @@ const weekdayLabels: Record<string, { ar: string; fr: string }> = {
 };
 
 export async function POST(request: Request) {
+  let locale: "ar" | "fr" = "ar";
+
   try {
     const formData = await request.formData();
+    locale = String(formData.get("locale") ?? "ar") === "fr" ? "fr" : "ar";
     const profilePhoto = formData.get("profilePhoto");
     const verificationDocument = formData.get("verificationDocument");
     const workPhotos = formData.getAll("workPhotos");
 
     const payload = providerSignupSchema.parse({
+      profileType: String(formData.get("profileType") ?? "service_provider"),
       fullName: String(formData.get("fullName") ?? ""),
       workshopName: String(formData.get("workshopName") ?? ""),
       phoneNumber: String(formData.get("phoneNumber") ?? ""),
@@ -43,14 +49,25 @@ export async function POST(request: Request) {
         verificationDocument instanceof File && verificationDocument.size > 0 ? verificationDocument.name : undefined,
     });
 
+    const primaryPhone = payload.phoneNumber || payload.whatsappNumber;
+    const primaryWhatsapp = payload.whatsappNumber || payload.phoneNumber;
     const generatedSlug = `${slugify(payload.workshopName || payload.fullName)}-${Date.now().toString(36).slice(-5)}`;
+    const primaryZone = seedZones.find((zone) => zone.slug === payload.zones[0]);
+    const fallbackMapsUrl =
+      payload.googleMapsUrl ||
+      `https://maps.google.com/?q=${encodeURIComponent(
+        `${primaryZone?.name.fr ?? payload.zones[0]} ${primaryZone?.provinceName.fr ?? "Algeria"}`,
+      )}`;
 
     if (!hasSupabaseServerEnv()) {
       return NextResponse.json({
         ok: true,
         demoMode: true,
         providerId: `demo-provider-${Date.now().toString(36)}`,
-        message: "Your application has been received and is pending review.",
+        message:
+          locale === "ar"
+            ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
+            : "Votre demande a bien été reçue et reste maintenant en attente de revue.",
       });
     }
 
@@ -63,12 +80,25 @@ export async function POST(request: Request) {
     await supabase.from("users").upsert(
       {
         full_name: payload.fullName,
-        phone_number: payload.phoneNumber,
+        phone_number: primaryPhone,
         role: "provider",
       },
       {
         onConflict: "phone_number",
       },
+    );
+
+    const selectedCategory = seedCategories.find((category) => category.slug === payload.categorySlug);
+    await supabase.from("categories").upsert(
+      {
+        slug: payload.categorySlug,
+        icon: selectedCategory?.icon ?? "🧰",
+        name_ar: selectedCategory?.name.ar ?? payload.categorySlug,
+        name_fr: selectedCategory?.name.fr ?? payload.categorySlug,
+        description_ar: selectedCategory?.description.ar ?? selectedCategory?.name.ar ?? payload.categorySlug,
+        description_fr: selectedCategory?.description.fr ?? selectedCategory?.name.fr ?? payload.categorySlug,
+      },
+      { onConflict: "slug" },
     );
 
     const { data: providerRecord, error: providerError } = await supabase
@@ -77,16 +107,16 @@ export async function POST(request: Request) {
         slug: generatedSlug,
         display_name: payload.fullName,
         workshop_name: payload.workshopName || null,
-        phone_number: payload.phoneNumber,
-        whatsapp_number: payload.whatsappNumber,
-        hourly_rate: payload.hourlyRate,
-        travel_fee: payload.travelFee,
-        years_experience: payload.yearsExperience,
+        phone_number: primaryPhone,
+        whatsapp_number: primaryWhatsapp,
+        hourly_rate: payload.hourlyRate ?? 0,
+        travel_fee: payload.travelFee ?? 0,
+        years_experience: payload.yearsExperience ?? 0,
         bio_ar: payload.shortDescription,
         bio_fr: payload.shortDescription,
         tagline_ar: payload.workshopName || payload.fullName,
         tagline_fr: payload.workshopName || payload.fullName,
-        google_maps_url: payload.googleMapsUrl,
+        google_maps_url: fallbackMapsUrl,
         response_time_minutes: 60,
         completed_jobs_count: 0,
         rating_average: 0,
@@ -120,15 +150,15 @@ export async function POST(request: Request) {
       );
     }
 
-    if (payload.weekdays.length > 0) {
+    if ((payload.weekdays?.length ?? 0) > 0) {
       await supabase.from("availability").insert(
-        payload.weekdays.map((weekday) => ({
+        payload.weekdays!.map((weekday) => ({
           provider_id: providerId,
           day_key: weekday,
           label_ar: weekdayLabels[weekday]?.ar ?? weekday,
           label_fr: weekdayLabels[weekday]?.fr ?? weekday,
-          start_time: payload.startTime,
-          end_time: payload.endTime,
+          start_time: payload.startTime ?? "08:00",
+          end_time: payload.endTime ?? "18:00",
         })),
       );
     }
@@ -158,15 +188,60 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       providerId,
-      message: "Your application has been received and is pending review.",
+      message:
+        locale === "ar"
+          ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
+          : "Votre demande a bien été reçue et reste maintenant en attente de revue.",
     });
   } catch (error) {
     return NextResponse.json(
       {
         ok: false,
-        message: error instanceof Error ? error.message : "Unable to submit provider application.",
+        message: localizeSignupError(error, locale),
       },
       { status: 400 },
     );
   }
+}
+
+function localizeSignupError(error: unknown, locale: "ar" | "fr") {
+  if (error instanceof ZodError) {
+    const issue = error.issues[0];
+
+    if (!issue) {
+      return locale === "ar" ? "يرجى مراجعة المعلومات وإعادة الإرسال." : "Merci de vérifier les informations puis de réessayer.";
+    }
+
+    if (issue.message === "phone_or_whatsapp_required") {
+      return locale === "ar"
+        ? "يرجى إدخال رقم هاتف أو رقم واتساب واحد على الأقل."
+        : "Veuillez renseigner au moins un numéro de téléphone ou WhatsApp.";
+    }
+
+    if (issue.path[0] === "shortDescription") {
+      return locale === "ar"
+        ? "يرجى إضافة وصف قصير وبسيط عن نشاطك أو خدمتك."
+        : "Veuillez ajouter une courte description simple de votre activité ou service.";
+    }
+
+    if (issue.path[0] === "zones") {
+      return locale === "ar"
+        ? "يرجى اختيار ولاية ومدينة أو منطقة واحدة على الأقل."
+        : "Veuillez choisir au moins une wilaya et une ville ou zone.";
+    }
+
+    if (issue.path[0] === "categorySlug") {
+      return locale === "ar" ? "يرجى اختيار الفئة المناسبة." : "Veuillez choisir la bonne catégorie.";
+    }
+
+    if (issue.path[0] === "fullName") {
+      return locale === "ar" ? "يرجى إدخال الاسم أو اسم المشروع." : "Veuillez saisir votre nom ou le nom du projet.";
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return locale === "ar" ? "تعذر إرسال الطلب حالياً." : "Impossible d'envoyer la demande pour le moment.";
 }
