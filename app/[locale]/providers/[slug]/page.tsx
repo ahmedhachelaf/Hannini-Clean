@@ -148,6 +148,33 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
           </div>
 
           <div className="surface-card rounded-[1.75rem] p-6">
+            <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+              {locale === "ar" ? "الموقع والمناطق المغطاة" : "Localisation et zones couvertes"}
+            </h2>
+            <div className="map-panel mt-5">
+              <iframe
+                title={locale === "ar" ? "موقع مزود الخدمة" : "Carte du prestataire"}
+                src={`https://www.google.com/maps?q=${encodeURIComponent(`${provider.displayName} ${providerZones.map((zone) => getLocalizedValue(zone.name, locale)).join(" ")} Algeria`)}&z=11&output=embed`}
+                className="h-72 w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <div className="border-t border-[rgba(15,95,255,0.12)] bg-white/88 p-5">
+                <div className="flex flex-wrap gap-2">
+                  {providerZones.map((zone) => (
+                    <span key={zone.slug} className="chip-button min-h-0 px-3 py-2 text-xs">
+                      {getLocalizedValue(zone.name, locale)}
+                    </span>
+                  ))}
+                </div>
+                <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary mt-4">
+                  {dictionary.common.googleMaps}
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="surface-card rounded-[1.75rem] p-6">
             <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.provider.reviewTitle}</h2>
             <div className="mt-5 space-y-4">
               {reviews.length === 0 ? (

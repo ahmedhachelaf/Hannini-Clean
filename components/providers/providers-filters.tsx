@@ -27,7 +27,7 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
   return (
     <form
       action={`/${locale}/providers`}
-      className="surface-card flex flex-col gap-4 rounded-[1.75rem] p-5 lg:flex-row lg:items-end"
+      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(236,244,255,0.9))] p-5 lg:flex-row lg:items-end"
     >
       <label className="flex-1">
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.searchLabel}</span>

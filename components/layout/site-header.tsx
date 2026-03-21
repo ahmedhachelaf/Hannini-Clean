@@ -27,20 +27,26 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[rgba(247,247,244,0.92)] backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-white/55 bg-[rgba(238,244,255,0.74)] backdrop-blur-xl">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 rounded-[1.75rem] border border-white/70 bg-[rgba(255,255,255,0.78)] px-4 py-3 shadow-[0_18px_50px_rgba(15,95,255,0.1)]">
           <Link href={`/${locale}`} className="flex items-center gap-3">
-            <Image src="/brand/henini-mark.svg" alt="Henini" width={48} height={48} className="h-12 w-12 rounded-2xl" />
+            <Image
+              src="/brand/henini-mark.svg"
+              alt="Henini"
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-2xl ring-1 ring-[rgba(15,95,255,0.12)]"
+            />
             <div>
               <div className={`text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هنيني</div>
-              <div className="text-xs text-[var(--muted)]">Henini</div>
+              <div className="text-xs text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
             </div>
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-6 text-sm font-medium text-[var(--muted)] md:flex">
+          <nav aria-label="Primary" className="hidden items-center gap-2 text-sm font-medium text-[var(--muted)] md:flex">
             {navItems.map((item) => (
-              <Link key={item.href} href={item.href}>
+              <Link key={item.href} href={item.href} className="chip-button min-h-11 px-4 text-sm font-semibold">
                 {item.label}
               </Link>
             ))}

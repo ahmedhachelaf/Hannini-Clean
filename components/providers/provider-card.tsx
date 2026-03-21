@@ -15,9 +15,9 @@ export function ProviderCard({ locale, provider, category, zones }: ProviderCard
   const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(locale === "ar" ? " • " : " • ");
 
   return (
-    <article className="surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] p-5">
+    <article className="surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.9))] p-5">
       <div className="flex items-start gap-4">
-        <div className="h-20 w-20 overflow-hidden rounded-3xl bg-[var(--soft)]">
+        <div className="h-20 w-20 overflow-hidden rounded-3xl bg-[var(--soft)] ring-1 ring-[rgba(15,95,255,0.1)]">
           <Image src={provider.profilePhotoUrl} alt={provider.displayName} width={160} height={120} className="h-full w-full object-cover" />
         </div>
 
@@ -45,25 +45,25 @@ export function ProviderCard({ locale, provider, category, zones }: ProviderCard
       </div>
 
       <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-3">
+        <div className="stat-card rounded-2xl p-3">
           <dt className="text-[var(--muted)]">{locale === "ar" ? "التقييم" : "Note"}</dt>
           <dd className="mt-1 font-bold">{provider.rating.toFixed(1)} / 5</dd>
         </div>
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-3">
+        <div className="stat-card rounded-2xl p-3">
           <dt className="text-[var(--muted)]">{locale === "ar" ? "الأعمال" : "Missions"}</dt>
           <dd className="mt-1 font-bold">{formatNumber(provider.completedJobs, locale)}</dd>
         </div>
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-3">
+        <div className="stat-card rounded-2xl p-3">
           <dt className="text-[var(--muted)]">{locale === "ar" ? "الرد" : "Réponse"}</dt>
           <dd className="mt-1 font-bold">{formatResponseTime(provider.responseTimeMinutes, locale)}</dd>
         </div>
-        <div className="rounded-2xl border border-[var(--line)] bg-white p-3">
+        <div className="stat-card rounded-2xl p-3">
           <dt className="text-[var(--muted)]">{locale === "ar" ? "الساعة" : "Tarif"}</dt>
           <dd className="mt-1 font-bold">{formatCurrency(provider.hourlyRate, locale)}</dd>
         </div>
       </dl>
 
-      <div className="space-y-2 rounded-2xl border border-[var(--line)] bg-white p-4 text-sm text-[var(--muted)]">
+      <div className="space-y-2 rounded-2xl border border-[rgba(15,95,255,0.12)] bg-white/88 p-4 text-sm text-[var(--muted)]">
         <div>
           <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "المناطق:" : "Zones :"}</span> {zoneNames}
         </div>

@@ -40,9 +40,17 @@ export default async function ProvidersPage({ params, searchParams }: ProvidersP
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="space-y-4">
+      <section className="surface-card gradient-frame rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.92))] p-6 sm:p-8">
         <h1 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.listing.title}</h1>
         <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">{dictionary.listing.description}</p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
+            {locale === "ar" ? `${providers.length} مزود ظاهر` : `${providers.length} prestataires visibles`}
+          </span>
+          <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
+            {locale === "ar" ? "ترتيب يعتمد على الثقة والاستجابة" : "Classement par confiance et réactivité"}
+          </span>
+        </div>
       </section>
 
       <ProvidersFilters
@@ -54,7 +62,7 @@ export default async function ProvidersPage({ params, searchParams }: ProvidersP
       />
 
       {providers.length === 0 ? (
-        <section className="surface-card rounded-[1.75rem] p-10 text-center">
+        <section className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.9))] p-10 text-center">
           <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.listing.emptyTitle}</h2>
           <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{dictionary.listing.emptyDescription}</p>
         </section>

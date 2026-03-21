@@ -5,12 +5,24 @@ import { bookingSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
   try {
-    const payload = bookingSchema.parse(await request.json());
+    const contentType = request.headers.get("content-type") ?? "";
+    const payload =
+      contentType.includes("multipart/form-data")
+        ? bookingSchema.parse(await readFormPayload(request))
+        : bookingSchema.parse(await request.json());
     const provider = await getProviderById(payload.providerId, true);
 
     if (!provider) {
       return NextResponse.json({ ok: false, message: "Provider not found." }, { status: 404 });
     }
+
+    const issueSummary = [
+      payload.issueDescription,
+      payload.notificationRequested ? "Notification requested: yes" : null,
+      payload.issuePhotoNames.length > 0 ? `Issue photos: ${payload.issuePhotoNames.join(", ")}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const whatsappMessage = encodeURIComponent(
       `Bonjour / السلام عليكم. Booking via Henini:\n` +
@@ -19,7 +31,7 @@ export async function POST(request: Request) {
         `Date: ${payload.date} ${payload.time}\n` +
         `Address: ${payload.address}\n` +
         `Maps: ${payload.googleMapsUrl}\n` +
-        `Issue: ${payload.issueDescription}`,
+        `Issue: ${issueSummary}`,
     );
 
     if (!hasSupabaseServerEnv()) {
@@ -61,7 +73,7 @@ export async function POST(request: Request) {
         zone_slug: payload.zoneSlug,
         address: payload.address,
         google_maps_url: payload.googleMapsUrl,
-        issue_description: payload.issueDescription,
+        issue_description: issueSummary,
         preferred_contact_method: payload.preferredContactMethod,
         status: "pending",
       })
@@ -87,4 +99,29 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+}
+
+async function readFormPayload(request: Request) {
+  const formData = await request.formData();
+  const files = formData
+    .getAll("issuePhotos")
+    .filter((value): value is File => value instanceof File && value.size > 0)
+    .map((file) => file.name);
+
+  return {
+    providerId: String(formData.get("providerId") ?? ""),
+    providerSlug: String(formData.get("providerSlug") ?? ""),
+    customerName: String(formData.get("customerName") ?? ""),
+    phoneNumber: String(formData.get("phoneNumber") ?? ""),
+    selectedService: String(formData.get("selectedService") ?? ""),
+    date: String(formData.get("date") ?? ""),
+    time: String(formData.get("time") ?? ""),
+    zoneSlug: String(formData.get("zoneSlug") ?? ""),
+    address: String(formData.get("address") ?? ""),
+    googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
+    issueDescription: String(formData.get("issueDescription") ?? ""),
+    notificationRequested: String(formData.get("notificationRequested") ?? "") === "on",
+    issuePhotoNames: files,
+    preferredContactMethod: String(formData.get("preferredContactMethod") ?? ""),
+  };
 }

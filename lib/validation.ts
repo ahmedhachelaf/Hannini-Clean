@@ -12,6 +12,8 @@ export const bookingSchema = z.object({
   address: z.string().min(4),
   googleMapsUrl: z.string().url(),
   issueDescription: z.string().min(10),
+  notificationRequested: z.boolean().default(false),
+  issuePhotoNames: z.array(z.string()).default([]),
   preferredContactMethod: z.enum(["whatsapp", "phone"]),
 });
 

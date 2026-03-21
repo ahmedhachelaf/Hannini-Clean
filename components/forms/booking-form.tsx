@@ -24,6 +24,9 @@ type BookingFormProps = {
       address: string;
       mapsLink: string;
       issueDescription: string;
+      issuePhotos: string;
+      notificationOption: string;
+      notificationHint: string;
       preferredContactMethod: string;
     };
   };
@@ -37,29 +40,13 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
   async function handleSubmit(formData: FormData) {
     setPending(true);
     setResult(null);
-
-    const payload = {
-      providerId: provider.id,
-      providerSlug: provider.slug,
-      customerName: String(formData.get("customerName") ?? ""),
-      phoneNumber: String(formData.get("phoneNumber") ?? ""),
-      selectedService: String(formData.get("selectedService") ?? ""),
-      date: String(formData.get("date") ?? ""),
-      time: String(formData.get("time") ?? ""),
-      zoneSlug: String(formData.get("zoneSlug") ?? ""),
-      address: String(formData.get("address") ?? ""),
-      googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
-      issueDescription: String(formData.get("issueDescription") ?? ""),
-      preferredContactMethod: String(formData.get("preferredContactMethod") ?? ""),
-    };
+    formData.set("providerId", provider.id);
+    formData.set("providerSlug", provider.slug);
 
     try {
       const response = await fetch("/api/bookings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       const data = (await response.json()) as BookingSubmissionResult;
@@ -98,7 +85,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
   return (
     <form
       action={handleSubmit}
-      className="surface-card flex flex-col gap-5 rounded-[1.75rem] p-6"
+      className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.92))] p-6"
     >
       <div>
         <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
@@ -158,6 +145,21 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.issueDescription}</span>
         <textarea name="issueDescription" required rows={5} className="input-base min-h-32 resize-y" />
       </label>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.issuePhotos}</span>
+          <input name="issuePhotos" type="file" accept="image/*" multiple className="input-base min-h-[unset] py-3" />
+        </label>
+
+        <label className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white/90 p-4">
+          <span className="mb-3 block text-sm font-semibold text-[var(--ink)]">{labels.fields.notificationOption}</span>
+          <div className="flex items-start gap-3 text-sm text-[var(--muted)]">
+            <input name="notificationRequested" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <span>{labels.fields.notificationHint}</span>
+          </div>
+        </label>
+      </div>
 
       <label>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.preferredContactMethod}</span>

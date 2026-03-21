@@ -77,6 +77,8 @@ export type Booking = {
   address: string;
   googleMapsUrl: string;
   issueDescription: string;
+  notificationRequested?: boolean;
+  issuePhotoNames?: string[];
   preferredContactMethod: ContactMethod;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   createdAt: string;
@@ -115,6 +117,8 @@ export type BookingInput = {
   address: string;
   googleMapsUrl: string;
   issueDescription: string;
+  notificationRequested: boolean;
+  issuePhotoNames: string[];
   preferredContactMethod: ContactMethod;
 };
 

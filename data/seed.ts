@@ -114,6 +114,16 @@ export const zones: Zone[] = [
     wilaya: "Oran",
     name: { ar: "عين الترك", fr: "Ain Turk" },
   },
+  {
+    slug: "djelfa-centre",
+    wilaya: "Djelfa",
+    name: { ar: "الجلفة", fr: "Djelfa" },
+  },
+  {
+    slug: "sidi-bel-abbes-centre",
+    wilaya: "Sidi Bel Abbes",
+    name: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbes" },
+  },
 ];
 
 const workGallery = [
