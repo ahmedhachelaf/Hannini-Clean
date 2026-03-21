@@ -5,6 +5,7 @@ export const fr = {
     home: "Accueil",
     providers: "Prestataires",
     businesses: "Activités à domicile",
+    grow: "Apprendre & développer",
     join: "Rejoindre Henini",
     support: "Support",
     admin: "Admin",
@@ -59,6 +60,11 @@ export const fr = {
     businessFeaturedTitle: "Activités à domicile recommandées",
     businessFeaturedDescription:
       "Un espace dédié aux initiatives locales, aux microbusinesses de quartier et aux revenus à domicile encadrés avec soin.",
+    growTitle: "Apprendre & développer",
+    growDescription:
+      "Un espace léger pour aider artisans et activités à domicile à améliorer leur profil, leur tarification, la confiance client et leur communication.",
+    growCta: "Ouvrir la section Apprendre & développer",
+    growSoon: "Hannini Academy arrive bientôt — restez à l'écoute",
     joinTitle: "Vous êtes artisan ou atelier local ?",
     joinDescription:
       "Créez votre profil comme prestataire de service ou activité à domicile. L'équipe Henini vérifie chaque demande avant publication.",
@@ -129,6 +135,88 @@ export const fr = {
       "Vous pouvez rejoindre Henini comme prestataire de service ou activité à domicile. Le formulaire est volontairement simple pour ce MVP, puis l'équipe effectue une revue avant publication. Aucun email automatique n'est encore envoyé.",
     successTitle: "Votre demande a bien ete recue",
     successDescription: "Votre candidature a ete enregistree et reste maintenant en attente de revue.",
+  },
+  grow: {
+    title: "Apprendre & développer",
+    subtitle: "Démarrer et améliorer votre activité",
+    description:
+      "Une couche légère dans Henini pour aider prestataires et activités à domicile à mieux se présenter, inspirer confiance et mieux gérer leurs demandes, sans transformer l'application en LMS complet.",
+    academySoon: "Hannini Academy arrive bientôt — un contenu plus riche viendra plus tard.",
+    laneService: "Utile pour les prestataires de services à domicile",
+    laneBusiness: "Utile pour les activités à domicile et micro-entreprises locales",
+    guidesTitle: "Guides courts et actionnables",
+    checklistTitle: "Checklist de départ",
+    checklistItems: [
+      "Ajoutez une description claire et de vraies photos pour rendre votre profil crédible.",
+      "Affichez un prix de départ simple et un canal de contact clair par téléphone ou WhatsApp.",
+      "Vérifiez bien votre wilaya et votre zone pour être trouvé par les bons clients.",
+      "Demandez un avis après chaque mission ou commande réussie.",
+    ],
+    guides: [
+      {
+        title: "Comment fixer votre prix",
+        description: "Commencez par un prix clair, puis indiquez si les frais de déplacement ou livraison sont séparés.",
+        bullets: [
+          "Comparez avec les tarifs proches de chez vous.",
+          "Commencez simple puis ajustez après vos premières demandes.",
+          "Expliquez ce que le prix inclut pour éviter les malentendus.",
+        ],
+      },
+      {
+        title: "Comment mieux photographier votre travail",
+        description: "De bonnes photos inspirent vite confiance, surtout pour la cuisine, les pâtisseries et la couture.",
+        bullets: [
+          "Utilisez la lumière du jour et un fond propre.",
+          "Montrez un avant/après si vous êtes prestataire de service.",
+          "Trois photos nettes valent mieux qu'une galerie confuse.",
+        ],
+      },
+      {
+        title: "Répondre aux clients avec professionnalisme",
+        description: "Une réponse rapide et claire rend votre profil plus sérieux et augmente les chances de conversion.",
+        bullets: [
+          "Confirmez vite que vous avez bien reçu la demande.",
+          "Posez seulement les questions essentielles au départ.",
+          "Terminez par une prochaine étape claire : horaire, prix indicatif ou message WhatsApp.",
+        ],
+      },
+      {
+        title: "Construire la confiance et les avis",
+        description: "La confiance sur Henini vient de la clarté, de la régularité et de bons retours clients.",
+        bullets: [
+          "Respectez l'horaire annoncé.",
+          "Gardez une description honnête de votre offre.",
+          "Demandez un avis juste après une bonne prestation.",
+        ],
+      },
+      {
+        title: "Utiliser WhatsApp de façon professionnelle",
+        description: "WhatsApp reste la boucle principale du MVP, donc votre usage doit être propre et rassurant.",
+        bullets: [
+          "Choisissez un nom visible et une photo sérieuse.",
+          "Préparez un court message d'accueil.",
+          "Évitez de bombarder le client avant d'avoir compris son besoin.",
+        ],
+      },
+      {
+        title: "Obtenir vos 5 premiers clients sans générer de mauvais avis",
+        description: "Le bon départ vient d'un périmètre simple, d'une qualité stable et d'attentes bien cadrées.",
+        bullets: [
+          "Commencez par une zone proche de chez vous.",
+          "Ne promettez pas ce que vous ne pouvez pas tenir.",
+          "En cas de retard, prévenez tôt au lieu de laisser le client attendre.",
+        ],
+      },
+      {
+        title: "Pour la cuisine et les commandes d'occasion",
+        description: "Les activités alimentaires à domicile doivent rassurer sur la qualité, l'organisation et l'hygiène.",
+        bullets: [
+          "Précisez clairement les types de commandes acceptées.",
+          "Utilisez des photos récentes et fidèles au produit.",
+          "Validez la quantité, l'horaire et les demandes spéciales avant d'accepter.",
+        ],
+      },
+    ],
   },
   review: {
     title: "Laisser un avis",

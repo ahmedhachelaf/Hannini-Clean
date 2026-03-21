@@ -14,6 +14,7 @@ type HomePageContentProps = {
     nav: {
       providers: string;
       businesses: string;
+      grow: string;
     };
     home: {
       badge: string;
@@ -34,6 +35,10 @@ type HomePageContentProps = {
       featuredDescription: string;
       businessFeaturedTitle: string;
       businessFeaturedDescription: string;
+      growTitle: string;
+      growDescription: string;
+      growCta: string;
+      growSoon: string;
       joinTitle: string;
       joinDescription: string;
       joinCta: string;
@@ -153,6 +158,9 @@ export function HomePageContent({
               </Link>
               <Link href={`/${locale}/businesses`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
                 {dictionary.nav.businesses}
+              </Link>
+              <Link href={`/${locale}/grow`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+                {dictionary.nav.grow}
               </Link>
               <Link href={`/${locale}/join`} className="button-primary">
                 {dictionary.home.joinCta}
@@ -293,6 +301,26 @@ export function HomePageContent({
       </section>
 
       <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_70%,rgba(83,146,255,0.9))] p-6 text-white sm:p-8">
+        <div className="mb-6 rounded-[1.5rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/72">{dictionary.nav.grow}</div>
+              <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+                {dictionary.home.growTitle}
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-8 text-white/82">{dictionary.home.growDescription}</p>
+            </div>
+            <div className="flex flex-col gap-3 lg:max-w-sm">
+              <span className="rounded-[1.25rem] border border-white/14 bg-[rgba(8,18,37,0.18)] px-4 py-3 text-sm font-semibold text-white/84">
+                {dictionary.home.growSoon}
+              </span>
+              <Link href={`/${locale}/grow`} className="button-secondary border-white/20 bg-white/12 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+                {dictionary.home.growCta}
+              </Link>
+            </div>
+          </div>
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <h2 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
