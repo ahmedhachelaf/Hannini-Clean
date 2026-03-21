@@ -15,7 +15,7 @@ export function ProviderCard({ locale, provider, category, zones }: ProviderCard
   const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(locale === "ar" ? " • " : " • ");
 
   return (
-    <article className="surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.9))] p-5">
+    <article className="surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(227,238,255,0.94))] p-5 shadow-[0_26px_60px_rgba(12,40,104,0.14)]">
       <div className="flex items-start gap-4">
         <div className="h-20 w-20 overflow-hidden rounded-3xl bg-[var(--soft)] ring-1 ring-[rgba(15,95,255,0.1)]">
           <Image src={provider.profilePhotoUrl} alt={provider.displayName} width={160} height={120} className="h-full w-full object-cover" />

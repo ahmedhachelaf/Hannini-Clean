@@ -27,9 +27,9 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/55 bg-[rgba(238,244,255,0.74)] backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-[rgba(13,28,69,0.08)] bg-[rgba(225,236,255,0.72)] backdrop-blur-xl">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4 rounded-[1.75rem] border border-white/70 bg-[rgba(255,255,255,0.78)] px-4 py-3 shadow-[0_18px_50px_rgba(15,95,255,0.1)]">
+        <div className="flex items-center justify-between gap-4 rounded-[1.75rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(231,240,255,0.84))] px-4 py-3 shadow-[0_24px_60px_rgba(13,28,69,0.14)]">
           <Link href={`/${locale}`} className="flex items-center gap-3">
             <Image
               src="/brand/henini-mark.svg"
@@ -40,7 +40,7 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
             />
             <div>
               <div className={`text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هنيني</div>
-              <div className="text-xs text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
+              <div className="text-xs font-medium text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
             </div>
           </Link>
 

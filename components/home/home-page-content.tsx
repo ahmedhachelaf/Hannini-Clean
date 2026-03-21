@@ -53,12 +53,12 @@ export function HomePageContent({
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
-      <section id="hero" className="surface-card hero-shell gradient-frame relative overflow-hidden rounded-[2rem] p-5 sm:p-7 lg:p-10">
-        <div className="hero-orb -left-10 top-8 h-44 w-44 bg-[rgba(15,95,255,0.2)]" />
-        <div className="hero-orb right-10 top-16 h-36 w-36 bg-[rgba(14,165,233,0.18)]" />
+      <section id="hero" className="surface-card hero-shell gradient-frame relative overflow-hidden rounded-[2rem] p-5 text-white sm:p-7 lg:p-10">
+        <div className="hero-orb -left-10 top-8 h-44 w-44 bg-[rgba(125,180,255,0.46)]" />
+        <div className="hero-orb right-10 top-16 h-40 w-40 bg-[rgba(255,255,255,0.22)]" />
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
           <div>
-            <span className="inline-flex rounded-full border border-[rgba(15,95,255,0.12)] bg-white/90 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--muted)] shadow-[0_10px_24px_rgba(15,95,255,0.08)]">
+            <span className="inline-flex rounded-full border border-white/18 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/84 shadow-[0_10px_24px_rgba(8,18,37,0.14)] backdrop-blur">
               {dictionary.home.badge}
             </span>
 
@@ -70,13 +70,13 @@ export function HomePageContent({
               {dictionary.home.title}
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-[var(--muted)] sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
               {dictionary.home.description}
             </p>
 
             <form
               action={`/${locale}/providers`}
-              className="mt-8 grid gap-3 rounded-[1.75rem] border border-[rgba(15,95,255,0.14)] bg-white/95 p-4 shadow-[0_24px_48px_rgba(15,95,255,0.12)] sm:grid-cols-[minmax(0,1fr)_220px_auto]"
+              className="mt-8 grid gap-3 rounded-[1.75rem] border border-white/16 bg-[rgba(255,255,255,0.12)] p-4 shadow-[0_28px_60px_rgba(8,18,37,0.2)] backdrop-blur-xl sm:grid-cols-[minmax(0,1fr)_220px_auto]"
             >
               <input
                 name="q"
@@ -99,7 +99,7 @@ export function HomePageContent({
             </form>
 
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href={`/${locale}/providers`} className="button-secondary">
+              <Link href={`/${locale}/providers`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
                 {dictionary.nav.providers}
               </Link>
               <Link href={`/${locale}/join`} className="button-primary">
@@ -108,13 +108,13 @@ export function HomePageContent({
             </div>
 
             <div className="mt-7">
-              <div className="mb-3 text-sm font-semibold text-[var(--muted)]">{dictionary.home.categoryLabel}</div>
+              <div className="mb-3 text-sm font-semibold text-white/72">{dictionary.home.categoryLabel}</div>
               <div className="flex gap-3 overflow-x-auto pb-2" aria-label={dictionary.home.categoryLabel}>
                 {categories.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/${locale}/providers?category=${category.slug}`}
-                    className="chip-button text-sm"
+                    className="chip-button border-white/14 bg-white/10 text-white shadow-[0_10px_24px_rgba(8,18,37,0.12)] text-sm"
                   >
                     <span>{category.icon}</span>
                     <span>{getLocalizedValue(category.name, locale)}</span>
@@ -126,21 +126,21 @@ export function HomePageContent({
 
           <div className="grid gap-4">
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
-              <div className="stat-card rounded-[1.5rem] p-5">
-                <div className="text-sm text-[var(--muted)]">{dictionary.home.statsProviders}</div>
-                <div className="mt-2 text-3xl font-extrabold">{summary.providersCount}</div>
+              <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-5 shadow-[0_18px_34px_rgba(8,18,37,0.14)] backdrop-blur">
+                <div className="text-sm text-white/72">{dictionary.home.statsProviders}</div>
+                <div className="mt-2 text-3xl font-extrabold text-white">{summary.providersCount}</div>
               </div>
-              <div className="stat-card rounded-[1.5rem] p-5">
-                <div className="text-sm text-[var(--muted)]">{dictionary.home.statsZones}</div>
-                <div className="mt-2 text-3xl font-extrabold">{summary.zonesCount}</div>
+              <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-5 shadow-[0_18px_34px_rgba(8,18,37,0.14)] backdrop-blur">
+                <div className="text-sm text-white/72">{dictionary.home.statsZones}</div>
+                <div className="mt-2 text-3xl font-extrabold text-white">{summary.zonesCount}</div>
               </div>
-              <div className="stat-card rounded-[1.5rem] p-5">
-                <div className="text-sm text-[var(--muted)]">{dictionary.home.statsCategories}</div>
-                <div className="mt-2 text-3xl font-extrabold">{summary.categoriesCount}</div>
+              <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-5 shadow-[0_18px_34px_rgba(8,18,37,0.14)] backdrop-blur">
+                <div className="text-sm text-white/72">{dictionary.home.statsCategories}</div>
+                <div className="mt-2 text-3xl font-extrabold text-white">{summary.categoriesCount}</div>
               </div>
             </div>
 
-            <div className="surface-card rounded-[1.75rem] bg-white/92 p-5 sm:p-6">
+            <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(223,235,255,0.92))] p-5 sm:p-6">
               <div className="flex flex-col gap-5">
                 <div>
                   <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.zoneLabel}</div>
@@ -164,7 +164,7 @@ export function HomePageContent({
                   ))}
                 </div>
 
-                <div className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(220,232,255,0.72),rgba(255,255,255,0.95))] px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+                <div className="rounded-[1.25rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(180deg,rgba(208,225,255,0.82),rgba(255,255,255,0.95))] px-4 py-4 text-sm leading-7 text-[var(--muted)]">
                   {dictionary.home.featuredDescription}
                 </div>
               </div>
@@ -203,17 +203,17 @@ export function HomePageContent({
         </div>
       </section>
 
-      <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(230,240,255,0.9))] p-6 sm:p-8">
+      <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_70%,rgba(83,146,255,0.9))] p-6 text-white sm:p-8">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
             <h2 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
               {dictionary.home.joinTitle}
             </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-8 text-[var(--muted)]">
+            <p className="mt-4 max-w-2xl text-sm leading-8 text-white/82">
               {dictionary.home.joinDescription}
             </p>
           </div>
-          <Link href={`/${locale}/join`} className="button-primary">
+          <Link href={`/${locale}/join`} className="button-secondary border-white/20 bg-white/12 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
             {dictionary.home.joinCta}
           </Link>
         </div>

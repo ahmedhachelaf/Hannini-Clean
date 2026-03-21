@@ -13,7 +13,7 @@ type SiteFooterProps = {
 
 export function SiteFooter({ locale, nav }: SiteFooterProps) {
   return (
-    <footer className="border-t border-[var(--line)] bg-[rgba(255,255,255,0.78)] backdrop-blur-xl">
+    <footer className="border-t border-[rgba(13,28,69,0.08)] bg-[linear-gradient(180deg,rgba(226,237,255,0.76),rgba(244,248,255,0.92))] backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
         <div className="max-w-xl space-y-3">
           <div className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هنيني</div>

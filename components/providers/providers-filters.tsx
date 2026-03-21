@@ -27,10 +27,10 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
   return (
     <form
       action={`/${locale}/providers`}
-      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(236,244,255,0.9))] p-5 lg:flex-row lg:items-end"
+      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.96),rgba(20,92,255,0.9)_72%,rgba(96,165,250,0.84))] p-5 text-white shadow-[0_28px_60px_rgba(12,40,104,0.18)] lg:flex-row lg:items-end"
     >
       <label className="flex-1">
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.searchLabel}</span>
+        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.searchLabel}</span>
         <input
           type="search"
           name="q"
@@ -41,7 +41,7 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
       </label>
 
       <label className="lg:w-56">
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.categoryLabel}</span>
+        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.categoryLabel}</span>
         <select name="category" defaultValue={values.category ?? ""} className="input-base">
           <option value="">{locale === "ar" ? "كل الفئات" : "Toutes les catégories"}</option>
           {categories.map((category) => (
@@ -53,7 +53,7 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
       </label>
 
       <label className="lg:w-52">
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.zoneLabel}</span>
+        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.zoneLabel}</span>
         <select name="zone" defaultValue={values.zone ?? ""} className="input-base">
           <option value="">{locale === "ar" ? "كل المناطق" : "Toutes les zones"}</option>
           {zones.map((zone) => (
@@ -65,7 +65,7 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
       </label>
 
       <label className="lg:w-56">
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.sortLabel}</span>
+        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.sortLabel}</span>
         <select name="sort" defaultValue={values.sort ?? "top"} className="input-base">
           <option value="top">{labels.sortTop}</option>
           <option value="rating">{labels.sortRating}</option>
