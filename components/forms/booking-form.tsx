@@ -224,7 +224,13 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
       </label>
 
       {result?.message ? (
-        <p className={`text-sm ${result.ok ? "text-[var(--success)]" : "text-[var(--danger)]"}`}>{result.message}</p>
+        <p
+          role={result.ok ? "status" : "alert"}
+          aria-live="polite"
+          className={`text-sm font-medium ${result.ok ? "text-[var(--success)]" : "text-[var(--danger)]"}`}
+        >
+          {result.message}
+        </p>
       ) : null}
 
       <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit">

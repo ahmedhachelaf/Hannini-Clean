@@ -250,6 +250,9 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
         <div className="mt-4 rounded-[1.25rem] border border-[rgba(20,92,255,0.14)] bg-[var(--soft)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
           {copy.pendingHint}
         </div>
+        <p className="mt-3 text-sm font-medium text-[var(--navy)]">
+          {locale === "ar" ? "الحقول المعلّمة بكلمة مطلوب هي فقط الأساسية للانضمام الآن." : "Seuls les champs marqués Obligatoire sont nécessaires pour rejoindre la plateforme maintenant."}
+        </p>
       </div>
 
       <section className="grid gap-4">

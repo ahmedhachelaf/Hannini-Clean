@@ -56,6 +56,8 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
   return (
     <form
       action={actionPath}
+      role="search"
+      aria-label={locale === "ar" ? "تصفية والبحث عن المزودين" : "Filtrer et rechercher des prestataires"}
       className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(8,23,69,0.98),rgba(14,67,191,0.94)_62%,rgba(48,114,255,0.88))] p-5 text-white shadow-[0_28px_60px_rgba(8,34,99,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
     >
       <label className="min-w-[240px] flex-1">

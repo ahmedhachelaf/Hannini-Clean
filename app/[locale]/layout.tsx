@@ -28,7 +28,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         {locale === "ar" ? "انتقل إلى المحتوى" : "Aller au contenu"}
       </a>
       <SiteHeader locale={locale} dictionary={dictionary} />
-      <main id="main-content">{children}</main>
+      <main id="main-content" tabIndex={-1}>{children}</main>
       <SiteFooter locale={locale} nav={dictionary.nav} />
       <div className="pointer-events-none fixed bottom-4 left-0 right-0 z-30 flex justify-center px-4">
         <div className="pointer-events-auto">

@@ -34,6 +34,8 @@ export function HomeSearchForm({ locale, zones, labels }: HomeSearchFormProps) {
   return (
     <form
       action={`/${locale}/providers`}
+      role="search"
+      aria-label={locale === "ar" ? "البحث عن مزود خدمة" : "Recherche de prestataires"}
       className="mt-8 grid gap-3 rounded-[1.75rem] border border-white/16 bg-[rgba(255,255,255,0.12)] p-4 shadow-[0_28px_60px_rgba(8,18,37,0.2)] backdrop-blur-xl sm:grid-cols-[minmax(0,1fr)_210px_210px_auto]"
     >
       <input
