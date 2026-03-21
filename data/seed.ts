@@ -98,31 +98,37 @@ export const zones: Zone[] = [
     slug: "oran-centre",
     wilaya: "Oran",
     name: { ar: "وهران الوسط", fr: "Oran Centre" },
+    coordinates: { latitude: 35.6981, longitude: -0.6348 },
   },
   {
     slug: "bir-el-djir",
     wilaya: "Oran",
     name: { ar: "بئر الجير", fr: "Bir El Djir" },
+    coordinates: { latitude: 35.72, longitude: -0.57 },
   },
   {
     slug: "es-senia",
     wilaya: "Oran",
     name: { ar: "السانيا", fr: "Es Senia" },
+    coordinates: { latitude: 35.6464, longitude: -0.6236 },
   },
   {
     slug: "ain-turk",
     wilaya: "Oran",
     name: { ar: "عين الترك", fr: "Ain Turk" },
+    coordinates: { latitude: 35.7438, longitude: -0.7687 },
   },
   {
     slug: "djelfa-centre",
     wilaya: "Djelfa",
     name: { ar: "الجلفة", fr: "Djelfa" },
+    coordinates: { latitude: 34.6728, longitude: 3.263 },
   },
   {
     slug: "sidi-bel-abbes-centre",
     wilaya: "Sidi Bel Abbes",
     name: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbes" },
+    coordinates: { latitude: 35.1899, longitude: -0.6308 },
   },
 ];
 
@@ -150,6 +156,7 @@ export const providers: Provider[] = [
     hourlyRate: 2500,
     travelFee: 1000,
     zones: ["oran-centre", "bir-el-djir"],
+    coordinates: { latitude: 35.7035, longitude: -0.6285 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 12 34 56",
     whatsappNumber: "213555123456",
@@ -164,6 +171,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "registre-commerce-karim.pdf",
+      notes: "Carte d'identite et registre verifies manuellement.",
+    },
     availability: [
       {
         dayKey: "sat",
@@ -202,6 +214,7 @@ export const providers: Provider[] = [
     hourlyRate: 3200,
     travelFee: 1200,
     zones: ["bir-el-djir", "oran-centre", "es-senia"],
+    coordinates: { latitude: 35.7132, longitude: -0.5842 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 666 22 11 00",
     whatsappNumber: "213666221100",
@@ -216,6 +229,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "mekki-electric-docs.pdf",
+      notes: "Attestation metier et photos atelier recues.",
+    },
     availability: [
       {
         dayKey: "sun",
@@ -254,6 +272,7 @@ export const providers: Provider[] = [
     hourlyRate: 3500,
     travelFee: 1200,
     zones: ["es-senia", "oran-centre"],
+    coordinates: { latitude: 35.6554, longitude: -0.6215 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 777 88 90 12",
     whatsappNumber: "213777889012",
@@ -268,6 +287,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "nadia-klim-verification.pdf",
+      notes: "Verification complete pour climatisation domestique.",
+    },
     availability: [
       {
         dayKey: "sat",
@@ -306,6 +330,7 @@ export const providers: Provider[] = [
     hourlyRate: 3400,
     travelFee: 1500,
     zones: ["ain-turk", "oran-centre"],
+    coordinates: { latitude: 35.7412, longitude: -0.7564 },
     languages: ["العربية"],
     phoneNumber: "+213 698 77 66 55",
     whatsappNumber: "213698776655",
@@ -320,6 +345,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "gaz-salam-certificat.pdf",
+      notes: "Certificat securite gaz recu.",
+    },
     availability: [
       {
         dayKey: "sun",
@@ -358,6 +388,7 @@ export const providers: Provider[] = [
     hourlyRate: 2200,
     travelFee: 1000,
     zones: ["bir-el-djir", "es-senia"],
+    coordinates: { latitude: 35.702, longitude: -0.593 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 550 98 44 12",
     whatsappNumber: "213550984412",
@@ -372,6 +403,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "pending",
+      documentName: "yacine-peinture-id.jpg",
+      notes: "Photos de chantiers envoyees, verification en attente.",
+    },
     availability: [
       {
         dayKey: "mon",
@@ -410,6 +446,7 @@ export const providers: Provider[] = [
     hourlyRate: 2900,
     travelFee: 1200,
     zones: ["oran-centre"],
+    coordinates: { latitude: 35.697, longitude: -0.6359 },
     languages: ["العربية"],
     phoneNumber: "+213 661 17 22 10",
     whatsappNumber: "213661172210",
@@ -424,6 +461,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "pending",
+      documentName: "reda-bois-piece-identite.pdf",
+      notes: "Dossier incomplet, plus de photos atelier demandees.",
+    },
     availability: [
       {
         dayKey: "sun",
@@ -462,6 +504,7 @@ export const providers: Provider[] = [
     hourlyRate: 2400,
     travelFee: 900,
     zones: ["oran-centre", "bir-el-djir"],
+    coordinates: { latitude: 35.7058, longitude: -0.6128 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 66 12 20",
     whatsappNumber: "213555661220",
@@ -476,6 +519,11 @@ export const providers: Provider[] = [
     },
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "fixpro-kbis.pdf",
+      notes: "Compte atelier verifie et actif.",
+    },
     availability: [
       {
         dayKey: "sat",
@@ -493,6 +541,122 @@ export const providers: Provider[] = [
         dayKey: "mon",
         label: { ar: "الاثنين", fr: "Lundi" },
         startTime: "08:30",
+        endTime: "18:00",
+      },
+    ],
+  },
+  {
+    id: "provider-hichem-djelfa",
+    slug: "hichem-djelfa-froid",
+    displayName: "هشام الجلفة للتبريد",
+    workshopName: "Hichem Froid Djelfa",
+    categorySlug: "ac-repair",
+    rating: 4.8,
+    reviewCount: 12,
+    completedJobs: 83,
+    responseTimeMinutes: 27,
+    isVerified: true,
+    status: "approved",
+    featured: true,
+    yearsExperience: 10,
+    hourlyRate: 3300,
+    travelFee: 1100,
+    zones: ["djelfa-centre"],
+    coordinates: { latitude: 34.6735, longitude: 3.2615 },
+    languages: ["العربية", "Français"],
+    phoneNumber: "+213 661 44 80 21",
+    whatsappNumber: "213661448021",
+    googleMapsUrl: "https://maps.google.com/?q=Djelfa%20Centre%20Algeria",
+    bio: {
+      ar: "صيانة مكيفات المنازل في الجلفة مع تشخيص واضح، تنظيف، وتعبئة غاز للأعطال الشائعة.",
+      fr: "Entretien et reparation de climatiseurs a Djelfa avec diagnostic clair et interventions rapides.",
+    },
+    shortTagline: {
+      ar: "تقني تبريد موثوق في الجلفة",
+      fr: "Technicien froid fiable a Djelfa",
+    },
+    profilePhotoUrl: "/placeholders/provider-avatar.svg",
+    gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "hichem-froid-attestation.pdf",
+      notes: "Dossier complet et verifie par l'admin.",
+    },
+    availability: [
+      {
+        dayKey: "sat",
+        label: { ar: "السبت", fr: "Samedi" },
+        startTime: "08:30",
+        endTime: "17:30",
+      },
+      {
+        dayKey: "mon",
+        label: { ar: "الاثنين", fr: "Lundi" },
+        startTime: "08:30",
+        endTime: "17:30",
+      },
+      {
+        dayKey: "wed",
+        label: { ar: "الأربعاء", fr: "Mercredi" },
+        startTime: "08:30",
+        endTime: "17:30",
+      },
+    ],
+  },
+  {
+    id: "provider-nour-sba",
+    slug: "nour-sidi-bel-abbes-elec",
+    displayName: "نور سيدي بلعباس للكهرباء",
+    workshopName: "Nour Elec SBA",
+    categorySlug: "electrician",
+    rating: 4.7,
+    reviewCount: 16,
+    completedJobs: 97,
+    responseTimeMinutes: 22,
+    isVerified: true,
+    status: "approved",
+    featured: true,
+    yearsExperience: 13,
+    hourlyRate: 3100,
+    travelFee: 1000,
+    zones: ["sidi-bel-abbes-centre"],
+    coordinates: { latitude: 35.1931, longitude: -0.6341 },
+    languages: ["العربية", "Français"],
+    phoneNumber: "+213 555 90 61 22",
+    whatsappNumber: "213555906122",
+    googleMapsUrl: "https://maps.google.com/?q=Sidi%20Bel%20Abbes%20Centre%20Algeria",
+    bio: {
+      ar: "أعطال كهربائية منزلية، لوحات، إنارة، وتشخيص سريع داخل سيدي بلعباس.",
+      fr: "Depannage electrique domestique a Sidi Bel Abbes avec intervention propre et rapide.",
+    },
+    shortTagline: {
+      ar: "كهربائي سريع الرد في سيدي بلعباس",
+      fr: "Electricien reactif a Sidi Bel Abbes",
+    },
+    profilePhotoUrl: "/placeholders/provider-avatar.svg",
+    gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "nour-elec-sba.pdf",
+      notes: "Entreprise verifiee et references confirmees.",
+    },
+    availability: [
+      {
+        dayKey: "sun",
+        label: { ar: "الأحد", fr: "Dimanche" },
+        startTime: "09:00",
+        endTime: "18:00",
+      },
+      {
+        dayKey: "tue",
+        label: { ar: "الثلاثاء", fr: "Mardi" },
+        startTime: "09:00",
+        endTime: "18:00",
+      },
+      {
+        dayKey: "thu",
+        label: { ar: "الخميس", fr: "Jeudi" },
+        startTime: "09:00",
         endTime: "18:00",
       },
     ],

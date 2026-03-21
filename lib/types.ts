@@ -2,9 +2,14 @@ export type Locale = "ar" | "fr";
 
 export type SortOption = "top" | "rating" | "response" | "jobs";
 
-export type ProviderStatus = "approved" | "pending" | "rejected";
+export type ProviderStatus = "approved" | "pending" | "rejected" | "needs_more_info";
 
 export type ContactMethod = "whatsapp" | "phone";
+
+export type MapCoordinates = {
+  latitude: number;
+  longitude: number;
+};
 
 export type Category = {
   slug: string;
@@ -17,6 +22,7 @@ export type Zone = {
   slug: string;
   wilaya: string;
   name: Record<Locale, string>;
+  coordinates: MapCoordinates;
 };
 
 export type AvailabilitySlot = {
@@ -53,6 +59,7 @@ export type Provider = {
   hourlyRate: number;
   travelFee: number;
   zones: string[];
+  coordinates: MapCoordinates;
   languages: string[];
   phoneNumber: string;
   whatsappNumber: string;
@@ -62,6 +69,11 @@ export type Provider = {
   profilePhotoUrl: string;
   gallery: string[];
   availability: AvailabilitySlot[];
+  verification: {
+    status: "pending" | "verified" | "rejected";
+    documentName?: string | null;
+    notes?: string | null;
+  };
 };
 
 export type Booking = {

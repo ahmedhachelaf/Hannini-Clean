@@ -33,10 +33,10 @@ export const fr = {
     save: "Enregistrer",
   },
   home: {
-    badge: "Marketplace de services à domicile à Oran",
-    title: "Trouvez un artisan fiable en quelques étapes simples.",
+    badge: "Marketplace de services a domicile en Algerie",
+    title: "Trouvez un artisan fiable dans votre wilaya en quelques etapes simples.",
     description:
-      "Henini aide les foyers à comparer les artisans d'Oran avec une interface claire, des zones de service visibles, des prix fixés par les prestataires et une confirmation sur WhatsApp.",
+      "Henini aide les foyers a comparer les artisans dans les wilayas de lancement comme Oran, Djelfa et Sidi Bel Abbes, avec zones visibles, prix prestataire et confirmation WhatsApp.",
     searchPlaceholder: "Rechercher un service ou un prestataire",
     zoneLabel: "Zone",
     categoryLabel: "Catégories",
@@ -52,8 +52,8 @@ export const fr = {
     statsCategories: "catégories clés",
   },
   listing: {
-    title: "Prestataires disponibles à Oran",
-    description: "Filtrez par métier, zone ou nom pour trouver le bon professionnel.",
+    title: "Prestataires disponibles sur Henini",
+    description: "Filtrez par metier, wilaya, zone ou nom et utilisez la carte pour trouver le bon professionnel.",
     searchLabel: "Nom ou service",
     categoryLabel: "Catégorie",
     zoneLabel: "Zone",
@@ -100,9 +100,9 @@ export const fr = {
   join: {
     title: "Candidature prestataire",
     description:
-      "Ce formulaire sert à rejoindre le MVP Henini dans une seule wilaya au lancement : Oran. Le profil reste privé tant qu'il n'est pas approuvé.",
-    successTitle: "Votre demande a bien été envoyée",
-    successDescription: "L'équipe Henini reviendra vers vous après vérification.",
+      "Ce formulaire sert a deposer une candidature prestataire. Le dossier reste en revue admin et n'est jamais public avant validation. Aucun email automatique n'est envoye a ce stade du MVP.",
+    successTitle: "Votre demande a bien ete recue",
+    successDescription: "Votre candidature a ete enregistree et reste maintenant en attente de revue.",
   },
   review: {
     title: "Laisser un avis",
@@ -127,6 +127,7 @@ export const fr = {
     zones: "Zones",
     approve: "Approuver",
     reject: "Rejeter",
+    needsMoreInfo: "Demander plus d'infos",
     verify: "Marquer vérifié",
     logout: "Se déconnecter",
     addCategory: "Ajouter une catégorie",

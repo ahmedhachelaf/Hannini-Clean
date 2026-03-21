@@ -14,7 +14,7 @@ export async function POST(_request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   if (!hasSupabaseServerEnv()) {
-    return NextResponse.json({ ok: true, demoMode: true, message: "Rejected in demo mode." });
+    return NextResponse.json({ ok: true, demoMode: true, message: "Flagged in demo mode." });
   }
 
   const supabase = createServerSupabaseClient();
@@ -23,20 +23,23 @@ export async function POST(_request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, message: "Supabase unavailable." }, { status: 500 });
   }
 
-  const { error } = await supabase.from("providers").update({ approval_status: "rejected" }).eq("id", id);
+  const providerUpdate = await supabase.from("providers").update({ approval_status: "pending" }).eq("id", id);
 
-  if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 400 });
+  if (providerUpdate.error) {
+    return NextResponse.json({ ok: false, message: providerUpdate.error.message }, { status: 400 });
   }
 
-  await supabase.from("provider_verifications").upsert(
-    {
+  const verificationUpdate = await supabase
+    .from("provider_verifications")
+    .upsert({
       provider_id: id,
-      status: "rejected",
-      notes: "Application rejected by admin.",
-    },
-    { onConflict: "provider_id" },
-  );
+      status: "pending",
+      notes: "[needs_more_info] Additional business details requested by admin.",
+    }, { onConflict: "provider_id" });
+
+  if (verificationUpdate.error) {
+    return NextResponse.json({ ok: false, message: verificationUpdate.error.message }, { status: 400 });
+  }
 
   return NextResponse.json({ ok: true });
 }

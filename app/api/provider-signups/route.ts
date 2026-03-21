@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         ok: true,
         demoMode: true,
         providerId: `demo-provider-${Date.now().toString(36)}`,
-        message: "Provider application captured in demo mode. Configure Supabase to persist records.",
+        message: "Your application has been received and is pending review.",
       });
     }
 
@@ -158,7 +158,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       providerId,
-      message: "Provider application submitted successfully.",
+      message: "Your application has been received and is pending review.",
     });
   } catch (error) {
     return NextResponse.json(

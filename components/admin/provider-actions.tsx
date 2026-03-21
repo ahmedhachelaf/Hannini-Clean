@@ -12,6 +12,7 @@ type ProviderActionsProps = {
   labels: {
     approve: string;
     reject: string;
+    needsMoreInfo: string;
     verify: string;
   };
 };
@@ -50,6 +51,14 @@ export function ProviderActions({ providerId, locale, status, isVerified, labels
         onClick={() => runAction(`/api/admin/providers/${providerId}/reject`, "reject")}
       >
         {pending === "reject" ? (locale === "ar" ? "..." : "...") : labels.reject}
+      </button>
+      <button
+        type="button"
+        disabled={pending !== null || status === "needs_more_info"}
+        className="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 disabled:opacity-50"
+        onClick={() => runAction(`/api/admin/providers/${providerId}/needs-more-info`, "needs-more-info")}
+      >
+        {pending === "needs-more-info" ? (locale === "ar" ? "..." : "...") : labels.needsMoreInfo}
       </button>
       <button
         type="button"

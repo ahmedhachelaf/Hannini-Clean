@@ -9,13 +9,18 @@ type ProviderCardProps = {
   provider: Provider;
   category: Category | null;
   zones: Zone[];
+  highlighted?: boolean;
 };
 
-export function ProviderCard({ locale, provider, category, zones }: ProviderCardProps) {
+export function ProviderCard({ locale, provider, category, zones, highlighted = false }: ProviderCardProps) {
   const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(locale === "ar" ? " • " : " • ");
 
   return (
-    <article className="surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(227,238,255,0.94))] p-5 shadow-[0_26px_60px_rgba(12,40,104,0.14)]">
+    <article
+      className={`surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(227,238,255,0.94))] p-5 shadow-[0_26px_60px_rgba(12,40,104,0.14)] transition-all ${
+        highlighted ? "ring-2 ring-[rgba(20,92,255,0.45)] shadow-[0_30px_70px_rgba(12,40,104,0.2)]" : ""
+      }`}
+    >
       <div className="flex items-start gap-4">
         <div className="h-20 w-20 overflow-hidden rounded-3xl bg-[var(--soft)] ring-1 ring-[rgba(15,95,255,0.1)]">
           <Image src={provider.profilePhotoUrl} alt={provider.displayName} width={160} height={120} className="h-full w-full object-cover" />

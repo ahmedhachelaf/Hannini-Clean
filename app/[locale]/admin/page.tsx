@@ -47,15 +47,43 @@ export default async function AdminPage({ params }: AdminPageProps) {
                 <div className="space-y-3">
                   <div>
                     <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
-                    <p className="text-sm text-[var(--muted)]">
-                      {provider.status} • {provider.categorySlug} • {provider.zones.join(", ")}
-                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span
+                        className={`status-pill ${
+                          provider.status === "approved"
+                            ? "status-pill--verified"
+                            : provider.status === "needs_more_info"
+                              ? "border border-amber-200 bg-amber-50 text-amber-700"
+                              : provider.status === "rejected"
+                                ? "status-pill--danger"
+                                : "status-pill--pending"
+                        }`}
+                      >
+                        {provider.status}
+                      </span>
+                      <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
+                        {provider.categorySlug}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-[var(--muted)]">{provider.zones.join(", ")}</p>
                   </div>
                   <div className="grid gap-2 text-sm text-[var(--muted)] sm:grid-cols-2">
                     <div>{locale === "ar" ? "واتساب" : "WhatsApp"}: {provider.whatsappNumber}</div>
                     <div>{locale === "ar" ? "توثيق" : "Vérifié"}: {provider.isVerified ? "yes" : "no"}</div>
                     <div>{locale === "ar" ? "تقييم" : "Note"}: {provider.rating}</div>
                     <div>{locale === "ar" ? "أعمال" : "Jobs"}: {provider.completedJobs}</div>
+                  </div>
+                  <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] p-4 text-sm text-[var(--muted)]">
+                    <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "أدلة الطلب" : "Pièces du dossier"}</div>
+                    <div className="mt-2">
+                      {locale === "ar" ? "وثيقة التحقق:" : "Document :"} {provider.verification.documentName ?? (locale === "ar" ? "غير مرفق" : "Non fourni")}
+                    </div>
+                    <div className="mt-1">
+                      {locale === "ar" ? "ملاحظات الإدارة:" : "Notes admin :"} {provider.verification.notes ?? (locale === "ar" ? "لا توجد" : "Aucune")}
+                    </div>
+                    <div className="mt-1">
+                      {locale === "ar" ? "صور الأعمال:" : "Photos :"} {provider.gallery.length}
+                    </div>
                   </div>
                 </div>
                 <ProviderActions

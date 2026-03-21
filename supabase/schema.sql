@@ -1,7 +1,7 @@
 create extension if not exists pgcrypto;
 
 create type public.user_role as enum ('customer', 'provider', 'admin');
-create type public.provider_status as enum ('pending', 'approved', 'rejected');
+create type public.provider_status as enum ('pending', 'approved', 'rejected', 'needs_more_info');
 create type public.booking_status as enum ('pending', 'confirmed', 'completed', 'cancelled');
 create type public.verification_status as enum ('pending', 'verified', 'rejected');
 create type public.contact_method as enum ('whatsapp', 'phone');

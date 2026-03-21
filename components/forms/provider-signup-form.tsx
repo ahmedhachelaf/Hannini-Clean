@@ -56,10 +56,15 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   }
 
   return (
-    <form action={handleSubmit} className="surface-card flex flex-col gap-6 rounded-[1.75rem] p-6">
+    <form action={handleSubmit} className="surface-card flex flex-col gap-6 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.94))] p-6">
       <div>
         <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
+        <div className="mt-4 rounded-[1.25rem] border border-[rgba(20,92,255,0.14)] bg-[var(--soft)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+          {locale === "ar"
+            ? "بعد الإرسال، يظهر الطلب في لوحة الإدارة بحالة pending للمراجعة اليدوية. لا يتم إرسال بريد إلكتروني تلقائي حالياً."
+            : "Apres envoi, la candidature apparait en admin avec le statut pending pour revue manuelle. Aucun email automatique n'est envoye pour le moment."}
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -183,7 +188,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
       {result ? (
         <div className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
           <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
-          <div className="mt-1">{result.ok ? labels.successDescription : result.message}</div>
+          <div className="mt-1">{result.ok ? result.message : result.message}</div>
         </div>
       ) : null}
 

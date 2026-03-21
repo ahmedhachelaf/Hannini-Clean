@@ -3,7 +3,7 @@ import { formatDate } from "@/lib/format";
 import { defaultLocale } from "@/lib/i18n";
 import { getProviderScore } from "@/lib/ranking";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-import type { AdminDashboardData, Booking, Category, Filters, Provider, Review, SortOption, Zone } from "@/lib/types";
+import type { AdminDashboardData, Booking, Category, Filters, MapCoordinates, Provider, ProviderStatus, Review, SortOption, Zone } from "@/lib/types";
 
 type ProviderRow = {
   id: string;
@@ -43,6 +43,13 @@ type ProviderRow = {
   }>;
   provider_photos?: Array<{
     url: string | null;
+    alt_text?: string | null;
+    sort_order?: number | null;
+  }>;
+  provider_verifications?: Array<{
+    status: "pending" | "verified" | "rejected";
+    document_name: string | null;
+    notes: string | null;
   }>;
 };
 
@@ -75,6 +82,29 @@ type BookingRow = {
     slug: string;
   }> | null;
 };
+
+const fallbackCoordinatesByZone: Record<string, MapCoordinates> = Object.fromEntries(
+  seedZones.map((zone) => [zone.slug, zone.coordinates]),
+);
+
+function getZoneCoordinates(zoneSlug: string | undefined) {
+  if (!zoneSlug) {
+    return { latitude: 35.6981, longitude: -0.6348 };
+  }
+
+  return fallbackCoordinatesByZone[zoneSlug] ?? { latitude: 35.6981, longitude: -0.6348 };
+}
+
+function deriveProviderStatus(
+  approvalStatus: ProviderStatus,
+  verificationNotes: string | null | undefined,
+) {
+  if (verificationNotes?.includes("[needs_more_info]")) {
+    return "needs_more_info" as const;
+  }
+
+  return approvalStatus;
+}
 
 function sortProviders(providers: Provider[], sort: SortOption = "top") {
   const nextProviders = [...providers];
@@ -133,6 +163,11 @@ function applyProviderFilters(providers: Provider[], filters: Filters = {}) {
 }
 
 function mapProviderRow(row: ProviderRow): Provider {
+  const providerZones = row.service_areas?.map((zone) => zone.zone_slug) ?? [];
+  const coordinates = getZoneCoordinates(providerZones[0]);
+  const verification = row.provider_verifications?.[0];
+  const derivedStatus = deriveProviderStatus(row.approval_status, verification?.notes);
+
   return {
     id: row.id,
     slug: row.slug,
@@ -144,12 +179,13 @@ function mapProviderRow(row: ProviderRow): Provider {
     completedJobs: row.completed_jobs_count ?? 0,
     responseTimeMinutes: row.response_time_minutes ?? 60,
     isVerified: Boolean(row.is_verified),
-    status: row.approval_status,
+    status: derivedStatus,
     featured: Boolean(row.featured),
     yearsExperience: row.years_experience ?? 0,
     hourlyRate: row.hourly_rate ?? 0,
     travelFee: row.travel_fee ?? 0,
-    zones: row.service_areas?.map((zone) => zone.zone_slug) ?? [],
+    zones: providerZones,
+    coordinates,
     languages: ["العربية", "Français"],
     phoneNumber: row.phone_number,
     whatsappNumber: row.whatsapp_number,
@@ -165,6 +201,11 @@ function mapProviderRow(row: ProviderRow): Provider {
     profilePhotoUrl: row.profile_photo_url ?? "/placeholders/provider-avatar.svg",
     gallery:
       row.provider_photos?.map((photo) => photo.url).filter((value): value is string => Boolean(value)) ?? [],
+    verification: {
+      status: verification?.status ?? "pending",
+      documentName: verification?.document_name ?? null,
+      notes: verification?.notes ?? null,
+    },
     availability:
       row.availability?.map((slot) => ({
         dayKey: slot.day_key,
@@ -250,7 +291,8 @@ async function fetchSupabaseProviders() {
         provider_services ( category_slug ),
         service_areas ( zone_slug ),
         availability ( day_key, label_ar, label_fr, start_time, end_time ),
-        provider_photos ( url )
+        provider_photos ( url, alt_text, sort_order ),
+        provider_verifications ( status, document_name, notes )
       `,
     )
     .order("created_at", { ascending: false });
@@ -356,11 +398,7 @@ export async function getCategories() {
     description_fr: string | null;
   }>("categories");
 
-  if (!rows) {
-    return seedCategories;
-  }
-
-  return rows.map((row) => ({
+  const mapped = rows?.map((row) => ({
     slug: row.slug,
     icon: row.icon ?? "🧰",
     name: {
@@ -371,7 +409,9 @@ export async function getCategories() {
       ar: row.description_ar ?? row.name_ar,
       fr: row.description_fr ?? row.name_fr,
     },
-  }));
+  })) ?? [];
+
+  return [...mapped, ...seedCategories.filter((seed) => !mapped.some((row) => row.slug === seed.slug))];
 }
 
 export async function getZones() {
@@ -382,23 +422,25 @@ export async function getZones() {
     name_fr: string;
   }>("zones");
 
-  if (!rows) {
-    return seedZones;
-  }
-
-  return rows.map((row) => ({
+  const mapped = rows?.map((row) => ({
     slug: row.slug,
     wilaya: row.wilaya,
     name: {
       ar: row.name_ar,
       fr: row.name_fr,
     },
-  }));
+    coordinates: getZoneCoordinates(row.slug),
+  })) ?? [];
+
+  return [...mapped, ...seedZones.filter((seed) => !mapped.some((row) => row.slug === seed.slug))];
 }
 
 export async function getProviders(filters: Filters = {}, includeAllStatuses = false) {
-  const providers = (await fetchSupabaseProviders()) ?? seedProviders;
-  const visibleProviders = includeAllStatuses ? providers : providers.filter((provider) => provider.status === "approved");
+  const supabaseProviders = (await fetchSupabaseProviders()) ?? [];
+  const providers = [...supabaseProviders, ...seedProviders.filter((seed) => !supabaseProviders.some((provider) => provider.slug === seed.slug))];
+  const visibleProviders = includeAllStatuses
+    ? providers
+    : providers.filter((provider) => provider.status === "approved");
   return applyProviderFilters(visibleProviders, filters);
 }
 
