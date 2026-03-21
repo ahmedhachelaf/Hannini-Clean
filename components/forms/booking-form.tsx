@@ -85,7 +85,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
 
   if (result?.ok) {
     return (
-      <div className="surface-card rounded-[1.75rem] p-6">
+      <div aria-live="polite" className="surface-card rounded-[1.75rem] p-6">
         <div className="status-pill status-pill--verified mb-4 inline-flex">{locale === "ar" ? "تم" : "OK"}</div>
         <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.successTitle}</h2>
         <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">{labels.successDescription}</p>
@@ -107,6 +107,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
   return (
     <form
       action={handleSubmit}
+      aria-busy={pending}
       className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.92))] p-6"
     >
       <div>
@@ -116,15 +117,15 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.fullName}</span>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.fullName} <span className="text-[var(--navy)]">*</span></span>
           <input name="customerName" required className="input-base" />
         </label>
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.phoneNumber}</span>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.phoneNumber} <span className="text-[var(--navy)]">*</span></span>
           <input name="phoneNumber" required type="tel" className="input-base" />
         </label>
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.selectedService}</span>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.selectedService} <span className="text-[var(--navy)]">*</span></span>
           <select name="selectedService" defaultValue={provider.categorySlug} className="input-base">
             {categories.map((category) => (
               <option key={category.slug} value={category.slug}>
@@ -134,7 +135,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
           </select>
         </label>
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.zone}</span>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.zone} <span className="text-[var(--navy)]">*</span></span>
           <select name="zoneSlug" className="input-base" required>
             {providerZones.map((zone) => (
               <option key={zone.slug} value={zone.slug}>
@@ -144,27 +145,27 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
           </select>
         </label>
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.date}</span>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.date} <span className="text-[var(--navy)]">*</span></span>
           <input name="date" type="date" min={minimumDate} required className="input-base" />
         </label>
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.time}</span>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.time} <span className="text-[var(--navy)]">*</span></span>
           <input name="time" type="time" required className="input-base" />
         </label>
       </div>
 
       <label>
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.address}</span>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.address} <span className="text-[var(--navy)]">*</span></span>
         <input name="address" required className="input-base" />
       </label>
 
       <label>
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.mapsLink}</span>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.mapsLink} <span className="text-[var(--navy)]">*</span></span>
         <input name="googleMapsUrl" type="url" required className="input-base" placeholder="https://maps.google.com/..." />
       </label>
 
       <label>
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.issueDescription}</span>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.issueDescription} <span className="text-[var(--navy)]">*</span></span>
         <textarea name="issueDescription" required rows={5} className="input-base min-h-32 resize-y" />
       </label>
 

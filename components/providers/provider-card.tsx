@@ -59,14 +59,14 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
           </div>
 
           <h3 className={`text-xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
-          <p className="mt-1 text-sm font-medium text-[var(--muted)]">
+          <p className="mt-1 text-[0.98rem] font-medium text-[var(--muted)]">
             {category ? `${category.icon} ${getLocalizedValue(category.name, locale)}` : provider.categorySlug}
           </p>
-          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{getLocalizedValue(provider.shortTagline, locale)}</p>
+          <p className="mt-3 text-[0.98rem] leading-8 text-[var(--muted)]">{getLocalizedValue(provider.shortTagline, locale)}</p>
         </div>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 text-sm">
+      <dl className="grid grid-cols-2 gap-3 text-[0.98rem]">
         <div className="stat-card rounded-2xl p-3">
           <dt className="text-[var(--muted)]">{locale === "ar" ? "التقييم" : "Note"}</dt>
           <dd className="mt-1 font-bold">{provider.rating.toFixed(1)} / 5</dd>
@@ -85,7 +85,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
         </div>
       </dl>
 
-      <div className="space-y-2 rounded-2xl border border-[rgba(15,95,255,0.12)] bg-white/88 p-4 text-sm text-[var(--muted)]">
+      <div className="space-y-2 rounded-2xl border border-[rgba(15,95,255,0.12)] bg-white/88 p-4 text-[0.98rem] leading-7 text-[var(--muted)]">
         <div>
           <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الولاية:" : "Wilaya :"}</span> {provinceName}
         </div>

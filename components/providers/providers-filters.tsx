@@ -59,7 +59,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(8,23,69,0.98),rgba(14,67,191,0.94)_62%,rgba(48,114,255,0.88))] p-5 text-white shadow-[0_28px_60px_rgba(8,34,99,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
     >
       <label className="min-w-[240px] flex-1">
-        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.searchLabel}</span>
+        <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.searchLabel}</span>
         <input
           type="search"
           name="q"
@@ -70,7 +70,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       </label>
 
       <label className="lg:w-56">
-        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.categoryLabel}</span>
+        <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.categoryLabel}</span>
         <select name="category" defaultValue={values.category ?? ""} className="input-base">
           <option value="">{locale === "ar" ? "كل الفئات" : "Toutes les catégories"}</option>
           {categories.map((category) => (
@@ -82,7 +82,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       </label>
 
       <label className="lg:w-52">
-        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.provinceLabel}</span>
+        <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.provinceLabel}</span>
         <select
           name="province"
           value={province}
@@ -99,7 +99,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       </label>
 
       <label className="lg:w-56">
-        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.zoneLabel}</span>
+        <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.zoneLabel}</span>
         <select name="zone" defaultValue={values.zone ?? ""} className="input-base">
           <option value="">{locale === "ar" ? "كل المدن والمناطق" : "Toutes les villes et zones"}</option>
           {filteredZones.map((zone) => (
@@ -111,7 +111,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       </label>
 
       <label className="lg:w-56">
-        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.sortLabel}</span>
+        <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.sortLabel}</span>
         <select name="sort" defaultValue={values.sort ?? "top"} className="input-base">
           <option value="top">{labels.sortTop}</option>
           <option value="rating">{labels.sortRating}</option>

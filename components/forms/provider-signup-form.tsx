@@ -240,7 +240,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   }
 
   return (
-    <form action={handleSubmit} className="surface-card flex flex-col gap-6 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.94))] p-6">
+    <form action={handleSubmit} aria-busy={pending} className="surface-card flex flex-col gap-6 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.94))] p-6">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="profileType" value={profileType} />
 
@@ -259,6 +259,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <button
               type="button"
               onClick={() => setProfileType("service_provider")}
+              aria-pressed={profileType === "service_provider"}
               className={`rounded-[1.5rem] border p-5 text-start transition ${
                 profileType === "service_provider"
                   ? "border-[rgba(20,92,255,0.24)] bg-[var(--accent-soft)] shadow-[0_18px_36px_rgba(20,92,255,0.12)]"
@@ -272,6 +273,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <button
               type="button"
               onClick={() => setProfileType("home_business")}
+              aria-pressed={profileType === "home_business"}
               className={`rounded-[1.5rem] border p-5 text-start transition ${
                 profileType === "home_business"
                   ? "border-[rgba(20,92,255,0.24)] bg-[var(--accent-soft)] shadow-[0_18px_36px_rgba(20,92,255,0.12)]"
@@ -297,7 +299,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
               {copy.fullName} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
-            <input name="fullName" required className="input-base" />
+            <input name="fullName" required aria-required="true" className="input-base" />
           </label>
 
           <label>
@@ -309,7 +311,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
               {copy.category} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
-            <select key={`category-${profileType}`} name="categorySlug" required defaultValue={primaryCategorySlug} className="input-base">
+            <select key={`category-${profileType}`} name="categorySlug" required aria-required="true" defaultValue={primaryCategorySlug} className="input-base">
               {laneCategories.length === 0 ? <option value="">{copy.noCategory}</option> : null}
               {laneCategories.map((category) => (
                 <option key={category.slug} value={category.slug}>
@@ -323,7 +325,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
               {copy.province} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
-            <select value={provinceSlug} onChange={(event) => setProvinceSlug(event.target.value)} className="input-base">
+            <select value={provinceSlug} onChange={(event) => setProvinceSlug(event.target.value)} aria-label={copy.province} className="input-base">
               {provinceGroups.map((province) => (
                 <option key={province.slug} value={province.slug}>
                   {province.name[locale]}
@@ -336,7 +338,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
               {copy.zone} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
-            <select key={`zone-${provinceSlug}`} name="zones" required defaultValue={primaryZoneSlug} className="input-base">
+            <select key={`zone-${provinceSlug}`} name="zones" required aria-required="true" defaultValue={primaryZoneSlug} className="input-base">
               {provinceZones.length === 0 ? <option value="">{copy.noZone}</option> : null}
               {provinceZones.map((zone) => (
                 <option key={zone.slug} value={zone.slug}>
@@ -364,6 +366,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <textarea
             name="shortDescription"
             required
+            aria-required="true"
             minLength={6}
             rows={4}
             className="input-base min-h-28 resize-y"
@@ -469,8 +472,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <legend className="text-sm font-semibold text-[var(--muted)]">{copy.languages}</legend>
           <div className="grid gap-3 sm:grid-cols-2">
             {languageChoices.map((language) => (
-              <label key={language.value} className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
-                <input type="checkbox" name="languages" value={language.value} defaultChecked={language.value === "العربية"} className="h-4 w-4" />
+              <label key={language.value} className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                <input type="checkbox" name="languages" value={language.value} defaultChecked={language.value === "العربية"} className="h-4 w-4 accent-[var(--accent)]" />
                 <span>{locale === "ar" ? language.ar : language.fr}</span>
               </label>
             ))}
@@ -481,8 +484,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <legend className="text-sm font-semibold text-[var(--muted)]">{copy.weekdays}</legend>
           <div className="grid gap-3 sm:grid-cols-3">
             {weekdays.map((day) => (
-              <label key={day.value} className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
-                <input type="checkbox" name="weekdays" value={day.value} className="h-4 w-4" />
+              <label key={day.value} className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                <input type="checkbox" name="weekdays" value={day.value} className="h-4 w-4 accent-[var(--accent)]" />
                 <span>{locale === "ar" ? day.ar : day.fr}</span>
               </label>
             ))}
@@ -528,7 +531,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
       </section>
 
       {result ? (
-        <div className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
+        <div aria-live="polite" className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
           <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
           <div className="mt-1">{result.message}</div>
         </div>
