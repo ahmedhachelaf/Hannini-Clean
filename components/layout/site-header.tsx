@@ -38,7 +38,7 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
     <header className="sticky top-0 z-30 border-b border-[rgba(13,28,69,0.08)] bg-[rgba(225,236,255,0.72)] backdrop-blur-xl">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-4 rounded-[1.75rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(231,240,255,0.84))] px-4 py-3 shadow-[0_24px_60px_rgba(13,28,69,0.14)]">
-          <Link href={`/${locale}`} className="flex items-center gap-3">
+          <Link href={`/${locale}`} aria-label={locale === "ar" ? "العودة إلى الصفحة الرئيسية" : "Retour à l'accueil"} className="flex items-center gap-3">
             <Image
               src="/brand/henini-mark.svg"
               alt="Henini"
@@ -48,11 +48,11 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
             />
             <div>
               <div className={`text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هنيني</div>
-              <div className="text-xs font-medium text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
+              <div className="text-sm font-medium text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
             </div>
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-2 text-sm font-medium text-[var(--muted)] md:flex">
+          <nav aria-label="Primary" className="hidden items-center gap-2 text-[0.98rem] font-medium text-[var(--muted)] md:flex">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className="chip-button min-h-11 px-4 text-sm font-semibold">
                 {item.label}

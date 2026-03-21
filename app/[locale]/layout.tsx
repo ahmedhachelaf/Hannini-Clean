@@ -24,8 +24,11 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   return (
     <div dir={getDirection(locale)} lang={locale} className="locale-shell">
+      <a href="#main-content" className="skip-link">
+        {locale === "ar" ? "انتقل إلى المحتوى" : "Aller au contenu"}
+      </a>
       <SiteHeader locale={locale} dictionary={dictionary} />
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       <SiteFooter locale={locale} nav={dictionary.nav} />
       <div className="pointer-events-none fixed bottom-4 left-0 right-0 z-30 flex justify-center px-4">
         <div className="pointer-events-auto">
