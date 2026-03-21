@@ -86,6 +86,7 @@ export type Provider = {
   shortTagline: Record<Locale, string>;
   profilePhotoUrl: string;
   gallery: string[];
+  galleryCaptions?: string[];
   availability: AvailabilitySlot[];
   verification: {
     status: "pending" | "verified" | "rejected";
@@ -222,6 +223,7 @@ export type SignupSubmissionResult = {
   ok: boolean;
   message: string;
   providerId?: string;
+  providerSlug?: string;
   demoMode?: boolean;
 };
 

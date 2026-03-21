@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
+import { updateProviderModeration } from "@/lib/provider-moderation";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -13,30 +13,22 @@ export async function POST(_request: Request, context: RouteContext) {
 
   const { id } = await context.params;
 
-  if (!hasSupabaseServerEnv()) {
-    return NextResponse.json({ ok: true, demoMode: true, message: "Provider rejected in demo mode." });
-  }
-
-  const supabase = createServerSupabaseClient();
-
-  if (!supabase) {
-    return NextResponse.json({ ok: false, message: "Supabase unavailable." }, { status: 500 });
-  }
-
-  const { error } = await supabase.from("providers").update({ approval_status: "rejected" }).eq("id", id);
-
-  if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 400 });
-  }
-
-  await supabase.from("provider_verifications").upsert(
-    {
-      provider_id: id,
+  const result = await updateProviderModeration({
+    providerId: id,
+    approvalStatus: "rejected",
+    verification: {
       status: "rejected",
       notes: "Application rejected by admin.",
     },
-    { onConflict: "provider_id" },
-  );
+  });
+
+  if ("demoMode" in result && result.demoMode) {
+    return NextResponse.json({ ok: true, demoMode: true, message: "Provider rejected in demo mode." });
+  }
+
+  if (!result.ok) {
+    return NextResponse.json({ ok: false, message: result.message }, { status: 400 });
+  }
 
   return NextResponse.json({ ok: true, message: "Provider rejected." });
 }

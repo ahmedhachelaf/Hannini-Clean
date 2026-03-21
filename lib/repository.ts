@@ -160,6 +160,10 @@ function deriveProviderStatus(
   approvalStatus: ProviderStatus,
   verificationNotes: string | null | undefined,
 ) {
+  if (approvalStatus === "needs_more_info") {
+    return "needs_more_info" as const;
+  }
+
   if (verificationNotes?.includes("[needs_more_info]")) {
     return "needs_more_info" as const;
   }
@@ -277,6 +281,10 @@ function mapProviderRow(row: ProviderRow): Provider {
     profilePhotoUrl: row.profile_photo_url ?? "/placeholders/provider-avatar.svg",
     gallery:
       row.provider_photos?.map((photo) => photo.url).filter((value): value is string => Boolean(value)) ?? [],
+    galleryCaptions:
+      row.provider_photos
+        ?.map((photo) => photo.alt_text)
+        .filter((value): value is string => Boolean(value)) ?? [],
     verification: {
       status: verification?.status ?? "pending",
       documentName: verification?.document_name ?? null,

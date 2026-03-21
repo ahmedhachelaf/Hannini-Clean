@@ -42,6 +42,12 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   const secondaryFeeLabel = provider.profileType === "home_business" ? dictionary.common.deliveryFee : dictionary.common.travelFee;
   const primaryActionLabel = provider.profileType === "home_business" ? dictionary.common.requestNow : dictionary.common.bookNow;
   const bookingHint = provider.profileType === "home_business" ? dictionary.provider.businessHint : dictionary.provider.bookingHint;
+  const galleryImages =
+    provider.gallery.length > 0
+      ? provider.gallery
+      : provider.galleryCaptions && provider.galleryCaptions.length > 0
+        ? provider.galleryCaptions.map((_, index) => `/gallery/work-${(index % 3) + 1}.svg`)
+        : [];
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -145,13 +151,32 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
         <div className="space-y-8">
           <div className="surface-card rounded-[1.75rem] p-6">
             <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.provider.galleryTitle}</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              {(provider.gallery.length > 0 ? provider.gallery : ["/gallery/work-1.svg", "/gallery/work-2.svg", "/gallery/work-3.svg"]).map((imageUrl) => (
-                <div key={imageUrl} className="overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white">
-                  <Image src={imageUrl} alt={provider.displayName} width={640} height={480} className="h-48 w-full object-cover" />
-                </div>
-              ))}
-            </div>
+            {galleryImages.length > 0 ? (
+              <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                {galleryImages.map((imageUrl, index) => (
+                  <div key={`${imageUrl}-${index}`} className="overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white">
+                    <Image
+                      src={imageUrl}
+                      alt={provider.galleryCaptions?.[index] ?? provider.displayName}
+                      width={640}
+                      height={480}
+                      className="h-48 w-full object-cover"
+                    />
+                    {provider.galleryCaptions?.[index] ? (
+                      <div className="border-t border-[var(--line)] px-4 py-3 text-xs leading-6 text-[var(--muted)]">
+                        {provider.galleryCaptions[index]}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-[var(--soft)] px-5 py-6 text-sm leading-7 text-[var(--muted)]">
+                {locale === "ar"
+                  ? "لم تتم إضافة صور أعمال بعد. يمكن للمزوّد إرفاق عينات العمل أثناء التسجيل أو عند تحديث الملف لاحقاً."
+                  : "Aucun échantillon de travail n'a encore été ajouté. Le prestataire pourra joindre des exemples pendant l'inscription ou plus tard."}
+              </div>
+            )}
           </div>
 
           <div className="surface-card rounded-[1.75rem] p-6">

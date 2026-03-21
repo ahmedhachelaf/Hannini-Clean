@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { categories as seedCategories, zones as seedZones } from "@/data/seed";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { providerSignupSchema } from "@/lib/validation";
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
         ok: true,
         demoMode: true,
         providerId: `demo-provider-${Date.now().toString(36)}`,
+        providerSlug: generatedSlug,
         message:
           locale === "ar"
             ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
@@ -163,15 +165,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const photoNames = payload.workPhotoNames.length > 0 ? payload.workPhotoNames : ["sample-1", "sample-2", "sample-3"];
-    await supabase.from("provider_photos").insert(
-      photoNames.slice(0, 3).map((photoName, index) => ({
-        provider_id: providerId,
-        url: `/gallery/work-${(index % 3) + 1}.svg`,
-        alt_text: photoName,
-        sort_order: index,
-      })),
-    );
+    if (payload.workPhotoNames.length > 0) {
+      await supabase.from("provider_photos").insert(
+        payload.workPhotoNames.slice(0, 3).map((photoName, index) => ({
+          provider_id: providerId,
+          url: `/gallery/work-${(index % 3) + 1}.svg`,
+          alt_text: photoName,
+          sort_order: index,
+        })),
+      );
+    }
 
     await supabase.from("provider_verifications").insert({
       provider_id: providerId,
@@ -185,9 +188,12 @@ export async function POST(request: Request) {
         .join(" | "),
     });
 
+    revalidateMarketplacePaths(generatedSlug);
+
     return NextResponse.json({
       ok: true,
       providerId,
+      providerSlug: generatedSlug,
       message:
         locale === "ar"
           ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
