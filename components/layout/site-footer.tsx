@@ -6,6 +6,7 @@ type SiteFooterProps = {
   nav: {
     home: string;
     providers: string;
+    businesses: string;
     join: string;
     support: string;
     admin: string;
@@ -29,6 +30,7 @@ export function SiteFooter({ locale, nav }: SiteFooterProps) {
         <div className="flex flex-wrap gap-4 text-sm font-medium text-[var(--muted)]">
           <Link href={`/${locale}`}>{nav.home}</Link>
           <Link href={`/${locale}/providers`}>{nav.providers}</Link>
+          <Link href={`/${locale}/businesses`}>{nav.businesses}</Link>
           <Link href={`/${locale}/join`}>{nav.join}</Link>
           <Link href={`/${locale}/support`}>{nav.support}</Link>
           <Link href={`/${locale}/admin`}>{nav.admin}</Link>

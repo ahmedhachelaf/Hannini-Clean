@@ -4,7 +4,7 @@ import { getCategories, getProviders, getZones } from "@/lib/repository";
 import type { SortOption } from "@/lib/types";
 import { notFound } from "next/navigation";
 
-type ProvidersPageProps = {
+type BusinessesPageProps = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -13,7 +13,7 @@ function readSearchValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function ProvidersPage({ params, searchParams }: ProvidersPageProps) {
+export default async function BusinessesPage({ params, searchParams }: BusinessesPageProps) {
   const [{ locale }, query] = await Promise.all([params, searchParams]);
 
   if (!isLocale(locale)) {
@@ -22,7 +22,7 @@ export default async function ProvidersPage({ params, searchParams }: ProvidersP
 
   const dictionary = getDictionary(locale);
   const filters = {
-    profileType: "service_provider" as const,
+    profileType: "home_business" as const,
     query: readSearchValue(query.q),
     category: readSearchValue(query.category),
     province: readSearchValue(query.province),
@@ -35,17 +35,24 @@ export default async function ProvidersPage({ params, searchParams }: ProvidersP
     getZones(),
     getProviders(filters),
   ]);
-  const serviceCategories = categories.filter((category) => category.lane === "service_provider");
+
+  const businessCategories = categories.filter((category) => category.lane === "home_business");
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <ProvidersExplorer
         locale={locale}
-        categories={serviceCategories}
+        categories={businessCategories}
         zones={zones}
         providers={providers}
         values={filters}
-        labels={dictionary.listing}
+        labels={{
+          ...dictionary.listing,
+          title: dictionary.businesses.title,
+          description: dictionary.businesses.description,
+          emptyTitle: dictionary.businesses.emptyTitle,
+          emptyDescription: dictionary.businesses.emptyDescription,
+        }}
       />
     </div>
   );

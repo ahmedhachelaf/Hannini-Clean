@@ -16,6 +16,7 @@ import type {
   Category,
   Filters,
   MapCoordinates,
+  ProfileType,
   Provider,
   ProviderStatus,
   Review,
@@ -137,6 +138,7 @@ const fallbackCoordinatesByZone: Record<string, MapCoordinates> = Object.fromEnt
 );
 
 const zoneDetailsBySlug = new Map(seedZones.map((zone) => [zone.slug, zone]));
+const categoryDetailsBySlug = new Map(seedCategories.map((category) => [category.slug, category]));
 
 const provinceLabels = new Map(
   seedZones.map((zone) => [zone.provinceSlug, zone.provinceName] as const),
@@ -191,6 +193,10 @@ function applyProviderFilters(providers: Provider[], filters: Filters = {}) {
   const query = filters.query?.trim().toLowerCase();
 
   const filtered = providers.filter((provider) => {
+    if (filters.profileType && provider.profileType !== filters.profileType) {
+      return false;
+    }
+
     if (filters.category && provider.categorySlug !== filters.category) {
       return false;
     }
@@ -234,13 +240,16 @@ function mapProviderRow(row: ProviderRow): Provider {
   const coordinates = getZoneCoordinates(providerZones[0]);
   const verification = row.provider_verifications?.[0];
   const derivedStatus = deriveProviderStatus(row.approval_status, verification?.notes);
+  const categorySlug = row.provider_services?.[0]?.category_slug ?? "handyman";
+  const profileType = categoryDetailsBySlug.get(categorySlug)?.lane ?? "service_provider";
 
   return {
     id: row.id,
     slug: row.slug,
+    profileType,
     displayName: row.display_name,
     workshopName: row.workshop_name,
-    categorySlug: row.provider_services?.[0]?.category_slug ?? "handyman",
+    categorySlug,
     rating: row.rating_average ?? 0,
     reviewCount: row.review_count ?? 0,
     completedJobs: row.completed_jobs_count ?? 0,
@@ -540,6 +549,7 @@ export async function getCategories() {
   const rows = await fetchSupabaseMetadata<{
     slug: string;
     icon: string | null;
+    lane?: ProfileType | null;
     name_ar: string;
     name_fr: string;
     description_ar: string | null;
@@ -548,6 +558,7 @@ export async function getCategories() {
 
   const mapped = rows?.map((row) => ({
     slug: row.slug,
+    lane: row.lane ?? categoryDetailsBySlug.get(row.slug)?.lane ?? "service_provider",
     icon: row.icon ?? "🧰",
     name: {
       ar: row.name_ar,
@@ -603,8 +614,8 @@ export async function getProviders(filters: Filters = {}, includeAllStatuses = f
   return applyProviderFilters(visibleProviders, filters);
 }
 
-export async function getFeaturedProviders() {
-  const providers = await getProviders({ sort: "top" });
+export async function getFeaturedProviders(profileType: ProfileType = "service_provider") {
+  const providers = await getProviders({ sort: "top", profileType });
   return providers.filter((provider) => provider.featured).slice(0, 4);
 }
 

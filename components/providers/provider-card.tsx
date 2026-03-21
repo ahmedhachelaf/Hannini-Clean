@@ -15,6 +15,22 @@ type ProviderCardProps = {
 export function ProviderCard({ locale, provider, category, zones, highlighted = false }: ProviderCardProps) {
   const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(locale === "ar" ? " • " : " • ");
   const provinceName = zones[0] ? getLocalizedValue(zones[0].provinceName, locale) : locale === "ar" ? "غير محدد" : "Non defini";
+  const priceLabel =
+    provider.profileType === "home_business"
+      ? locale === "ar"
+        ? "السعر الابتدائي"
+        : "Prix de depart"
+      : locale === "ar"
+        ? "الساعة"
+        : "Tarif";
+  const primaryActionLabel =
+    provider.profileType === "home_business"
+      ? locale === "ar"
+        ? "اطلب الآن"
+        : "Commander"
+      : locale === "ar"
+        ? "احجز الآن"
+        : "Réserver";
 
   return (
     <article
@@ -64,7 +80,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
           <dd className="mt-1 font-bold">{formatResponseTime(provider.responseTimeMinutes, locale)}</dd>
         </div>
         <div className="stat-card rounded-2xl p-3">
-          <dt className="text-[var(--muted)]">{locale === "ar" ? "الساعة" : "Tarif"}</dt>
+          <dt className="text-[var(--muted)]">{priceLabel}</dt>
           <dd className="mt-1 font-bold">{formatCurrency(provider.hourlyRate, locale)}</dd>
         </div>
       </dl>
@@ -87,7 +103,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
           {locale === "ar" ? "عرض الملف" : "Voir le profil"}
         </Link>
         <Link href={`/${locale}/book/${provider.slug}`} className="button-primary flex-1">
-          {locale === "ar" ? "احجز الآن" : "Réserver"}
+          {primaryActionLabel}
         </Link>
       </div>
     </article>

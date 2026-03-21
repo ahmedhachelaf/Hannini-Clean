@@ -13,6 +13,7 @@ type HomePageContentProps = {
     };
     nav: {
       providers: string;
+      businesses: string;
     };
     home: {
       badge: string;
@@ -22,8 +23,17 @@ type HomePageContentProps = {
       provinceLabel: string;
       zoneLabel: string;
       categoryLabel: string;
+      lanesTitle: string;
+      servicesLaneTitle: string;
+      servicesLaneDescription: string;
+      servicesLaneCta: string;
+      businessesLaneTitle: string;
+      businessesLaneDescription: string;
+      businessesLaneCta: string;
       featuredTitle: string;
       featuredDescription: string;
+      businessFeaturedTitle: string;
+      businessFeaturedDescription: string;
       joinTitle: string;
       joinDescription: string;
       joinCta: string;
@@ -35,6 +45,7 @@ type HomePageContentProps = {
   categories: Category[];
   zones: Zone[];
   featuredProviders: Provider[];
+  featuredBusinesses: Provider[];
   summary: {
     providersCount: number;
     zonesCount: number;
@@ -48,10 +59,13 @@ export function HomePageContent({
   categories,
   zones,
   featuredProviders,
+  featuredBusinesses,
   summary,
 }: HomePageContentProps) {
   const categoryMap = new Map(categories.map((category) => [category.slug, category]));
   const zoneMap = new Map(zones.map((zone) => [zone.slug, zone]));
+  const serviceCategories = categories.filter((category) => category.lane === "service_provider");
+  const businessCategories = categories.filter((category) => category.lane === "home_business");
   const provinces = Array.from(new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])).entries()).map(
     ([slug, name]) => ({
       slug,
@@ -83,6 +97,45 @@ export function HomePageContent({
               {dictionary.home.description}
             </p>
 
+            <div className="mt-8 space-y-4">
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/72">{dictionary.home.lanesTitle}</div>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Link
+                  href={`/${locale}/providers`}
+                  className="rounded-[1.75rem] border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.18)] backdrop-blur"
+                >
+                  <div className="text-sm font-semibold text-white/70">{locale === "ar" ? "المسار الأول" : "Volet 1"}</div>
+                  <div className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.servicesLaneTitle}</div>
+                  <p className="mt-3 text-sm leading-7 text-white/78">{dictionary.home.servicesLaneDescription}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {serviceCategories.slice(0, 4).map((category) => (
+                      <span key={category.slug} className="chip-button border-white/14 bg-white/10 text-white text-xs">
+                        {category.icon} {getLocalizedValue(category.name, locale)}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-5 text-sm font-bold text-white">{dictionary.home.servicesLaneCta}</div>
+                </Link>
+
+                <Link
+                  href={`/${locale}/businesses`}
+                  className="rounded-[1.75rem] border border-white/16 bg-[linear-gradient(180deg,rgba(180,220,255,0.2),rgba(255,255,255,0.08))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.18)] backdrop-blur"
+                >
+                  <div className="text-sm font-semibold text-white/70">{locale === "ar" ? "المسار الثاني" : "Volet 2"}</div>
+                  <div className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.businessesLaneTitle}</div>
+                  <p className="mt-3 text-sm leading-7 text-white/78">{dictionary.home.businessesLaneDescription}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {businessCategories.slice(0, 4).map((category) => (
+                      <span key={category.slug} className="chip-button border-white/14 bg-white/10 text-white text-xs">
+                        {category.icon} {getLocalizedValue(category.name, locale)}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-5 text-sm font-bold text-white">{dictionary.home.businessesLaneCta}</div>
+                </Link>
+              </div>
+            </div>
+
             <HomeSearchForm
               locale={locale}
               zones={zones}
@@ -98,6 +151,9 @@ export function HomePageContent({
               <Link href={`/${locale}/providers`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
                 {dictionary.nav.providers}
               </Link>
+              <Link href={`/${locale}/businesses`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+                {dictionary.nav.businesses}
+              </Link>
               <Link href={`/${locale}/join`} className="button-primary">
                 {dictionary.home.joinCta}
               </Link>
@@ -106,7 +162,7 @@ export function HomePageContent({
             <div className="mt-7">
               <div className="mb-3 text-sm font-semibold text-white/72">{dictionary.home.categoryLabel}</div>
               <div className="flex gap-3 overflow-x-auto pb-2" aria-label={dictionary.home.categoryLabel}>
-                {categories.map((category) => (
+                {serviceCategories.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/${locale}/providers?category=${category.slug}`}
@@ -193,6 +249,36 @@ export function HomePageContent({
 
         <div className="grid gap-5 lg:grid-cols-2">
           {featuredProviders.map((provider) => (
+            <ProviderCard
+              key={provider.id}
+              locale={locale}
+              provider={provider}
+              category={categoryMap.get(provider.categorySlug) ?? null}
+              zones={provider.zones
+                .map((slug) => zoneMap.get(slug))
+                .filter((zone): zone is Zone => Boolean(zone))}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section id="featured-businesses" className="space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+              {dictionary.home.businessFeaturedTitle}
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+              {dictionary.home.businessFeaturedDescription}
+            </p>
+          </div>
+          <Link href={`/${locale}/businesses`} className="button-secondary">
+            {dictionary.common.viewAll}
+          </Link>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-2">
+          {featuredBusinesses.map((provider) => (
             <ProviderCard
               key={provider.id}
               locale={locale}

@@ -38,6 +38,10 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
       ? `السلام عليكم، أريد تأكيد حجز مع ${provider.displayName} عبر هنيني.`
       : `Bonjour, je souhaite confirmer une réservation avec ${provider.displayName} via Henini.`,
   );
+  const priceLabel = provider.profileType === "home_business" ? dictionary.common.startingPrice : dictionary.common.hourlyRate;
+  const secondaryFeeLabel = provider.profileType === "home_business" ? dictionary.common.deliveryFee : dictionary.common.travelFee;
+  const primaryActionLabel = provider.profileType === "home_business" ? dictionary.common.requestNow : dictionary.common.bookNow;
+  const bookingHint = provider.profileType === "home_business" ? dictionary.provider.businessHint : dictionary.provider.bookingHint;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -90,10 +94,10 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                     <span className="font-semibold text-[var(--ink)]">{dictionary.common.languages}:</span> {provider.languages.join(" • ")}
                   </div>
                   <div>
-                    <span className="font-semibold text-[var(--ink)]">{dictionary.common.hourlyRate}:</span> {formatCurrency(provider.hourlyRate, locale)}
+                    <span className="font-semibold text-[var(--ink)]">{priceLabel}:</span> {formatCurrency(provider.hourlyRate, locale)}
                   </div>
                   <div>
-                    <span className="font-semibold text-[var(--ink)]">{dictionary.common.travelFee}:</span> {formatCurrency(provider.travelFee, locale)}
+                    <span className="font-semibold text-[var(--ink)]">{secondaryFeeLabel}:</span> {formatCurrency(provider.travelFee, locale)}
                   </div>
                 </div>
               </div>
@@ -115,7 +119,7 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link href={`/${locale}/book/${provider.slug}`} className="button-primary">
-                {dictionary.common.bookNow}
+                {primaryActionLabel}
               </Link>
               <a
                 href={`https://wa.me/${provider.whatsappNumber}?text=${whatsappMessage}`}
@@ -132,7 +136,7 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                 {dictionary.provider.reportIssue}
               </Link>
             </div>
-            <p className="text-sm text-[var(--muted)]">{dictionary.provider.bookingHint}</p>
+            <p className="text-sm text-[var(--muted)]">{bookingHint}</p>
           </div>
         </div>
       </section>

@@ -37,6 +37,20 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
   const [result, setResult] = useState<BookingSubmissionResult | null>(null);
   const minimumDate = new Date().toISOString().slice(0, 10);
   const providerZones = zones.filter((zone) => provider.zones.includes(zone.slug));
+  const submitLabel =
+    provider.profileType === "home_business"
+      ? locale === "ar"
+        ? "إرسال الطلب"
+        : "Envoyer la demande"
+      : locale === "ar"
+        ? "إرسال الحجز"
+        : "Envoyer la réservation";
+  const titleLabel =
+    provider.profileType === "home_business"
+      ? locale === "ar"
+        ? "إرسال طلب أو استفسار"
+        : "Envoyer une demande ou précommande"
+      : labels.title;
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -89,7 +103,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
       className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.92))] p-6"
     >
       <div>
-        <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
+        <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{titleLabel}</h2>
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
       </div>
 
@@ -175,7 +189,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
       ) : null}
 
       <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit">
-        {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : locale === "ar" ? "إرسال الحجز" : "Envoyer la réservation"}
+        {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : submitLabel}
       </button>
     </form>
   );

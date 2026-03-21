@@ -4,6 +4,8 @@ export type SortOption = "top" | "rating" | "response" | "jobs";
 
 export type ProviderStatus = "approved" | "pending" | "rejected" | "needs_more_info";
 
+export type ProfileType = "service_provider" | "home_business";
+
 export type ContactMethod = "whatsapp" | "phone";
 
 export type MapCoordinates = {
@@ -13,6 +15,7 @@ export type MapCoordinates = {
 
 export type Category = {
   slug: string;
+  lane: ProfileType;
   icon: string;
   name: Record<Locale, string>;
   description: Record<Locale, string>;
@@ -59,6 +62,7 @@ export type Review = {
 export type Provider = {
   id: string;
   slug: string;
+  profileType: ProfileType;
   displayName: string;
   workshopName?: string | null;
   categorySlug: string;
@@ -139,21 +143,22 @@ export type SupportCase = {
 };
 
 export type ProviderSignupInput = {
+  profileType: ProfileType;
   fullName: string;
   workshopName: string;
   phoneNumber: string;
   whatsappNumber: string;
   categorySlug: string;
   zones: string[];
-  hourlyRate: number;
-  travelFee: number;
-  yearsExperience: number;
+  hourlyRate?: number;
+  travelFee?: number;
+  yearsExperience?: number;
   shortDescription: string;
   languages: string[];
-  googleMapsUrl: string;
-  weekdays: string[];
-  startTime: string;
-  endTime: string;
+  googleMapsUrl?: string;
+  weekdays?: string[];
+  startTime?: string;
+  endTime?: string;
   profilePhotoName?: string;
   workPhotoNames: string[];
   verificationDocumentName?: string;
@@ -234,6 +239,7 @@ export type SupportSubmissionResult = {
 };
 
 export type Filters = {
+  profileType?: ProfileType;
   category?: string;
   province?: string;
   zone?: string;

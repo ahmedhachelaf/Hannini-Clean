@@ -17,10 +17,11 @@ export default async function HomePage({ params }: HomePageProps) {
   }
 
   const dictionary = getDictionary(locale);
-  const [categories, zones, featuredProviders, summary] = await Promise.all([
+  const [categories, zones, featuredProviders, featuredBusinesses, summary] = await Promise.all([
     getCategories(),
     getZones(),
-    getFeaturedProviders(),
+    getFeaturedProviders("service_provider"),
+    getFeaturedProviders("home_business"),
     getSearchSummary(),
   ]);
 
@@ -31,6 +32,7 @@ export default async function HomePage({ params }: HomePageProps) {
       categories={categories}
       zones={zones}
       featuredProviders={featuredProviders}
+      featuredBusinesses={featuredBusinesses}
       summary={summary}
     />
   );

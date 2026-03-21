@@ -3,6 +3,7 @@ import type { Booking, Category, Provider, Review, SupportCase, Zone } from "@/l
 export const categories: Category[] = [
   {
     slug: "plumber",
+    lane: "service_provider",
     icon: "🔧",
     name: { ar: "سبّاك", fr: "Plombier" },
     description: {
@@ -12,6 +13,7 @@ export const categories: Category[] = [
   },
   {
     slug: "electrician",
+    lane: "service_provider",
     icon: "⚡",
     name: { ar: "كهربائي", fr: "Électricien" },
     description: {
@@ -21,6 +23,7 @@ export const categories: Category[] = [
   },
   {
     slug: "water-heater",
+    lane: "service_provider",
     icon: "🔥",
     name: { ar: "تقني سخان الماء", fr: "Chauffe-eau" },
     description: {
@@ -30,6 +33,7 @@ export const categories: Category[] = [
   },
   {
     slug: "ac-repair",
+    lane: "service_provider",
     icon: "❄️",
     name: { ar: "تصليح المكيّف", fr: "Climatisation" },
     description: {
@@ -39,6 +43,7 @@ export const categories: Category[] = [
   },
   {
     slug: "city-gas",
+    lane: "service_provider",
     icon: "🛠️",
     name: { ar: "تقني غاز المدينة", fr: "Technicien gaz" },
     description: {
@@ -48,6 +53,7 @@ export const categories: Category[] = [
   },
   {
     slug: "painter",
+    lane: "service_provider",
     icon: "🎨",
     name: { ar: "دهّان", fr: "Peintre" },
     description: {
@@ -57,6 +63,7 @@ export const categories: Category[] = [
   },
   {
     slug: "mason",
+    lane: "service_provider",
     icon: "🧱",
     name: { ar: "بنّاء", fr: "Maçon" },
     description: {
@@ -66,6 +73,7 @@ export const categories: Category[] = [
   },
   {
     slug: "carpenter",
+    lane: "service_provider",
     icon: "🪚",
     name: { ar: "نجّار", fr: "Menuisier" },
     description: {
@@ -75,6 +83,7 @@ export const categories: Category[] = [
   },
   {
     slug: "handyman",
+    lane: "service_provider",
     icon: "🧰",
     name: { ar: "تصليحات عامة", fr: "Homme à tout faire" },
     description: {
@@ -84,11 +93,52 @@ export const categories: Category[] = [
   },
   {
     slug: "mechanic",
+    lane: "service_provider",
     icon: "🚗",
     name: { ar: "ميكانيكي", fr: "Mécanicien" },
     description: {
       ar: "تشخيص وصيانة ميكانيكية خفيفة.",
       fr: "Diagnostic et mécanique légère.",
+    },
+  },
+  {
+    slug: "home-cooking",
+    lane: "home_business",
+    icon: "🍲",
+    name: { ar: "طبخ منزلي", fr: "Cuisine maison" },
+    description: {
+      ar: "وجبات وولائم منزلية للمناسبات بطابع محلي موثوق.",
+      fr: "Cuisine maison pour occasions, fêtes et commandes locales.",
+    },
+  },
+  {
+    slug: "tailoring",
+    lane: "home_business",
+    icon: "🧵",
+    name: { ar: "خياطة وتفصيل", fr: "Couture et retouches" },
+    description: {
+      ar: "تفصيل، تعديلات، وخياطة منزلية للمناسبات والعيد.",
+      fr: "Couture, retouches et travaux de confection à domicile.",
+    },
+  },
+  {
+    slug: "pastries",
+    lane: "home_business",
+    icon: "🧁",
+    name: { ar: "حلويات ومعجنات", fr: "Pâtisseries et douceurs" },
+    description: {
+      ar: "حلويات تقليدية وعصرية بطلب مسبق للمناسبات.",
+      fr: "Pâtisseries maison et douceurs sur commande.",
+    },
+  },
+  {
+    slug: "handmade",
+    lane: "home_business",
+    icon: "🪡",
+    name: { ar: "منتجات يدوية", fr: "Créations artisanales" },
+    description: {
+      ar: "منتجات منزلية يدوية وهدايا وصناعات محلية صغيرة.",
+      fr: "Créations fait main, cadeaux et productions locales à petite échelle.",
     },
   },
 ];
@@ -233,6 +283,7 @@ const workGallery = [
 export const providers: Provider[] = [
   {
     id: "provider-karim-benali",
+    profileType: "service_provider",
     slug: "karim-benali",
     displayName: "كريم بن علي",
     workshopName: "Benali Plomberie",
@@ -291,6 +342,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-sofiane-mekki",
+    profileType: "service_provider",
     slug: "sofiane-mekki",
     displayName: "سفيان مكي",
     workshopName: "Atelier Mekki Electric",
@@ -349,6 +401,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-nadia-klim",
+    profileType: "service_provider",
     slug: "nadia-klim",
     displayName: "نادية كليم",
     workshopName: "Clima Nadia",
@@ -407,6 +460,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-gaz-salam",
+    profileType: "service_provider",
     slug: "gaz-salam",
     displayName: "غاز السلام",
     workshopName: "Gaz Salam",
@@ -465,6 +519,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-yacine-peinture",
+    profileType: "service_provider",
     slug: "yacine-peinture",
     displayName: "ياسين للطلاء",
     workshopName: "Yacine Peinture",
@@ -523,6 +578,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-reda-bois",
+    profileType: "service_provider",
     slug: "reda-bois",
     displayName: "رضا نجّار",
     workshopName: "Reda Bois",
@@ -581,6 +637,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-fixpro-oran",
+    profileType: "service_provider",
     slug: "fixpro-oran",
     displayName: "FixPro Oran",
     workshopName: "FixPro Oran",
@@ -639,6 +696,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-hichem-djelfa",
+    profileType: "service_provider",
     slug: "hichem-djelfa-froid",
     displayName: "هشام الجلفة للتبريد",
     workshopName: "Hichem Froid Djelfa",
@@ -697,6 +755,7 @@ export const providers: Provider[] = [
   },
   {
     id: "provider-nour-sba",
+    profileType: "service_provider",
     slug: "nour-sidi-bel-abbes-elec",
     displayName: "نور سيدي بلعباس للكهرباء",
     workshopName: "Nour Elec SBA",
@@ -751,6 +810,182 @@ export const providers: Provider[] = [
         startTime: "09:00",
         endTime: "18:00",
       },
+    ],
+  },
+  {
+    id: "provider-oum-yasmine-cuisine",
+    profileType: "home_business",
+    slug: "oum-yasmine-cuisine",
+    displayName: "أم ياسمين للطبخ المنزلي",
+    workshopName: "Cuisine Oum Yasmine",
+    categorySlug: "home-cooking",
+    rating: 4.9,
+    reviewCount: 21,
+    completedJobs: 94,
+    responseTimeMinutes: 26,
+    isVerified: true,
+    status: "approved",
+    featured: true,
+    yearsExperience: 9,
+    hourlyRate: 7000,
+    travelFee: 1200,
+    zones: ["oran-centre", "ain-turk"],
+    coordinates: { latitude: 35.7061, longitude: -0.6392 },
+    languages: ["العربية", "Français"],
+    phoneNumber: "+213 555 80 11 23",
+    whatsappNumber: "213555801123",
+    googleMapsUrl: "https://maps.google.com/?q=Oran%20Centre%20Algeria",
+    bio: {
+      ar: "طبخ منزلي للمناسبات الصغيرة والعائلية مع وصفات محلية، تنظيم بسيط، وتسليم داخل وهران.",
+      fr: "Cuisine maison pour petites occasions, menus locaux et livraison coordonnée dans Oran.",
+    },
+    shortTagline: {
+      ar: "ولائم منزلية دافئة بطابع محلي",
+      fr: "Cuisine maison chaleureuse pour occasions",
+    },
+    profilePhotoUrl: "/placeholders/provider-avatar.svg",
+    gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "oum-yasmine-docs.pdf",
+      notes: "Projet culinaire domestique verifie manuellement.",
+    },
+    availability: [
+      { dayKey: "sat", label: { ar: "السبت", fr: "Samedi" }, startTime: "09:00", endTime: "18:00" },
+      { dayKey: "sun", label: { ar: "الأحد", fr: "Dimanche" }, startTime: "09:00", endTime: "18:00" },
+      { dayKey: "wed", label: { ar: "الأربعاء", fr: "Mercredi" }, startTime: "09:00", endTime: "18:00" },
+    ],
+  },
+  {
+    id: "provider-khadidja-couture",
+    profileType: "home_business",
+    slug: "khadidja-couture-djelfa",
+    displayName: "خديجة للخياطة المنزلية",
+    workshopName: "Khadidja Couture",
+    categorySlug: "tailoring",
+    rating: 4.8,
+    reviewCount: 14,
+    completedJobs: 61,
+    responseTimeMinutes: 33,
+    isVerified: true,
+    status: "approved",
+    featured: true,
+    yearsExperience: 12,
+    hourlyRate: 4500,
+    travelFee: 600,
+    zones: ["djelfa-centre", "hassi-bahbah"],
+    coordinates: { latitude: 34.6812, longitude: 3.2741 },
+    languages: ["العربية"],
+    phoneNumber: "+213 667 50 44 18",
+    whatsappNumber: "213667504418",
+    googleMapsUrl: "https://maps.google.com/?q=Djelfa%20Centre%20Algeria",
+    bio: {
+      ar: "تفصيل نسائي، خياطة العيد، وتعديلات منزلية دقيقة بطلب مسبق وبمواعيد واضحة.",
+      fr: "Couture à domicile, retouches et confection pour fêtes avec prise de commande simple.",
+    },
+    shortTagline: {
+      ar: "تفصيل منزلي موثوق في الجلفة",
+      fr: "Couture de confiance à Djelfa",
+    },
+    profilePhotoUrl: "/placeholders/provider-avatar.svg",
+    gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "khadidja-couture-id.pdf",
+      notes: "Activite domicile verifiee, photos atelier recues.",
+    },
+    availability: [
+      { dayKey: "sun", label: { ar: "الأحد", fr: "Dimanche" }, startTime: "10:00", endTime: "17:00" },
+      { dayKey: "mon", label: { ar: "الاثنين", fr: "Lundi" }, startTime: "10:00", endTime: "17:00" },
+      { dayKey: "thu", label: { ar: "الخميس", fr: "Jeudi" }, startTime: "10:00", endTime: "17:00" },
+    ],
+  },
+  {
+    id: "provider-bent-bladi-pastries",
+    profileType: "home_business",
+    slug: "bent-bladi-pastries",
+    displayName: "بنات بلادي للحلويات",
+    workshopName: "Bent Bladi Patisserie",
+    categorySlug: "pastries",
+    rating: 4.9,
+    reviewCount: 19,
+    completedJobs: 88,
+    responseTimeMinutes: 19,
+    isVerified: true,
+    status: "approved",
+    featured: true,
+    yearsExperience: 8,
+    hourlyRate: 5500,
+    travelFee: 800,
+    zones: ["sidi-bel-abbes-centre", "telagh"],
+    coordinates: { latitude: 35.1908, longitude: -0.6271 },
+    languages: ["العربية", "Français"],
+    phoneNumber: "+213 555 22 71 09",
+    whatsappNumber: "213555227109",
+    googleMapsUrl: "https://maps.google.com/?q=Sidi%20Bel%20Abbes%20Centre%20Algeria",
+    bio: {
+      ar: "حلويات منزلية للمناسبات، علب ضيافة، وصواني جاهزة بطابع محلي أنيق.",
+      fr: "Pâtisseries maison, assortiments de fête et commandes locales avec présentation soignée.",
+    },
+    shortTagline: {
+      ar: "حلويات منزلية للمناسبات والضيافة",
+      fr: "Douceurs maison pour fêtes et réceptions",
+    },
+    profilePhotoUrl: "/placeholders/provider-avatar.svg",
+    gallery: workGallery,
+    verification: {
+      status: "verified",
+      documentName: "bent-bladi-patisserie.pdf",
+      notes: "Microbusiness local verifie.",
+    },
+    availability: [
+      { dayKey: "sat", label: { ar: "السبت", fr: "Samedi" }, startTime: "08:30", endTime: "17:30" },
+      { dayKey: "tue", label: { ar: "الثلاثاء", fr: "Mardi" }, startTime: "08:30", endTime: "17:30" },
+      { dayKey: "wed", label: { ar: "الأربعاء", fr: "Mercredi" }, startTime: "08:30", endTime: "17:30" },
+    ],
+  },
+  {
+    id: "provider-zina-handmade",
+    profileType: "home_business",
+    slug: "zina-handmade-atelier",
+    displayName: "زينة للأعمال اليدوية",
+    workshopName: "Zina Handmade",
+    categorySlug: "handmade",
+    rating: 4.7,
+    reviewCount: 10,
+    completedJobs: 43,
+    responseTimeMinutes: 41,
+    isVerified: false,
+    status: "approved",
+    featured: false,
+    yearsExperience: 6,
+    hourlyRate: 3200,
+    travelFee: 500,
+    zones: ["bir-el-djir", "oran-centre"],
+    coordinates: { latitude: 35.7178, longitude: -0.5804 },
+    languages: ["العربية", "Français"],
+    phoneNumber: "+213 666 80 12 61",
+    whatsappNumber: "213666801261",
+    googleMapsUrl: "https://maps.google.com/?q=Bir%20El%20Djir%20Oran",
+    bio: {
+      ar: "هدايا يدوية، تزيين بسيط، ومنتجات منزلية مصنوعة محلياً مع طلبات حسب المناسبة.",
+      fr: "Créations artisanales, cadeaux faits main et petites séries locales sur commande.",
+    },
+    shortTagline: {
+      ar: "منتجات يدوية بطابع محلي أنيق",
+      fr: "Créations locales et cadeaux faits main",
+    },
+    profilePhotoUrl: "/placeholders/provider-avatar.svg",
+    gallery: workGallery,
+    verification: {
+      status: "pending",
+      documentName: "zina-handmade-id.jpg",
+      notes: "Compte microbusiness en attente de badge.",
+    },
+    availability: [
+      { dayKey: "sun", label: { ar: "الأحد", fr: "Dimanche" }, startTime: "10:00", endTime: "16:00" },
+      { dayKey: "mon", label: { ar: "الاثنين", fr: "Lundi" }, startTime: "10:00", endTime: "16:00" },
+      { dayKey: "thu", label: { ar: "الخميس", fr: "Jeudi" }, startTime: "10:00", endTime: "16:00" },
     ],
   },
 ];
