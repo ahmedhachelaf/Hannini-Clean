@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { getLocalizedValue } from "@/lib/i18n";
 import type { Category, Locale, SortOption, Zone } from "@/lib/types";
 
 type ProvidersFiltersProps = {
@@ -7,12 +11,14 @@ type ProvidersFiltersProps = {
   values: {
     query?: string;
     category?: string;
+    province?: string;
     zone?: string;
     sort?: SortOption;
   };
   labels: {
     searchLabel: string;
     categoryLabel: string;
+    provinceLabel: string;
     zoneLabel: string;
     sortLabel: string;
     sortTop: string;
@@ -24,12 +30,34 @@ type ProvidersFiltersProps = {
 };
 
 export function ProvidersFilters({ locale, categories, zones, values, labels }: ProvidersFiltersProps) {
+  const defaultProvince =
+    values.province ??
+    zones.find((zone) => zone.slug === values.zone)?.provinceSlug ??
+    "";
+  const [province, setProvince] = useState(defaultProvince);
+
+  const provinces = useMemo(
+    () =>
+      Array.from(new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])).entries()).map(
+        ([slug, name]) => ({
+          slug,
+          name,
+        }),
+      ),
+    [zones],
+  );
+
+  const filteredZones = useMemo(
+    () => zones.filter((zone) => !province || zone.provinceSlug === province),
+    [province, zones],
+  );
+
   return (
     <form
       action={`/${locale}/providers`}
-      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.96),rgba(20,92,255,0.9)_72%,rgba(96,165,250,0.84))] p-5 text-white shadow-[0_28px_60px_rgba(12,40,104,0.18)] lg:flex-row lg:items-end"
+      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(8,23,69,0.98),rgba(14,67,191,0.94)_62%,rgba(48,114,255,0.88))] p-5 text-white shadow-[0_28px_60px_rgba(8,34,99,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
     >
-      <label className="flex-1">
+      <label className="min-w-[240px] flex-1">
         <span className="mb-2 block text-sm font-semibold text-white/76">{labels.searchLabel}</span>
         <input
           type="search"
@@ -53,12 +81,29 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
       </label>
 
       <label className="lg:w-52">
+        <span className="mb-2 block text-sm font-semibold text-white/76">{labels.provinceLabel}</span>
+        <select
+          name="province"
+          value={province}
+          onChange={(event) => setProvince(event.target.value)}
+          className="input-base"
+        >
+          <option value="">{locale === "ar" ? "كل الولايات" : "Toutes les wilayas"}</option>
+          {provinces.map((item) => (
+            <option key={item.slug} value={item.slug}>
+              {getLocalizedValue(item.name, locale)}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="lg:w-56">
         <span className="mb-2 block text-sm font-semibold text-white/76">{labels.zoneLabel}</span>
         <select name="zone" defaultValue={values.zone ?? ""} className="input-base">
-          <option value="">{locale === "ar" ? "كل المناطق" : "Toutes les zones"}</option>
-          {zones.map((zone) => (
+          <option value="">{locale === "ar" ? "كل المدن والمناطق" : "Toutes les villes et zones"}</option>
+          {filteredZones.map((zone) => (
             <option key={zone.slug} value={zone.slug}>
-              {zone.name[locale]}
+              {getLocalizedValue(zone.name, locale)}
             </option>
           ))}
         </select>

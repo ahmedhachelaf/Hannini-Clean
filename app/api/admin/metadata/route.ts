@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     } else {
       const { error } = await supabase.from("zones").insert({
         slug: payload.slug,
+        province_slug: payload.provinceSlug ?? payload.slug,
         wilaya: payload.wilaya,
         name_ar: payload.nameAr,
         name_fr: payload.nameFr,

@@ -7,6 +7,7 @@ type SiteFooterProps = {
     home: string;
     providers: string;
     join: string;
+    support: string;
     admin: string;
   };
 };
@@ -29,6 +30,7 @@ export function SiteFooter({ locale, nav }: SiteFooterProps) {
           <Link href={`/${locale}`}>{nav.home}</Link>
           <Link href={`/${locale}/providers`}>{nav.providers}</Link>
           <Link href={`/${locale}/join`}>{nav.join}</Link>
+          <Link href={`/${locale}/support`}>{nav.support}</Link>
           <Link href={`/${locale}/admin`}>{nav.admin}</Link>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { BookingForm } from "@/components/forms/booking-form";
+import Link from "next/link";
 import { formatCurrency } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
 import { getCategories, getProviderBySlug, getZones } from "@/lib/repository";
@@ -48,6 +49,12 @@ export default async function BookingPage({ params }: BookingPageProps) {
             ? "يمكنك إضافة صور للمشكلة وتفعيل تنبيه واتساب. في هذا الـMVP يتم تمرير هذه التفاصيل ضمن الطلب للمتابعة اليدوية."
             : "Vous pouvez ajouter des photos du problème et demander une notification WhatsApp. Dans ce MVP, ces détails sont transmis dans la demande pour suivi manuel."}
         </div>
+        <Link
+          href={`/${locale}/support?actor=customer&providerSlug=${provider.slug}&providerId=${provider.id}`}
+          className="button-secondary mt-5"
+        >
+          {dictionary.booking.supportLink}
+        </Link>
       </aside>
     </div>
   );

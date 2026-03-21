@@ -14,6 +14,7 @@ type ProviderCardProps = {
 
 export function ProviderCard({ locale, provider, category, zones, highlighted = false }: ProviderCardProps) {
   const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(locale === "ar" ? " • " : " • ");
+  const provinceName = zones[0] ? getLocalizedValue(zones[0].provinceName, locale) : locale === "ar" ? "غير محدد" : "Non defini";
 
   return (
     <article
@@ -70,7 +71,10 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
 
       <div className="space-y-2 rounded-2xl border border-[rgba(15,95,255,0.12)] bg-white/88 p-4 text-sm text-[var(--muted)]">
         <div>
-          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "المناطق:" : "Zones :"}</span> {zoneNames}
+          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الولاية:" : "Wilaya :"}</span> {provinceName}
+        </div>
+        <div>
+          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "المدن والمناطق:" : "Villes et zones :"}</span> {zoneNames}
         </div>
         <div>
           <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "رسوم التنقل:" : "Déplacement :"}</span>{" "}

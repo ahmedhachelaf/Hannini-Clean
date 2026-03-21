@@ -32,6 +32,13 @@ const languageChoices = [
 export function ProviderSignupForm({ locale, categories, zones, labels }: ProviderSignupFormProps) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SignupSubmissionResult | null>(null);
+  const provinceGroups = Array.from(new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])).entries()).map(
+    ([slug, name]) => ({
+      slug,
+      name,
+      zones: zones.filter((zone) => zone.provinceSlug === slug),
+    }),
+  );
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -120,12 +127,19 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "المناطق التي تخدمها" : "Zones desservies"}</legend>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {zones.map((zone) => (
-            <label key={zone.slug} className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-white px-4 py-3">
-              <input type="checkbox" name="zones" value={zone.slug} className="h-4 w-4" />
-              <span>{zone.name[locale]}</span>
-            </label>
+        <div className="grid gap-4">
+          {provinceGroups.map((group) => (
+            <div key={group.slug} className="rounded-[1.5rem] border border-[var(--line)] bg-white p-4">
+              <div className="mb-3 text-sm font-bold text-[var(--ink)]">{group.name[locale]}</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {group.zones.map((zone) => (
+                  <label key={zone.slug} className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                    <input type="checkbox" name="zones" value={zone.slug} className="h-4 w-4" />
+                    <span>{zone.name[locale]}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </fieldset>

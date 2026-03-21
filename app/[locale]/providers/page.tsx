@@ -24,6 +24,7 @@ export default async function ProvidersPage({ params, searchParams }: ProvidersP
   const filters = {
     query: readSearchValue(query.q),
     category: readSearchValue(query.category),
+    province: readSearchValue(query.province),
     zone: readSearchValue(query.zone),
     sort: (readSearchValue(query.sort) as SortOption | undefined) ?? "top",
   };

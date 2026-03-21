@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { MetadataManager } from "@/components/admin/metadata-manager";
 import { ProviderActions } from "@/components/admin/provider-actions";
+import { SupportCaseActions } from "@/components/admin/support-case-actions";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { formatDate } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
@@ -25,6 +26,12 @@ export default async function AdminPage({ params }: AdminPageProps) {
 
   const dictionary = getDictionary(locale);
   const dashboard = await getAdminDashboardData();
+  const supportStatusLabels = {
+    open: dictionary.admin.open,
+    in_review: dictionary.admin.inReview,
+    waiting_for_user: dictionary.admin.waitingForUser,
+    resolved: dictionary.admin.resolved,
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -130,6 +137,61 @@ export default async function AdminPage({ params }: AdminPageProps) {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="surface-card rounded-[1.75rem] p-6">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className="text-xl font-extrabold">{dictionary.admin.supportCases}</h2>
+        </div>
+        <div className="space-y-5">
+          {dashboard.supportCases.map((supportCase) => (
+            <article key={supportCase.id} className="rounded-[1.5rem] border border-[var(--line)] bg-white p-5">
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
+                      {supportStatusLabels[supportCase.status]}
+                    </span>
+                    <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                      {supportCase.category}
+                    </span>
+                    <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                      #{supportCase.id}
+                    </span>
+                  </div>
+                  <h3 className={`mt-3 text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{supportCase.subject}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{supportCase.message}</p>
+                  <div className="mt-4 grid gap-2 text-sm text-[var(--muted)] sm:grid-cols-2">
+                    <div>{locale === "ar" ? "المقدّم" : "Auteur"}: {supportCase.actorRole}</div>
+                    <div>{locale === "ar" ? "الهاتف" : "Téléphone"}: {supportCase.phoneNumber ?? "-"}</div>
+                    <div>{locale === "ar" ? "مرجع الحجز" : "Référence réservation"}: {supportCase.bookingId ?? "-"}</div>
+                    <div>{locale === "ar" ? "مرجع المزود" : "Référence prestataire"}: {supportCase.providerSlug ?? "-"}</div>
+                  </div>
+                  <div className="mt-4 space-y-3 rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] p-4">
+                    {supportCase.messages.map((message) => (
+                      <div key={message.id} className="rounded-[1rem] border border-[var(--line)] bg-white p-3 text-sm">
+                        <div className="font-semibold text-[var(--ink)]">{message.authorName}</div>
+                        <div className="mt-1 text-xs text-[var(--muted)]">{message.authorRole}</div>
+                        <p className="mt-2 leading-7 text-[var(--muted)]">{message.message}</p>
+                        {message.attachmentNames.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {message.attachmentNames.map((attachment) => (
+                              <span key={attachment} className="chip-button min-h-0 px-3 py-2 text-xs">
+                                {attachment}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <SupportCaseActions locale={locale} supportCase={supportCase} labels={dictionary.admin} />
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 

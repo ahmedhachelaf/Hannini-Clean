@@ -128,6 +128,9 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
               <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary">
                 {dictionary.common.googleMaps}
               </a>
+              <Link href={`/${locale}/support?actor=customer&providerSlug=${provider.slug}&providerId=${provider.id}`} className="button-secondary">
+                {dictionary.provider.reportIssue}
+              </Link>
             </div>
             <p className="text-sm text-[var(--muted)]">{dictionary.provider.bookingHint}</p>
           </div>

@@ -36,6 +36,7 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<BookingSubmissionResult | null>(null);
   const minimumDate = new Date().toISOString().slice(0, 10);
+  const providerZones = zones.filter((zone) => provider.zones.includes(zone.slug));
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -114,9 +115,9 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.zone}</span>
           <select name="zoneSlug" className="input-base" required>
-            {zones.map((zone) => (
+            {providerZones.map((zone) => (
               <option key={zone.slug} value={zone.slug}>
-                {zone.name[locale]}
+                {zone.provinceName[locale]} • {zone.name[locale]}
               </option>
             ))}
           </select>

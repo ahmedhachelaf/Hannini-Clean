@@ -20,10 +20,24 @@ export type Category = {
 
 export type Zone = {
   slug: string;
+  provinceSlug: string;
+  provinceName: Record<Locale, string>;
   wilaya: string;
   name: Record<Locale, string>;
   coordinates: MapCoordinates;
 };
+
+export type SupportActor = "customer" | "provider";
+
+export type SupportStatus = "open" | "in_review" | "waiting_for_user" | "resolved";
+
+export type SupportCategory =
+  | "booking_issue"
+  | "provider_report"
+  | "payment_question"
+  | "account_help"
+  | "technical_issue"
+  | "general_support";
 
 export type AvailabilitySlot = {
   dayKey: string;
@@ -96,6 +110,34 @@ export type Booking = {
   createdAt: string;
 };
 
+export type SupportMessage = {
+  id: string;
+  caseId: string;
+  authorRole: SupportActor | "admin";
+  authorName: string;
+  message: string;
+  attachmentNames: string[];
+  createdAt: string;
+};
+
+export type SupportCase = {
+  id: string;
+  actorRole: SupportActor;
+  category: SupportCategory;
+  status: SupportStatus;
+  subject: string;
+  message: string;
+  phoneNumber?: string;
+  email?: string;
+  bookingId?: string;
+  providerId?: string;
+  providerSlug?: string;
+  attachmentNames: string[];
+  createdAt: string;
+  updatedAt: string;
+  messages: SupportMessage[];
+};
+
 export type ProviderSignupInput = {
   fullName: string;
   workshopName: string;
@@ -142,6 +184,27 @@ export type ReviewInput = {
   comment: string;
 };
 
+export type SupportCaseInput = {
+  actorRole: SupportActor;
+  category: SupportCategory;
+  subject: string;
+  message: string;
+  phoneNumber?: string;
+  email?: string;
+  bookingId?: string;
+  providerId?: string;
+  providerSlug?: string;
+  attachmentNames: string[];
+};
+
+export type SupportReplyInput = {
+  caseId: string;
+  authorRole: SupportActor | "admin";
+  authorName: string;
+  message: string;
+  attachmentNames: string[];
+};
+
 export type BookingSubmissionResult = {
   ok: boolean;
   message: string;
@@ -163,8 +226,16 @@ export type ReviewSubmissionResult = {
   demoMode?: boolean;
 };
 
+export type SupportSubmissionResult = {
+  ok: boolean;
+  message: string;
+  caseId?: string;
+  demoMode?: boolean;
+};
+
 export type Filters = {
   category?: string;
+  province?: string;
   zone?: string;
   query?: string;
   sort?: SortOption;
@@ -174,6 +245,7 @@ export type AdminDashboardData = {
   providers: Provider[];
   bookings: Booking[];
   reviews: Review[];
+  supportCases: SupportCase[];
   categories: Category[];
   zones: Zone[];
 };

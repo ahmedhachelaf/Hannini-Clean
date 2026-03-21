@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeSearchForm } from "@/components/home/home-search-form";
 import { ProviderCard } from "@/components/providers/provider-card";
 import { getLocalizedValue } from "@/lib/i18n";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
@@ -18,6 +19,7 @@ type HomePageContentProps = {
       title: string;
       description: string;
       searchPlaceholder: string;
+      provinceLabel: string;
       zoneLabel: string;
       categoryLabel: string;
       featuredTitle: string;
@@ -50,6 +52,13 @@ export function HomePageContent({
 }: HomePageContentProps) {
   const categoryMap = new Map(categories.map((category) => [category.slug, category]));
   const zoneMap = new Map(zones.map((zone) => [zone.slug, zone]));
+  const provinces = Array.from(new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])).entries()).map(
+    ([slug, name]) => ({
+      slug,
+      name,
+      zones: zones.filter((zone) => zone.provinceSlug === slug),
+    }),
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
@@ -74,29 +83,16 @@ export function HomePageContent({
               {dictionary.home.description}
             </p>
 
-            <form
-              action={`/${locale}/providers`}
-              className="mt-8 grid gap-3 rounded-[1.75rem] border border-white/16 bg-[rgba(255,255,255,0.12)] p-4 shadow-[0_28px_60px_rgba(8,18,37,0.2)] backdrop-blur-xl sm:grid-cols-[minmax(0,1fr)_220px_auto]"
-            >
-              <input
-                name="q"
-                type="search"
-                className="input-base"
-                placeholder={dictionary.home.searchPlaceholder}
-                aria-label={dictionary.home.searchPlaceholder}
-              />
-              <select name="zone" className="input-base" aria-label={dictionary.home.zoneLabel}>
-                <option value="">{dictionary.home.zoneLabel}</option>
-                {zones.map((zone) => (
-                  <option key={zone.slug} value={zone.slug}>
-                    {getLocalizedValue(zone.name, locale)}
-                  </option>
-                ))}
-              </select>
-              <button type="submit" className="button-primary w-full sm:w-auto">
-                {dictionary.common.search}
-              </button>
-            </form>
+            <HomeSearchForm
+              locale={locale}
+              zones={zones}
+              labels={{
+                search: dictionary.common.search,
+                searchPlaceholder: dictionary.home.searchPlaceholder,
+                provinceLabel: dictionary.home.provinceLabel,
+                zoneLabel: dictionary.home.zoneLabel,
+              }}
+            />
 
             <div className="mt-4 flex flex-wrap gap-3">
               <Link href={`/${locale}/providers`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
@@ -143,24 +139,31 @@ export function HomePageContent({
             <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(223,235,255,0.92))] p-5 sm:p-6">
               <div className="flex flex-col gap-5">
                 <div>
-                  <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.zoneLabel}</div>
+                  <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.provinceLabel}</div>
                   <div className="mt-2 text-2xl font-extrabold tracking-tight">
-                    {locale === "ar" ? "اختر المنطقة الأقرب إليك" : "Choisissez la zone la plus proche"}
+                    {locale === "ar" ? "اختر الولاية ثم المدينة الأقرب إليك" : "Choisissez la wilaya puis la ville la plus proche"}
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {zones.map((zone) => (
-                    <Link
-                      key={zone.slug}
-                      href={`/${locale}/providers?zone=${zone.slug}`}
-                      className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-4 shadow-[0_10px_24px_rgba(15,95,255,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(15,95,255,0.24)]"
-                    >
-                      <div className="text-base font-bold">{getLocalizedValue(zone.name, locale)}</div>
-                      <div className="mt-1 text-sm text-[var(--muted)]">
-                        {locale === "ar" ? "اعرض الحرفيين المتاحين" : "Voir les prestataires disponibles"}
+                <div className="grid gap-4">
+                  {provinces.map((province) => (
+                    <div key={province.slug} className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] p-4 shadow-[0_10px_24px_rgba(15,95,255,0.06)]">
+                      <div className="text-base font-extrabold text-[var(--ink)]">{getLocalizedValue(province.name, locale)}</div>
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        {province.zones.map((zone) => (
+                          <Link
+                            key={zone.slug}
+                            href={`/${locale}/providers?province=${province.slug}&zone=${zone.slug}`}
+                            className="rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,95,255,0.06)] transition hover:-translate-y-0.5 hover:border-[rgba(15,95,255,0.24)]"
+                          >
+                            <div className="text-sm font-bold">{getLocalizedValue(zone.name, locale)}</div>
+                            <div className="mt-1 text-xs text-[var(--muted)]">
+                              {locale === "ar" ? "اعرض الحرفيين المتاحين" : "Voir les prestataires disponibles"}
+                            </div>
+                          </Link>
+                        ))}
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
 

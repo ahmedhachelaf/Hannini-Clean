@@ -14,12 +14,14 @@ type ProvidersExplorerProps = {
   values: {
     query?: string;
     category?: string;
+    province?: string;
     zone?: string;
     sort?: SortOption;
   };
   labels: {
     searchLabel: string;
     categoryLabel: string;
+    provinceLabel: string;
     zoneLabel: string;
     sortLabel: string;
     sortTop: string;
@@ -52,7 +54,16 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
 
   const zoneMap = useMemo(() => new Map(zones.map((zone) => [zone.slug, zone])), [zones]);
   const categoryMap = useMemo(() => new Map(categories.map((category) => [category.slug, category])), [categories]);
+  const provinceMap = useMemo(
+    () => new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])),
+    [zones],
+  );
   const bounds = useMemo(() => (providers.length > 0 ? getBounds(providers) : null), [providers]);
+  const activeProvinceName = values.province
+    ? getLocalizedValue(provinceMap.get(values.province) ?? { ar: "غير محدد", fr: "Non defini" }, locale)
+    : locale === "ar"
+      ? "كل الولايات"
+      : "Toutes les wilayas";
 
   function getMarkerPosition(provider: Provider) {
     if (!bounds) {
@@ -102,6 +113,9 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
               <div className="absolute inset-x-6 top-6 rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur">
                 <div className="text-sm font-semibold text-white/76">{locale === "ar" ? "خريطة المزودين" : "Carte des prestataires"}</div>
                 <div className="mt-1 text-lg font-extrabold">{locale === "ar" ? "نتائج حسب الولاية والفئة" : "Resultats par wilaya et categorie"}</div>
+                <div className="mt-2 text-xs text-white/72">
+                  {locale === "ar" ? "الولاية الحالية:" : "Wilaya active :"} {activeProvinceName}
+                </div>
               </div>
 
               <div className="absolute inset-0 mt-24">
@@ -147,7 +161,7 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
                 >
                   <div className="text-sm font-bold text-[var(--ink)]">{provider.displayName}</div>
                   <div className="mt-1 text-xs text-[var(--muted)]">
-                    {categoryMap.get(provider.categorySlug)?.name[locale]} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}
+                    {categoryMap.get(provider.categorySlug)?.name[locale]} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.provinceName ?? { ar: "غير محدد", fr: "Non defini" }, locale)} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}
                   </div>
                 </button>
               ))}

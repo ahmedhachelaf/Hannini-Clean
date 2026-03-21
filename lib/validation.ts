@@ -25,6 +25,34 @@ export const reviewSchema = z.object({
   comment: z.string().min(8),
 });
 
+export const supportCaseSchema = z.object({
+  actorRole: z.enum(["customer", "provider"]),
+  category: z.enum([
+    "booking_issue",
+    "provider_report",
+    "payment_question",
+    "account_help",
+    "technical_issue",
+    "general_support",
+  ]),
+  subject: z.string().min(4),
+  message: z.string().min(10),
+  phoneNumber: z.string().optional().default(""),
+  email: z.string().email().optional().or(z.literal("")).default(""),
+  bookingId: z.string().optional().default(""),
+  providerId: z.string().optional().default(""),
+  providerSlug: z.string().optional().default(""),
+  attachmentNames: z.array(z.string()).default([]),
+});
+
+export const supportReplySchema = z.object({
+  caseId: z.string().min(1),
+  authorRole: z.enum(["customer", "provider", "admin"]),
+  authorName: z.string().min(2),
+  message: z.string().min(2),
+  attachmentNames: z.array(z.string()).default([]),
+});
+
 export const adminLoginSchema = z.object({
   password: z.string().min(1),
 });
@@ -63,6 +91,7 @@ export const metadataSchema = z.discriminatedUnion("type", [
     slug: z.string().min(1),
     nameAr: z.string().min(1),
     nameFr: z.string().min(1),
+    provinceSlug: z.string().min(1).optional(),
     wilaya: z.string().min(1),
   }),
 ]);

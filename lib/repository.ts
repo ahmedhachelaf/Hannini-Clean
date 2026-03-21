@@ -1,9 +1,30 @@
-import { bookings as seedBookings, categories as seedCategories, providers as seedProviders, reviews as seedReviews, zones as seedZones } from "@/data/seed";
+import {
+  bookings as seedBookings,
+  categories as seedCategories,
+  providers as seedProviders,
+  reviews as seedReviews,
+  zones as seedZones,
+} from "@/data/seed";
 import { formatDate } from "@/lib/format";
 import { defaultLocale } from "@/lib/i18n";
 import { getProviderScore } from "@/lib/ranking";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
-import type { AdminDashboardData, Booking, Category, Filters, MapCoordinates, Provider, ProviderStatus, Review, SortOption, Zone } from "@/lib/types";
+import { findDemoSupportCase, listDemoSupportCases } from "@/lib/support-store";
+import type {
+  AdminDashboardData,
+  Booking,
+  Category,
+  Filters,
+  MapCoordinates,
+  Provider,
+  ProviderStatus,
+  Review,
+  SortOption,
+  SupportCase,
+  SupportMessage,
+  SupportStatus,
+  Zone,
+} from "@/lib/types";
 
 type ProviderRow = {
   id: string;
@@ -83,8 +104,42 @@ type BookingRow = {
   }> | null;
 };
 
+type SupportCaseRow = {
+  id: string;
+  actor_role: SupportCase["actorRole"];
+  issue_category: SupportCase["category"];
+  status: SupportStatus;
+  subject: string;
+  message: string;
+  phone_number: string | null;
+  email: string | null;
+  booking_id: string | null;
+  provider_id: string | null;
+  provider_slug: string | null;
+  attachment_names: string[] | null;
+  created_at: string;
+  updated_at: string;
+  support_messages?: SupportMessageRow[];
+};
+
+type SupportMessageRow = {
+  id: string;
+  support_case_id: string;
+  author_role: SupportMessage["authorRole"];
+  author_name: string;
+  message: string;
+  attachment_names: string[] | null;
+  created_at: string;
+};
+
 const fallbackCoordinatesByZone: Record<string, MapCoordinates> = Object.fromEntries(
   seedZones.map((zone) => [zone.slug, zone.coordinates]),
+);
+
+const zoneDetailsBySlug = new Map(seedZones.map((zone) => [zone.slug, zone]));
+
+const provinceLabels = new Map(
+  seedZones.map((zone) => [zone.provinceSlug, zone.provinceName] as const),
 );
 
 function getZoneCoordinates(zoneSlug: string | undefined) {
@@ -93,6 +148,10 @@ function getZoneCoordinates(zoneSlug: string | undefined) {
   }
 
   return fallbackCoordinatesByZone[zoneSlug] ?? { latitude: 35.6981, longitude: -0.6348 };
+}
+
+function getProvinceName(provinceSlug: string | undefined) {
+  return provinceLabels.get(provinceSlug ?? "") ?? { ar: "غير محدد", fr: "Non defini" };
 }
 
 function deriveProviderStatus(
@@ -134,6 +193,14 @@ function applyProviderFilters(providers: Provider[], filters: Filters = {}) {
   const filtered = providers.filter((provider) => {
     if (filters.category && provider.categorySlug !== filters.category) {
       return false;
+    }
+
+    if (filters.province) {
+      const matchesProvince = provider.zones.some((zoneSlug) => zoneDetailsBySlug.get(zoneSlug)?.provinceSlug === filters.province);
+
+      if (!matchesProvince) {
+        return false;
+      }
     }
 
     if (filters.zone && !provider.zones.includes(filters.zone)) {
@@ -248,6 +315,38 @@ function mapBookingRow(row: BookingRow): Booking {
     preferredContactMethod: row.preferred_contact_method,
     status: row.status,
     createdAt: row.created_at,
+  };
+}
+
+function mapSupportMessageRow(row: SupportMessageRow): SupportMessage {
+  return {
+    id: row.id,
+    caseId: row.support_case_id,
+    authorRole: row.author_role,
+    authorName: row.author_name,
+    message: row.message,
+    attachmentNames: row.attachment_names ?? [],
+    createdAt: row.created_at,
+  };
+}
+
+function mapSupportCaseRow(row: SupportCaseRow): SupportCase {
+  return {
+    id: row.id,
+    actorRole: row.actor_role,
+    category: row.issue_category,
+    status: row.status,
+    subject: row.subject,
+    message: row.message,
+    phoneNumber: row.phone_number ?? undefined,
+    email: row.email ?? undefined,
+    bookingId: row.booking_id ?? undefined,
+    providerId: row.provider_id ?? undefined,
+    providerSlug: row.provider_slug ?? undefined,
+    attachmentNames: row.attachment_names ?? [],
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    messages: (row.support_messages ?? []).map(mapSupportMessageRow),
   };
 }
 
@@ -368,6 +467,55 @@ async function fetchSupabaseBookings() {
   return (data as BookingRow[]).map(mapBookingRow);
 }
 
+async function fetchSupabaseSupportCases() {
+  if (!hasSupabaseServerEnv()) {
+    return null;
+  }
+
+  const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("support_cases")
+    .select(
+      `
+        id,
+        actor_role,
+        issue_category,
+        status,
+        subject,
+        message,
+        phone_number,
+        email,
+        booking_id,
+        provider_id,
+        provider_slug,
+        attachment_names,
+        created_at,
+        updated_at,
+        support_messages (
+          id,
+          support_case_id,
+          author_role,
+          author_name,
+          message,
+          attachment_names,
+          created_at
+        )
+      `,
+    )
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    return null;
+  }
+
+  return (data as SupportCaseRow[]).map(mapSupportCaseRow);
+}
+
 async function fetchSupabaseMetadata<Row>(table: "categories" | "zones") {
   if (!hasSupabaseServerEnv()) {
     return null;
@@ -417,6 +565,7 @@ export async function getCategories() {
 export async function getZones() {
   const rows = await fetchSupabaseMetadata<{
     slug: string;
+    province_slug?: string | null;
     wilaya: string;
     name_ar: string;
     name_fr: string;
@@ -424,6 +573,16 @@ export async function getZones() {
 
   const mapped = rows?.map((row) => ({
     slug: row.slug,
+    provinceSlug:
+      row.province_slug ??
+      zoneDetailsBySlug.get(row.slug)?.provinceSlug ??
+      row.wilaya.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-"),
+    provinceName:
+      zoneDetailsBySlug.get(row.slug)?.provinceName ??
+      getProvinceName(
+        row.province_slug ??
+          row.wilaya.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-"),
+      ),
     wilaya: row.wilaya,
     name: {
       ar: row.name_ar,
@@ -473,16 +632,30 @@ export async function getBookings() {
   return (await fetchSupabaseBookings()) ?? seedBookings;
 }
 
+export async function getSupportCases() {
+  return (await fetchSupabaseSupportCases()) ?? listDemoSupportCases();
+}
+
+export async function getSupportCaseById(id: string) {
+  if (!hasSupabaseServerEnv()) {
+    return findDemoSupportCase(id);
+  }
+
+  const items = await getSupportCases();
+  return items.find((item) => item.id === id) ?? null;
+}
+
 export async function getBookingById(id: string) {
   const items = await getBookings();
   return items.find((booking) => booking.id === id) ?? null;
 }
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
-  const [providers, bookings, reviews, categories, zones] = await Promise.all([
+  const [providers, bookings, reviews, supportCases, categories, zones] = await Promise.all([
     getProviders({}, true),
     getBookings(),
     getReviews(),
+    getSupportCases(),
     getCategories(),
     getZones(),
   ]);
@@ -491,6 +664,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     providers,
     bookings,
     reviews,
+    supportCases,
     categories,
     zones,
   };
