@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency, formatDate, formatNumber, formatResponseTime } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
+import { getGrowthStage, getOpportunityTypes, getProviderJourney, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import { getCategories, getProviderBySlug, getReviews, getZones } from "@/lib/repository";
 import { notFound } from "next/navigation";
 
@@ -44,6 +45,48 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   const primaryActionLabel = provider.profileType === "home_business" ? dictionary.common.requestNow : dictionary.common.bookNow;
   const bookingHint = provider.profileType === "home_business" ? dictionary.provider.businessHint : dictionary.provider.bookingHint;
   const locationHint = provider.profileType === "home_business" ? dictionary.provider.privacyLocationHint : dictionary.provider.serviceLocationHint;
+  const readiness = getProviderReadiness(provider);
+  const journey = getProviderJourney(provider);
+  const opportunities = getOpportunityTypes(provider);
+  const growthStage = getGrowthStage(provider);
+  const opportunityLabels = {
+    individual_customers: locale === "ar" ? "زبائن أفراد" : "Clients particuliers",
+    repeat_clients: locale === "ar" ? "جاهز للزبائن المتكررين" : "Prêt pour des clients récurrents",
+    occasion_orders: locale === "ar" ? "طلبات مناسبات" : "Commandes d'occasion",
+    business_buyers: locale === "ar" ? "مشترون مهنيون" : "Acheteurs professionnels",
+    bulk_ready: locale === "ar" ? "جاهز للجملة" : "Prêt au volume",
+  };
+  const readinessLabels = {
+    category: locale === "ar" ? "الفئة محددة" : "Catégorie définie",
+    location: locale === "ar" ? "الموقع مكتمل" : "Zone renseignée",
+    contact: locale === "ar" ? "التواصل واضح" : "Contact disponible",
+    description: locale === "ar" ? "الوصف واضح" : "Description claire",
+    pricing: locale === "ar" ? "السعر ظاهر" : "Tarification visible",
+    portfolio: locale === "ar" ? "معرض أعمال مرفوع" : "Portfolio publié",
+    availability: locale === "ar" ? "أوقات العمل مضافة" : "Disponibilités ajoutées",
+    moderation: locale === "ar" ? "تمت المراجعة" : "Revu par l'équipe",
+    trust: locale === "ar" ? "ثقة وتقييمات" : "Confiance et avis",
+    digital: locale === "ar" ? "حضور رقمي" : "Présence digitale",
+    bulk: locale === "ar" ? "جاهزية للجملة" : "Préparation volume",
+  };
+  const journeyLabels = {
+    joined: locale === "ar" ? "انضم" : "Rejoint",
+    profile_completed: locale === "ar" ? "أكمل الملف" : "Profil complété",
+    portfolio_added: locale === "ar" ? "أضاف أعماله" : "Portfolio ajouté",
+    reviewed: locale === "ar" ? "تمت المراجعة" : "Dossier revu",
+    approved: locale === "ar" ? "تم القبول" : "Approuvé",
+    first_client: locale === "ar" ? "أول زبون" : "Premier client",
+    first_5_jobs: locale === "ar" ? "أول 5 أعمال" : "5 premières missions",
+    highly_rated: locale === "ar" ? "تقييم قوي" : "Très bien noté",
+    bulk_order_ready: locale === "ar" ? "جاهز للجملة" : "Prêt au volume",
+    mentor_ready: locale === "ar" ? "جاهز للإلهام" : "Mentor-ready",
+  };
+  const stageLabels = {
+    starting: locale === "ar" ? "في بداية المسار" : "Début de parcours",
+    building: locale === "ar" ? "يبني حضوره" : "Profil en construction",
+    trusted: locale === "ar" ? "موثوق ويتقدم" : "Fiable et en progression",
+    thriving: locale === "ar" ? "موثوق ويزدهر" : "Trusted and thriving",
+  };
   const socialLinks = [
     { key: "facebook", label: "Facebook", url: provider.socialLinks?.facebook },
     { key: "instagram", label: "Instagram", url: provider.socialLinks?.instagram },
@@ -128,6 +171,71 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                       </span>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(232,242,255,0.92))] p-5 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-base font-bold text-[var(--ink)]">{locale === "ar" ? "جاهزية الملف" : "Niveau de préparation"}</h2>
+                  <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{readiness.score}%</span>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                  {locale === "ar"
+                    ? `أكمل هذا الملف ${readiness.completed} من ${readiness.total} عناصر تساعده على بناء الثقة والظهور لفرص أفضل.`
+                    : `Ce profil a complété ${readiness.completed} éléments sur ${readiness.total} pour inspirer confiance et accéder à de meilleures opportunités.`}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {readiness.checks.map((check) => (
+                    <span
+                      key={check.key}
+                      className={`status-pill ${
+                        check.complete ? "status-pill--verified" : "border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]"
+                      }`}
+                    >
+                      {readinessLabels[check.key]}
+                    </span>
+                  ))}
+                </div>
+                {readiness.nextSteps.length > 0 ? (
+                  <div className="mt-4 rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+                    <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الخطوة التالية" : "Étape suivante"}:</span>{" "}
+                    {readiness.nextSteps.map((step) => readinessLabels[step.key]).join(locale === "ar" ? " • " : " • ")}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-white p-5 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-base font-bold text-[var(--ink)]">{locale === "ar" ? "رحلة النمو" : "Parcours de progression"}</h2>
+                  <span className="chip-button min-h-0 px-3 py-2 text-xs">{stageLabels[growthStage]}</span>
+                </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {journey.steps.map((step) => (
+                    <div
+                      key={step.key}
+                      className={`rounded-[1rem] border px-4 py-3 text-sm ${
+                        step.complete
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-[var(--line)] bg-[var(--soft)] text-[var(--muted)]"
+                      }`}
+                    >
+                      {journeyLabels[step.key]}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {opportunities.map((key) => (
+                    <span key={key} className="chip-button min-h-0 px-3 py-2 text-xs">
+                      {opportunityLabels[key]}
+                    </span>
+                  ))}
+                  {isMentorReady(provider) ? (
+                    <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                      {locale === "ar" ? "ملهم لغيره" : "Inspirant pour d'autres"}
+                    </span>
+                  ) : null}
                 </div>
               </div>
             </div>

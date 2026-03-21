@@ -6,6 +6,7 @@ import { SupportCaseActions } from "@/components/admin/support-case-actions";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { formatDate } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
+import { getGrowthStage, getOpportunityTypes, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import { getAdminDashboardData } from "@/lib/repository";
 import { notFound } from "next/navigation";
 
@@ -268,6 +269,36 @@ function ProviderAdminCard({
     unverify: string;
   };
 }) {
+  const readiness = getProviderReadiness(provider);
+  const growthStage = getGrowthStage(provider);
+  const opportunities = getOpportunityTypes(provider);
+  const stageLabels = {
+    starting: locale === "ar" ? "بداية المسار" : "Début de parcours",
+    building: locale === "ar" ? "يبني حضوره" : "Profil en construction",
+    trusted: locale === "ar" ? "موثوق ويتقدم" : "Fiable et en progression",
+    thriving: locale === "ar" ? "موثوق ويزدهر" : "Trusted and thriving",
+  };
+  const readinessLabels = {
+    category: locale === "ar" ? "الفئة" : "Catégorie",
+    location: locale === "ar" ? "الموقع" : "Zone",
+    contact: locale === "ar" ? "التواصل" : "Contact",
+    description: locale === "ar" ? "الوصف" : "Description",
+    pricing: locale === "ar" ? "السعر" : "Tarification",
+    portfolio: locale === "ar" ? "المعرض" : "Portfolio",
+    availability: locale === "ar" ? "التوفر" : "Disponibilités",
+    moderation: locale === "ar" ? "المراجعة" : "Revue",
+    trust: locale === "ar" ? "الثقة" : "Confiance",
+    digital: locale === "ar" ? "الروابط" : "Présence digitale",
+    bulk: locale === "ar" ? "الجملة" : "Volume",
+  };
+  const opportunityLabels = {
+    individual_customers: locale === "ar" ? "أفراد" : "Particuliers",
+    repeat_clients: locale === "ar" ? "متكرر" : "Récurrent",
+    occasion_orders: locale === "ar" ? "مناسبات" : "Occasions",
+    business_buyers: locale === "ar" ? "مهني" : "Acheteurs pro",
+    bulk_ready: locale === "ar" ? "جملة" : "Volume",
+  };
+
   return (
     <article className="rounded-[1.5rem] border border-[var(--line)] bg-white p-5">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -299,6 +330,38 @@ function ProviderAdminCard({
             <div>{locale === "ar" ? "الهاتف" : "Téléphone"}: {provider.phoneNumber}</div>
             <div>{locale === "ar" ? "التقييم" : "Note"}: {provider.rating}</div>
             <div>{locale === "ar" ? "الأعمال المكتملة" : "Missions terminées"}: {provider.completedJobs}</div>
+          </div>
+
+          <div className="rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(243,248,255,0.96),rgba(255,255,255,0.98))] p-4 text-sm text-[var(--muted)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الجاهزية والنمو" : "Préparation et progression"}</div>
+              <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{readiness.score}%</span>
+            </div>
+            <div className="mt-2">{locale === "ar" ? "المرحلة الحالية:" : "Étape actuelle :"} {stageLabels[growthStage]}</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {readiness.checks.slice(0, 6).map((check) => (
+                <span
+                  key={check.key}
+                  className={`status-pill ${
+                    check.complete ? "status-pill--verified" : "border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]"
+                  }`}
+                >
+                  {readinessLabels[check.key]}
+                </span>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {opportunities.map((opportunity) => (
+                <span key={opportunity} className="chip-button min-h-0 px-3 py-2 text-xs">
+                  {opportunityLabels[opportunity]}
+                </span>
+              ))}
+              {isMentorReady(provider) ? (
+                <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                  {locale === "ar" ? "جاهز للإلهام" : "Mentor-ready"}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] p-4 text-sm text-[var(--muted)]">

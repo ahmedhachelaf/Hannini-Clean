@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency, formatNumber, formatResponseTime } from "@/lib/format";
 import { getLocalizedValue } from "@/lib/i18n";
+import { getGrowthStage, getOpportunityTypes, getProviderReadiness } from "@/lib/provider-growth";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
 
 type ProviderCardProps = {
@@ -31,6 +32,22 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
       : locale === "ar"
         ? "احجز الآن"
         : "Réserver";
+  const readiness = getProviderReadiness(provider);
+  const growthStage = getGrowthStage(provider);
+  const opportunities = getOpportunityTypes(provider).slice(0, 3);
+  const stageLabels = {
+    starting: locale === "ar" ? "بداية المسار" : "Début",
+    building: locale === "ar" ? "يبني الثقة" : "En progression",
+    trusted: locale === "ar" ? "موثوق" : "Fiable",
+    thriving: locale === "ar" ? "مزدهر" : "En plein essor",
+  };
+  const opportunityLabels = {
+    individual_customers: locale === "ar" ? "أفراد" : "Particuliers",
+    repeat_clients: locale === "ar" ? "متكرر" : "Récurrent",
+    occasion_orders: locale === "ar" ? "مناسبات" : "Occasions",
+    business_buyers: locale === "ar" ? "مهني" : "Pro",
+    bulk_ready: locale === "ar" ? "جملة" : "Volume",
+  };
 
   return (
     <article
@@ -56,6 +73,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
                 {locale === "ar" ? "مقترح" : "Recommandé"}
               </span>
             ) : null}
+            <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">{stageLabels[growthStage]}</span>
           </div>
 
           <h3 className={`text-xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
@@ -96,6 +114,17 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
           <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "رسوم التنقل:" : "Déplacement :"}</span>{" "}
           {formatCurrency(provider.travelFee, locale)}
         </div>
+        <div>
+          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "جاهزية الملف:" : "Préparation :"}</span> {readiness.score}%
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {opportunities.map((opportunity) => (
+          <span key={opportunity} className="chip-button min-h-0 px-3 py-2 text-xs">
+            {opportunityLabels[opportunity]}
+          </span>
+        ))}
       </div>
 
       <div className="mt-auto flex flex-col gap-3 sm:flex-row">

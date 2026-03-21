@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HomeSearchForm } from "@/components/home/home-search-form";
 import { ProviderCard } from "@/components/providers/provider-card";
 import { getLocalizedValue } from "@/lib/i18n";
+import { getGrowthStage, getOpportunityTypes, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
 
 type HomePageContentProps = {
@@ -87,6 +88,19 @@ export function HomePageContent({
     }),
   );
   const spotlightProfiles = [...featuredProviders.slice(0, 1), ...featuredBusinesses.slice(0, 2)];
+  const opportunityLabels = {
+    individual_customers: locale === "ar" ? "زبائن أفراد" : "Clients particuliers",
+    repeat_clients: locale === "ar" ? "زبائن متكررون" : "Clients récurrents",
+    occasion_orders: locale === "ar" ? "طلبات مناسبات" : "Commandes d'occasion",
+    business_buyers: locale === "ar" ? "مشترون مهنيون" : "Acheteurs professionnels",
+    bulk_ready: locale === "ar" ? "جاهز للكميات" : "Prêt au volume",
+  };
+  const stageLabels = {
+    starting: locale === "ar" ? "في بداية المسار" : "Début de parcours",
+    building: locale === "ar" ? "يبني حضوره" : "Profil en construction",
+    trusted: locale === "ar" ? "موثوق ويتقدم" : "Fiable et en progression",
+    thriving: locale === "ar" ? "موثوق ويزدهر" : "Trusted and thriving",
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
@@ -349,6 +363,9 @@ export function HomePageContent({
             {spotlightProfiles.map((provider) => {
               const spotlightZones = provider.zones.map((slug) => zoneMap.get(slug)).filter((zone): zone is Zone => Boolean(zone));
               const primaryZone = spotlightZones[0];
+              const readiness = getProviderReadiness(provider);
+              const opportunities = getOpportunityTypes(provider).slice(0, 3);
+              const stage = getGrowthStage(provider);
               return (
                 <div key={provider.id} className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(231,240,255,0.9))] p-5 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
                   <div className="flex flex-wrap items-center gap-2">
@@ -356,6 +373,7 @@ export function HomePageContent({
                     <span className="chip-button min-h-0 px-3 py-2 text-xs">
                       {provider.profileType === "home_business" ? dictionary.nav.businesses : dictionary.nav.providers}
                     </span>
+                    <span className="chip-button min-h-0 px-3 py-2 text-xs">{stageLabels[stage]}</span>
                   </div>
                   <h3 className={`mt-3 text-xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
                   <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{getLocalizedValue(provider.shortTagline, locale)}</p>
@@ -371,11 +389,97 @@ export function HomePageContent({
                       </span>
                     ))}
                   </div>
+                  <div className="mt-4 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm text-[var(--muted)]">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="font-semibold text-[var(--ink)]">
+                        {locale === "ar" ? "جاهزية الملف" : "Niveau de préparation"}
+                      </span>
+                      <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
+                        {readiness.score}%
+                      </span>
+                    </div>
+                    <p className="mt-2 leading-7">
+                      {locale === "ar"
+                        ? `هذا الملف أكمل ${readiness.completed} من ${readiness.total} عناصر تساعده على الظهور، الثقة، والحصول على فرص أفضل.`
+                        : `Ce profil a déjà complété ${readiness.completed} éléments sur ${readiness.total} pour gagner en visibilité, confiance et opportunités.`}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {opportunities.map((key) => (
+                        <span key={key} className="chip-button min-h-0 px-3 py-2 text-xs">
+                          {opportunityLabels[key]}
+                        </span>
+                      ))}
+                      {isMentorReady(provider) ? (
+                        <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                          {locale === "ar" ? "جاهز للإلهام والإرشاد" : "Prêt à inspirer d'autres profils"}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               );
             })}
           </div>
         </article>
+      </section>
+
+      <section className="surface-card rounded-[2rem] p-6 sm:p-7">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+              {locale === "ar" ? "مسارات الفرص" : "Types d'opportunités"}
+            </div>
+            <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+              {locale === "ar" ? "هنيني يساعدك تكبر من أول طلب إلى فرص أكبر" : "Henini aide à grandir du premier client vers de meilleures opportunités"}
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
+              {locale === "ar"
+                ? "المسار لا يتوقف عند الظهور في السوق: الملف الجيد، الصور الواضحة، الثقة، وسرعة الرد تفتح المجال لزبائن متكررين، طلبات مناسبات، ومشترين مهنيين."
+                : "Le parcours ne s'arrête pas à la mise en ligne: un bon profil, de vraies photos, la confiance et une réponse claire ouvrent la porte à des clients récurrents, aux commandes d'occasion et à des acheteurs professionnels."}
+            </p>
+          </div>
+          <Link href={`/${locale}/grow`} className="button-secondary">
+            {dictionary.nav.grow}
+          </Link>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-4">
+          {[
+            {
+              title: locale === "ar" ? "أول زبون" : "Premier client",
+              body:
+                locale === "ar"
+                  ? "ابدأ بملف واضح وصور جيدة ورد سريع حتى تظهر بجدية."
+                  : "Commencez avec un profil clair, de bonnes photos et une réponse rapide.",
+            },
+            {
+              title: locale === "ar" ? "زبائن متكررون" : "Clients récurrents",
+              body:
+                locale === "ar"
+                  ? "الالتزام والجودة والتقييمات الجيدة يساعدانك على تحويل الطلب إلى عادة."
+                  : "La régularité, la qualité et les avis aident à transformer une demande en relation durable.",
+            },
+            {
+              title: locale === "ar" ? "طلبات مناسبات" : "Commandes d'occasion",
+              body:
+                locale === "ar"
+                  ? "مهم خصوصاً للطبخ، الحلويات، والخياطة مع تنظيم أوضح للكميات والمواعيد."
+                  : "Très utile pour cuisine, pâtisserie et couture avec meilleure organisation des quantités et délais.",
+            },
+            {
+              title: locale === "ar" ? "مشترون مهنيون" : "Acheteurs professionnels",
+              body:
+                locale === "ar"
+                  ? "عندما تكتمل الجاهزية والقدرة، يمكن للنشاط أن يستقبل استفسارات أكبر بثقة."
+                  : "Quand le profil et la capacité sont prêts, l'activité peut accueillir des demandes plus ambitieuses.",
+            },
+          ].map((item) => (
+            <article key={item.title} className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(231,240,255,0.88))] p-5 shadow-[0_14px_34px_rgba(15,95,255,0.08)]">
+              <h3 className={`text-xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{item.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{item.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_70%,rgba(83,146,255,0.9))] p-6 text-white sm:p-8">
