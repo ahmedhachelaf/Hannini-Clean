@@ -14,7 +14,7 @@ export async function POST(_request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   if (!hasSupabaseServerEnv()) {
-    return NextResponse.json({ ok: true, demoMode: true, message: "Approved in demo mode." });
+    return NextResponse.json({ ok: true, demoMode: true, message: "Provider approved in demo mode." });
   }
 
   const supabase = createServerSupabaseClient();
@@ -38,5 +38,5 @@ export async function POST(_request: Request, context: RouteContext) {
     { onConflict: "provider_id" },
   );
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, message: "Provider approved." });
 }

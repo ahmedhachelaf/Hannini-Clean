@@ -129,6 +129,7 @@ export const ar = {
     reject: "رفض",
     needsMoreInfo: "طلب معلومات إضافية",
     verify: "تأكيد التوثيق",
+    unverify: "إلغاء التوثيق",
     logout: "تسجيل الخروج",
     addCategory: "إضافة فئة",
     addZone: "إضافة منطقة",

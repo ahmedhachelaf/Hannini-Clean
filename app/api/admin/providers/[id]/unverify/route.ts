@@ -14,7 +14,7 @@ export async function POST(_request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   if (!hasSupabaseServerEnv()) {
-    return NextResponse.json({ ok: true, demoMode: true, message: "Provider flagged for more info in demo mode." });
+    return NextResponse.json({ ok: true, demoMode: true, message: "Provider marked unverified in demo mode." });
   }
 
   const supabase = createServerSupabaseClient();
@@ -23,23 +23,24 @@ export async function POST(_request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, message: "Supabase unavailable." }, { status: 500 });
   }
 
-  const providerUpdate = await supabase.from("providers").update({ approval_status: "pending" }).eq("id", id);
+  const providerUpdate = await supabase.from("providers").update({ is_verified: false }).eq("id", id);
 
   if (providerUpdate.error) {
     return NextResponse.json({ ok: false, message: providerUpdate.error.message }, { status: 400 });
   }
 
-  const verificationUpdate = await supabase
-    .from("provider_verifications")
-    .upsert({
+  const verificationUpdate = await supabase.from("provider_verifications").upsert(
+    {
       provider_id: id,
       status: "pending",
-      notes: "[needs_more_info] Additional business details requested by admin.",
-    }, { onConflict: "provider_id" });
+      notes: "Verification badge removed by admin.",
+    },
+    { onConflict: "provider_id" },
+  );
 
   if (verificationUpdate.error) {
     return NextResponse.json({ ok: false, message: verificationUpdate.error.message }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true, message: "Provider marked as needs more info." });
+  return NextResponse.json({ ok: true, message: "Provider marked as unverified." });
 }

@@ -129,6 +129,7 @@ export const fr = {
     reject: "Rejeter",
     needsMoreInfo: "Demander plus d'infos",
     verify: "Marquer vérifié",
+    unverify: "Retirer le badge",
     logout: "Se déconnecter",
     addCategory: "Ajouter une catégorie",
     addZone: "Ajouter une zone",

@@ -14,7 +14,7 @@ export async function POST(_request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   if (!hasSupabaseServerEnv()) {
-    return NextResponse.json({ ok: true, demoMode: true, message: "Verified in demo mode." });
+    return NextResponse.json({ ok: true, demoMode: true, message: "Provider verified in demo mode." });
   }
 
   const supabase = createServerSupabaseClient();
@@ -29,7 +29,16 @@ export async function POST(_request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, message: error.message }, { status: 400 });
   }
 
-  await supabase.from("provider_verifications").update({ status: "verified" }).eq("provider_id", id);
+  await supabase
+    .from("provider_verifications")
+    .upsert(
+      {
+        provider_id: id,
+        status: "verified",
+        notes: "Provider verified by admin.",
+      },
+      { onConflict: "provider_id" },
+    );
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, message: "Provider verified." });
 }
