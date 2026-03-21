@@ -6,6 +6,7 @@ import type { Category, Locale, SortOption, Zone } from "@/lib/types";
 
 type ProvidersFiltersProps = {
   locale: Locale;
+  actionPath: string;
   categories: Category[];
   zones: Zone[];
   values: {
@@ -29,7 +30,7 @@ type ProvidersFiltersProps = {
   };
 };
 
-export function ProvidersFilters({ locale, categories, zones, values, labels }: ProvidersFiltersProps) {
+export function ProvidersFilters({ locale, actionPath, categories, zones, values, labels }: ProvidersFiltersProps) {
   const defaultProvince =
     values.province ??
     zones.find((zone) => zone.slug === values.zone)?.provinceSlug ??
@@ -54,7 +55,7 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
 
   return (
     <form
-      action={`/${locale}/providers`}
+      action={actionPath}
       className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(8,23,69,0.98),rgba(14,67,191,0.94)_62%,rgba(48,114,255,0.88))] p-5 text-white shadow-[0_28px_60px_rgba(8,34,99,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
     >
       <label className="min-w-[240px] flex-1">
@@ -123,7 +124,7 @@ export function ProvidersFilters({ locale, categories, zones, values, labels }: 
         <button type="submit" className="button-primary">
           {locale === "ar" ? "تطبيق" : "Appliquer"}
         </button>
-        <a href={`/${locale}/providers`} className="button-secondary">
+        <a href={actionPath} className="button-secondary">
           {labels.reset}
         </a>
       </div>

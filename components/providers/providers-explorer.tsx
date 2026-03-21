@@ -8,6 +8,7 @@ import type { Category, Locale, Provider, SortOption, Zone } from "@/lib/types";
 
 type ProvidersExplorerProps = {
   locale: Locale;
+  actionPath: string;
   categories: Category[];
   zones: Zone[];
   providers: Provider[];
@@ -48,7 +49,20 @@ function getBounds(items: Provider[]) {
   };
 }
 
-export function ProvidersExplorer({ locale, categories, zones, providers, values, labels }: ProvidersExplorerProps) {
+function getPaddedBounds(items: Provider[]) {
+  const bounds = getBounds(items);
+  const latPadding = Math.max((bounds.maxLat - bounds.minLat) * 0.28, 0.12);
+  const lngPadding = Math.max((bounds.maxLng - bounds.minLng) * 0.28, 0.12);
+
+  return {
+    minLat: bounds.minLat - latPadding,
+    maxLat: bounds.maxLat + latPadding,
+    minLng: bounds.minLng - lngPadding,
+    maxLng: bounds.maxLng + lngPadding,
+  };
+}
+
+export function ProvidersExplorer({ locale, actionPath, categories, zones, providers, values, labels }: ProvidersExplorerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(providers[0]?.id ?? null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -58,7 +72,8 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
     () => new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])),
     [zones],
   );
-  const bounds = useMemo(() => (providers.length > 0 ? getBounds(providers) : null), [providers]);
+  const bounds = useMemo(() => (providers.length > 0 ? getPaddedBounds(providers) : null), [providers]);
+  const selectedProvider = providers.find((provider) => provider.id === selectedId) ?? providers[0] ?? null;
   const activeProvinceName = values.province
     ? getLocalizedValue(provinceMap.get(values.province) ?? { ar: "غير محدد", fr: "Non defini" }, locale)
     : locale === "ar"
@@ -78,6 +93,24 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
       left: 16 + ((provider.coordinates.longitude - bounds.minLng) / lngSpan) * 68,
     };
   }
+
+  const mapFrameSrc = useMemo(() => {
+    if (!bounds) {
+      return "https://www.openstreetmap.org/export/embed.html?bbox=-1%2C34%2C5%2C37&layer=mapnik";
+    }
+
+    const bbox = [
+      bounds.minLng.toFixed(4),
+      bounds.minLat.toFixed(4),
+      bounds.maxLng.toFixed(4),
+      bounds.maxLat.toFixed(4),
+    ].join(",");
+    const marker = selectedProvider
+      ? `&marker=${selectedProvider.coordinates.latitude.toFixed(4)}%2C${selectedProvider.coordinates.longitude.toFixed(4)}`
+      : "";
+
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik${marker}`;
+  }, [bounds, selectedProvider]);
 
   function selectProvider(providerId: string) {
     setSelectedId(providerId);
@@ -99,7 +132,7 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
         </div>
       </section>
 
-      <ProvidersFilters locale={locale} categories={categories} zones={zones} values={values} labels={labels} />
+      <ProvidersFilters locale={locale} actionPath={actionPath} categories={categories} zones={zones} values={values} labels={labels} />
 
       {providers.length === 0 ? (
         <section className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.9))] p-10 text-center">
@@ -109,21 +142,35 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
       ) : (
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
           <div className="map-panel sticky top-28 overflow-hidden rounded-[2rem] shadow-[0_30px_70px_rgba(12,40,104,0.14)]">
-            <div className="relative min-h-[480px] bg-[linear-gradient(180deg,rgba(13,28,69,0.96),rgba(20,92,255,0.88)_65%,rgba(147,197,253,0.78))] p-6 text-white">
-              <div className="absolute inset-x-6 top-6 rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur">
+            <div className="relative min-h-[520px] overflow-hidden bg-[linear-gradient(180deg,rgba(13,28,69,0.98),rgba(20,92,255,0.9)_75%,rgba(147,197,253,0.78))] p-6 text-white">
+              <iframe
+                title={locale === "ar" ? "خريطة النتائج" : "Carte des résultats"}
+                src={mapFrameSrc}
+                className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-92"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,23,56,0.12),rgba(9,23,56,0.34)_100%)]" />
+
+              <div className="absolute inset-x-6 top-6 z-10 rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur">
                 <div className="text-sm font-semibold text-white/76">{locale === "ar" ? "خريطة المزودين" : "Carte des prestataires"}</div>
                 <div className="mt-1 text-lg font-extrabold">{locale === "ar" ? "نتائج حسب الولاية والفئة" : "Resultats par wilaya et categorie"}</div>
                 <div className="mt-2 text-xs text-white/72">
                   {locale === "ar" ? "الولاية الحالية:" : "Wilaya active :"} {activeProvinceName}
                 </div>
+                {selectedProvider ? (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/86">
+                    <span className="rounded-full border border-white/14 bg-[rgba(8,18,37,0.18)] px-3 py-1.5">
+                      {selectedProvider.displayName}
+                    </span>
+                    <span className="rounded-full border border-white/14 bg-[rgba(8,18,37,0.18)] px-3 py-1.5">
+                      {getLocalizedValue(zoneMap.get(selectedProvider.zones[0])?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}
+                    </span>
+                  </div>
+                ) : null}
               </div>
 
-              <div className="absolute inset-0 mt-24">
-                <div className="absolute left-[14%] top-[54%] h-28 w-28 rounded-full bg-white/8 blur-3xl" />
-                <div className="absolute left-[48%] top-[34%] h-32 w-32 rounded-full bg-white/10 blur-3xl" />
-                <div className="absolute right-[12%] top-[48%] h-28 w-28 rounded-full bg-white/8 blur-3xl" />
-
-                <div className="absolute inset-[10%] rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))]">
+              <div className="absolute inset-0 z-10 mt-24">
+                <div className="absolute inset-[10%] rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.02))]">
                   {providers.map((provider) => {
                     const position = getMarkerPosition(provider);
                     const selected = provider.id === selectedId;
@@ -134,8 +181,8 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
                         onClick={() => selectProvider(provider.id)}
                         className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-2 text-xs font-bold shadow-[0_12px_28px_rgba(8,18,37,0.22)] transition ${
                           selected
-                            ? "z-20 border-white bg-white text-[var(--navy)]"
-                            : "z-10 border-white/18 bg-[rgba(13,28,69,0.72)] text-white backdrop-blur"
+                            ? "z-20 border-white bg-white text-[var(--navy)] ring-4 ring-white/20"
+                            : "z-10 border-white/18 bg-[rgba(13,28,69,0.78)] text-white backdrop-blur hover:bg-[rgba(13,28,69,0.88)]"
                         }`}
                         style={{ top: `${position.top}%`, left: `${position.left}%` }}
                       >
@@ -145,10 +192,28 @@ export function ProvidersExplorer({ locale, categories, zones, providers, values
                   })}
                 </div>
               </div>
+
+              <div className="absolute inset-x-6 bottom-6 z-10 rounded-[1.35rem] border border-white/14 bg-[rgba(8,18,37,0.26)] p-4 backdrop-blur">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-white/84">
+                    {locale === "ar" ? "اضغط على البطاقة أو الدبوس لمزامنة الخريطة" : "Cliquez sur la carte ou un repère pour synchroniser la sélection"}
+                  </div>
+                  {selectedProvider ? (
+                    <a
+                      href={selectedProvider.googleMapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="button-secondary border-white/16 bg-white/12 text-white"
+                    >
+                      {locale === "ar" ? "افتح في الخرائط" : "Ouvrir dans Maps"}
+                    </a>
+                  ) : null}
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-3 border-t border-[rgba(20,92,255,0.12)] bg-white/92 p-5">
-              {providers.slice(0, 3).map((provider) => (
+              {providers.slice(0, 4).map((provider) => (
                 <button
                   key={provider.id}
                   type="button"
