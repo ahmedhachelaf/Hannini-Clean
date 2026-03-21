@@ -7,6 +7,7 @@ type SupportFormProps = {
   locale: Locale;
   defaultValues?: {
     actorRole?: "customer" | "provider";
+    category?: string;
     bookingId?: string;
     providerId?: string;
     providerSlug?: string;
@@ -25,6 +26,12 @@ type SupportFormProps = {
     bookingReferenceLabel: string;
     providerReferenceLabel: string;
     attachmentsLabel: string;
+    safetyBlockLabel: string;
+    safetyBlockHint: string;
+    privacySensitiveLabel: string;
+    privacySensitiveHint: string;
+    safetyNoteTitle: string;
+    safetyNoteBody: string;
     categories: Record<string, string>;
     successTitle: string;
     successDescription: string;
@@ -77,7 +84,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         </label>
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.categoryLabel}</span>
-          <select name="category" defaultValue="general_support" className="input-base">
+          <select name="category" defaultValue={defaultValues?.category ?? "general_support"} className="input-base">
             {Object.entries(labels.categories).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -125,6 +132,32 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.attachmentsLabel}</span>
         <input name="attachments" type="file" accept="image/*" multiple className="input-base py-3" />
       </label>
+
+      <div className="grid gap-4 rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[var(--soft)] p-5 md:grid-cols-2">
+        <label className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
+          <div className="flex items-start gap-3">
+            <input name="requestSafetyBlock" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <div>
+              <div className="text-sm font-semibold text-[var(--ink)]">{labels.safetyBlockLabel}</div>
+              <div className="mt-1 text-xs leading-6 text-[var(--muted)]">{labels.safetyBlockHint}</div>
+            </div>
+          </div>
+        </label>
+        <label className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
+          <div className="flex items-start gap-3">
+            <input name="privacySensitive" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <div>
+              <div className="text-sm font-semibold text-[var(--ink)]">{labels.privacySensitiveLabel}</div>
+              <div className="mt-1 text-xs leading-6 text-[var(--muted)]">{labels.privacySensitiveHint}</div>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <div className="rounded-[1.5rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(180deg,rgba(214,230,255,0.72),rgba(255,255,255,0.96))] px-5 py-5 text-sm leading-7 text-[var(--muted)]">
+        <div className="font-semibold text-[var(--ink)]">{labels.safetyNoteTitle}</div>
+        <div className="mt-2">{labels.safetyNoteBody}</div>
+      </div>
 
       {result?.ok ? (
         <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">

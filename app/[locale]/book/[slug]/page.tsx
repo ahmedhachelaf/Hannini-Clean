@@ -56,7 +56,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
               : "Vous pouvez ajouter des photos du problème et demander une notification WhatsApp. Dans ce MVP, ces détails sont transmis dans la demande pour suivi manuel."}
         </div>
         <Link
-          href={`/${locale}/support?actor=customer&providerSlug=${provider.slug}&providerId=${provider.id}`}
+          href={`/${locale}/support?actor=customer&category=booking_issue&providerSlug=${provider.slug}&providerId=${provider.id}`}
           className="button-secondary mt-5"
         >
           {dictionary.booking.supportLink}

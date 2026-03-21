@@ -37,6 +37,11 @@ export type SupportStatus = "open" | "in_review" | "waiting_for_user" | "resolve
 export type SupportCategory =
   | "booking_issue"
   | "provider_report"
+  | "harassment"
+  | "unsafe_behavior"
+  | "fraud_or_scam"
+  | "inappropriate_contact"
+  | "misconduct"
   | "payment_question"
   | "account_help"
   | "technical_issue"
@@ -130,6 +135,8 @@ export type SupportCase = {
   actorRole: SupportActor;
   category: SupportCategory;
   status: SupportStatus;
+  requestSafetyBlock?: boolean;
+  privacySensitive?: boolean;
   subject: string;
   message: string;
   phoneNumber?: string;
@@ -193,6 +200,8 @@ export type ReviewInput = {
 export type SupportCaseInput = {
   actorRole: SupportActor;
   category: SupportCategory;
+  requestSafetyBlock?: boolean;
+  privacySensitive?: boolean;
   subject: string;
   message: string;
   phoneNumber?: string;

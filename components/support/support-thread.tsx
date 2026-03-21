@@ -14,6 +14,9 @@ type SupportThreadProps = {
     yourNameLabel: string;
     attachmentsLabel: string;
     sendReply: string;
+    categories: Record<string, string>;
+    safetyBlockLabel: string;
+    privacySensitiveLabel: string;
   };
 };
 
@@ -54,7 +57,13 @@ export function SupportThread({ locale, supportCase, labels }: SupportThreadProp
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{labels.threadDescription}</p>
         <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold">
           <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{supportCase.status}</span>
-          <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{supportCase.category}</span>
+          <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{labels.categories[supportCase.category]}</span>
+          {supportCase.requestSafetyBlock ? (
+            <span className="status-pill border border-rose-200 bg-rose-50 text-rose-700">{labels.safetyBlockLabel}</span>
+          ) : null}
+          {supportCase.privacySensitive ? (
+            <span className="status-pill border border-blue-200 bg-blue-50 text-blue-700">{labels.privacySensitiveLabel}</span>
+          ) : null}
           <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">#{supportCase.id}</span>
         </div>
       </section>

@@ -37,6 +37,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
     waiting_for_user: dictionary.admin.waitingForUser,
     resolved: dictionary.admin.resolved,
   };
+  const supportCategoryLabels = dictionary.support.categories;
   const providerStatusLabels = {
     approved: dictionary.common.approved,
     pending: dictionary.common.pending,
@@ -157,8 +158,18 @@ export default async function AdminPage({ params }: AdminPageProps) {
                       {supportStatusLabels[supportCase.status]}
                     </span>
                     <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
-                      {supportCase.category}
+                      {supportCategoryLabels[supportCase.category]}
                     </span>
+                    {supportCase.requestSafetyBlock ? (
+                      <span className="status-pill border border-rose-200 bg-rose-50 text-rose-700">
+                        {dictionary.admin.blockRequested}
+                      </span>
+                    ) : null}
+                    {supportCase.privacySensitive ? (
+                      <span className="status-pill border border-blue-200 bg-blue-50 text-blue-700">
+                        {dictionary.admin.privateHandling}
+                      </span>
+                    ) : null}
                     <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
                       #{supportCase.id}
                     </span>
@@ -170,6 +181,8 @@ export default async function AdminPage({ params }: AdminPageProps) {
                     <div>{locale === "ar" ? "الهاتف" : "Téléphone"}: {supportCase.phoneNumber ?? "-"}</div>
                     <div>{locale === "ar" ? "مرجع الحجز" : "Référence réservation"}: {supportCase.bookingId ?? "-"}</div>
                     <div>{locale === "ar" ? "مرجع المزود" : "Référence prestataire"}: {supportCase.providerSlug ?? "-"}</div>
+                    <div>{locale === "ar" ? "طلب حظر التواصل" : "Demande de blocage"}: {supportCase.requestSafetyBlock ? (locale === "ar" ? "نعم" : "Oui") : (locale === "ar" ? "لا" : "Non")}</div>
+                    <div>{locale === "ar" ? "معالجة بحساسية أعلى" : "Traitement sensible"}: {supportCase.privacySensitive ? (locale === "ar" ? "نعم" : "Oui") : (locale === "ar" ? "لا" : "Non")}</div>
                   </div>
                   <div className="mt-4 space-y-3 rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] p-4">
                     {supportCase.messages.map((message) => (

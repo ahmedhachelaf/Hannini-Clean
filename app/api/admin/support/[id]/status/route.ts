@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { appendDemoSupportMessage, updateDemoSupportStatus } from "@/lib/support-store";
 import { supportReplySchema } from "@/lib/validation";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const supportStatusSchema = z.object({
@@ -86,6 +87,11 @@ export async function POST(request: Request, context: RouteContext) {
         throw replyError;
       }
     }
+
+    revalidatePath("/ar/admin");
+    revalidatePath("/fr/admin");
+    revalidatePath(`/ar/support/${id}`);
+    revalidatePath(`/fr/support/${id}`);
 
     return NextResponse.json({ ok: true, message: "Support case updated." });
   } catch (error) {

@@ -110,6 +110,8 @@ type SupportCaseRow = {
   actor_role: SupportCase["actorRole"];
   issue_category: SupportCase["category"];
   status: SupportStatus;
+  request_safety_block?: boolean | null;
+  privacy_sensitive?: boolean | null;
   subject: string;
   message: string;
   phone_number: string | null;
@@ -132,6 +134,32 @@ type SupportMessageRow = {
   attachment_names: string[] | null;
   created_at: string;
 };
+
+function stripPrefix(value: string, prefix: string) {
+  return value.startsWith(prefix) ? value.slice(prefix.length) : value;
+}
+
+function parseSupportMessageMetadata(message: string) {
+  let nextMessage = message;
+  let requestSafetyBlock = false;
+  let privacySensitive = false;
+
+  if (nextMessage.startsWith("[request_safety_block]")) {
+    requestSafetyBlock = true;
+    nextMessage = stripPrefix(nextMessage, "[request_safety_block]");
+  }
+
+  if (nextMessage.startsWith("[privacy_sensitive]")) {
+    privacySensitive = true;
+    nextMessage = stripPrefix(nextMessage, "[privacy_sensitive]");
+  }
+
+  return {
+    requestSafetyBlock,
+    privacySensitive,
+    message: nextMessage.trim(),
+  };
+}
 
 const fallbackCoordinatesByZone: Record<string, MapCoordinates> = Object.fromEntries(
   seedZones.map((zone) => [zone.slug, zone.coordinates]),
@@ -348,13 +376,17 @@ function mapSupportMessageRow(row: SupportMessageRow): SupportMessage {
 }
 
 function mapSupportCaseRow(row: SupportCaseRow): SupportCase {
+  const fallbackSafetyMeta = parseSupportMessageMetadata(row.message);
+
   return {
     id: row.id,
     actorRole: row.actor_role,
     category: row.issue_category,
     status: row.status,
+    requestSafetyBlock: row.request_safety_block ?? fallbackSafetyMeta.requestSafetyBlock,
+    privacySensitive: row.privacy_sensitive ?? fallbackSafetyMeta.privacySensitive,
     subject: row.subject,
-    message: row.message,
+    message: fallbackSafetyMeta.message,
     phoneNumber: row.phone_number ?? undefined,
     email: row.email ?? undefined,
     bookingId: row.booking_id ?? undefined,
@@ -495,6 +527,32 @@ async function fetchSupabaseSupportCases() {
     return null;
   }
 
+  const baseSelect = `
+        id,
+        actor_role,
+        issue_category,
+        status,
+        subject,
+        message,
+        phone_number,
+        email,
+        booking_id,
+        provider_id,
+        provider_slug,
+        attachment_names,
+        created_at,
+        updated_at,
+        support_messages (
+          id,
+          support_case_id,
+          author_role,
+          author_name,
+          message,
+          attachment_names,
+          created_at
+        )
+      `;
+
   const { data, error } = await supabase
     .from("support_cases")
     .select(
@@ -503,6 +561,8 @@ async function fetchSupabaseSupportCases() {
         actor_role,
         issue_category,
         status,
+        request_safety_block,
+        privacy_sensitive,
         subject,
         message,
         phone_number,
@@ -527,7 +587,16 @@ async function fetchSupabaseSupportCases() {
     .order("updated_at", { ascending: false });
 
   if (error) {
-    return null;
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from("support_cases")
+      .select(baseSelect)
+      .order("updated_at", { ascending: false });
+
+    if (fallbackError) {
+      return null;
+    }
+
+    return (fallbackData as SupportCaseRow[]).map(mapSupportCaseRow);
   }
 
   return (data as SupportCaseRow[]).map(mapSupportCaseRow);

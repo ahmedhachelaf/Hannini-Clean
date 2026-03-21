@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { createDemoSupportCase } from "@/lib/support-store";
+import { revalidatePath } from "next/cache";
 import { supportCaseSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -14,6 +15,8 @@ export async function POST(request: Request) {
     const payload = supportCaseSchema.parse({
       actorRole: String(formData.get("actorRole") ?? ""),
       category: String(formData.get("category") ?? ""),
+      requestSafetyBlock: String(formData.get("requestSafetyBlock") ?? "") === "on",
+      privacySensitive: String(formData.get("privacySensitive") ?? "") === "on",
       subject: String(formData.get("subject") ?? ""),
       message: String(formData.get("message") ?? ""),
       phoneNumber: String(formData.get("phoneNumber") ?? ""),
@@ -23,12 +26,15 @@ export async function POST(request: Request) {
       providerSlug: String(formData.get("providerSlug") ?? ""),
       attachmentNames,
     });
+    const legacyTaggedMessage = `${payload.requestSafetyBlock ? "[request_safety_block]" : ""}${payload.privacySensitive ? "[privacy_sensitive]" : ""}${payload.message}`;
 
     if (!hasSupabaseServerEnv()) {
       const supportCase = createDemoSupportCase({
         actorRole: payload.actorRole,
         category: payload.category,
         status: "open",
+        requestSafetyBlock: payload.requestSafetyBlock,
+        privacySensitive: payload.privacySensitive,
         subject: payload.subject,
         message: payload.message,
         phoneNumber: payload.phoneNumber || undefined,
@@ -53,12 +59,14 @@ export async function POST(request: Request) {
       throw new Error("Supabase client is not available.");
     }
 
-    const { data: supportCase, error } = await supabase
+    let { data: supportCase, error } = await supabase
       .from("support_cases")
       .insert({
         actor_role: payload.actorRole,
         issue_category: payload.category,
         status: "open",
+        request_safety_block: payload.requestSafetyBlock,
+        privacy_sensitive: payload.privacySensitive,
         subject: payload.subject,
         message: payload.message,
         phone_number: payload.phoneNumber || null,
@@ -72,7 +80,30 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      throw error;
+      const fallbackInsert = await supabase
+        .from("support_cases")
+        .insert({
+          actor_role: payload.actorRole,
+          issue_category: payload.category,
+          status: "open",
+          subject: payload.subject,
+          message: legacyTaggedMessage,
+          phone_number: payload.phoneNumber || null,
+          email: payload.email || null,
+          booking_id: payload.bookingId || null,
+          provider_id: payload.providerId || null,
+          provider_slug: payload.providerSlug || null,
+          attachment_names: payload.attachmentNames,
+        })
+        .select("id")
+        .single();
+
+      supportCase = fallbackInsert.data;
+      error = fallbackInsert.error;
+    }
+
+    if (error || !supportCase) {
+      throw error ?? new Error("Unable to create support case.");
     }
 
     await supabase.from("support_messages").insert({
@@ -82,6 +113,11 @@ export async function POST(request: Request) {
       message: payload.message,
       attachment_names: payload.attachmentNames,
     });
+
+    revalidatePath("/ar/admin");
+    revalidatePath("/fr/admin");
+    revalidatePath("/ar/support");
+    revalidatePath("/fr/support");
 
     return NextResponse.json({
       ok: true,

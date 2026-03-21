@@ -157,6 +157,8 @@ create table if not exists public.support_cases (
   actor_role public.support_actor not null,
   issue_category text not null,
   status public.support_status not null default 'open',
+  request_safety_block boolean not null default false,
+  privacy_sensitive boolean not null default false,
   subject text not null,
   message text not null,
   phone_number text,

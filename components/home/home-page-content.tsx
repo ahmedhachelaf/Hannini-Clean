@@ -10,11 +10,14 @@ type HomePageContentProps = {
     common: {
       search: string;
       viewAll: string;
+      verified: string;
+      featured: string;
     };
     nav: {
       providers: string;
       businesses: string;
       grow: string;
+      safety: string;
     };
     home: {
       badge: string;
@@ -39,6 +42,11 @@ type HomePageContentProps = {
       growDescription: string;
       growCta: string;
       growSoon: string;
+      safetyTitle: string;
+      safetyDescription: string;
+      safetyCta: string;
+      spotlightTitle: string;
+      spotlightDescription: string;
       joinTitle: string;
       joinDescription: string;
       joinCta: string;
@@ -78,6 +86,7 @@ export function HomePageContent({
       zones: zones.filter((zone) => zone.provinceSlug === slug),
     }),
   );
+  const spotlightProfiles = [...featuredProviders.slice(0, 1), ...featuredBusinesses.slice(0, 2)];
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
@@ -161,6 +170,9 @@ export function HomePageContent({
               </Link>
               <Link href={`/${locale}/grow`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
                 {dictionary.nav.grow}
+              </Link>
+              <Link href={`/${locale}/safety`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+                {dictionary.nav.safety}
               </Link>
               <Link href={`/${locale}/join`} className="button-primary">
                 {dictionary.home.joinCta}
@@ -298,6 +310,72 @@ export function HomePageContent({
             />
           ))}
         </div>
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+        <article className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_72%,rgba(96,165,250,0.8))] p-6 text-white shadow-[0_26px_60px_rgba(12,40,104,0.18)] sm:p-7">
+          <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/72">{dictionary.nav.safety}</div>
+          <h2 className={`mt-3 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.safetyTitle}</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-8 text-white/82">{dictionary.home.safetyDescription}</p>
+          <div className="mt-5 grid gap-3">
+            {[
+              locale === "ar" ? "الإبلاغ عن التحرش أو التواصل غير المناسب" : "Signaler un harcèlement ou un contact inapproprié",
+              locale === "ar" ? "حماية الخصوصية للأنشطة المنزلية الحساسة" : "Mieux protéger les activités à domicile sensibles",
+              locale === "ar" ? "فتح طلب دعم مع متابعة واضحة داخل لوحة الإدارة" : "Ouvrir un ticket avec suivi clair côté admin",
+            ].map((item) => (
+              <div key={item} className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm leading-7 text-white/84">
+                {item}
+              </div>
+            ))}
+          </div>
+          <Link href={`/${locale}/safety`} className="button-secondary mt-6 border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+            {dictionary.home.safetyCta}
+          </Link>
+        </article>
+
+        <article className="surface-card rounded-[2rem] p-6 sm:p-7">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">{locale === "ar" ? "قصص نجاح" : "Success stories"}</div>
+              <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.spotlightTitle}</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">{dictionary.home.spotlightDescription}</p>
+            </div>
+            <Link href={`/${locale}/grow`} className="button-secondary">
+              {dictionary.nav.grow}
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            {spotlightProfiles.map((provider) => {
+              const spotlightZones = provider.zones.map((slug) => zoneMap.get(slug)).filter((zone): zone is Zone => Boolean(zone));
+              const primaryZone = spotlightZones[0];
+              return (
+                <div key={provider.id} className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(231,240,255,0.9))] p-5 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="status-pill status-pill--verified">{provider.isVerified ? dictionary.common.verified : dictionary.common.featured}</span>
+                    <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                      {provider.profileType === "home_business" ? dictionary.nav.businesses : dictionary.nav.providers}
+                    </span>
+                  </div>
+                  <h3 className={`mt-3 text-xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
+                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{getLocalizedValue(provider.shortTagline, locale)}</p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                    {locale === "ar"
+                      ? `بنى هذا الملف حضوره بثبات من خلال ${provider.completedJobs} طلباً، تقييم ${provider.rating.toFixed(1)}، وخدمة واضحة في ${primaryZone ? getLocalizedValue(primaryZone.name, locale) : "منطقته"}.`
+                      : `Ce profil se distingue par ${provider.completedJobs} demandes accomplies, une note de ${provider.rating.toFixed(1)} et une présence claire autour de ${primaryZone ? getLocalizedValue(primaryZone.name, locale) : "sa zone"}.`}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {spotlightZones.slice(0, 3).map((zone) => (
+                      <span key={zone.slug} className="chip-button min-h-0 px-3 py-2 text-xs">
+                        {getLocalizedValue(zone.name, locale)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </article>
       </section>
 
       <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_70%,rgba(83,146,255,0.9))] p-6 text-white sm:p-8">

@@ -6,6 +6,7 @@ export const fr = {
     providers: "Prestataires",
     businesses: "Activités à domicile",
     grow: "Apprendre & développer",
+    safety: "Centre sécurité",
     join: "Rejoindre Henini",
     support: "Support",
     admin: "Admin",
@@ -65,6 +66,13 @@ export const fr = {
       "Un espace léger pour aider artisans et activités à domicile à améliorer leur profil, leur tarification, la confiance client et leur communication.",
     growCta: "Ouvrir la section Apprendre & développer",
     growSoon: "Hannini Academy arrive bientôt — restez à l'écoute",
+    safetyTitle: "Sécurité et confiance d'abord",
+    safetyDescription:
+      "Des repères simples pour signaler un comportement risqué, protéger la vie privée et mieux encadrer les échanges, surtout pour les activités à domicile.",
+    safetyCta: "Ouvrir le centre sécurité",
+    spotlightTitle: "Parcours inspirants sur Henini",
+    spotlightDescription:
+      "Des profils qui grandissent avec sérieux, confiance client et ancrage local, sans perdre le côté humain du voisinage.",
     joinTitle: "Vous êtes artisan ou atelier local ?",
     joinDescription:
       "Créez votre profil comme prestataire de service ou activité à domicile. L'équipe Henini vérifie chaque demande avant publication.",
@@ -103,6 +111,8 @@ export const fr = {
     reviewTitle: "Avis clients",
     bookingHint: "La confirmation finale du rendez-vous se fait ensuite sur WhatsApp.",
     businessHint: "Pour une activité à domicile, cette demande sert d'intérêt ou de précommande avant la coordination finale sur WhatsApp.",
+    privacyLocationHint: "La carte publique reste au niveau wilaya/zone pour protéger la confidentialité des activités à domicile. Les détails précis sont partagés après confirmation.",
+    serviceLocationHint: "La carte publique reste centrée sur la zone de service pour montrer le périmètre sans surexposer d'adresse privée.",
     reportIssue: "Signaler un problème ou demander de l'aide",
   },
   booking: {
@@ -144,6 +154,15 @@ export const fr = {
     academySoon: "Hannini Academy arrive bientôt — un contenu plus riche viendra plus tard.",
     laneService: "Utile pour les prestataires de services à domicile",
     laneBusiness: "Utile pour les activités à domicile et micro-entreprises locales",
+    safetyTitle: "Sécurité et limites professionnelles",
+    safetyDescription:
+      "Des repères courts pour fixer un cadre clair, protéger votre vie privée et réagir vite quand un client devient difficile ou intrusif.",
+    safetyItems: [
+      "Gardez le premier échange sur WhatsApp ou dans un canal que vous pouvez retrouver facilement.",
+      "N'affichez pas publiquement une adresse de domicile complète si votre activité est sensible.",
+      "Si un échange devient insistant ou déplacé, stoppez-le et ouvrez un ticket de support avec demande de blocage.",
+      "Pour les livraisons et retraits, préférez un point clair, calme et simple à gérer.",
+    ],
     guidesTitle: "Guides courts et actionnables",
     checklistTitle: "Checklist de départ",
     checklistItems: [
@@ -245,6 +264,8 @@ export const fr = {
     inReview: "En revue",
     waitingForUser: "En attente du client",
     resolved: "Résolu",
+    blockRequested: "Blocage demandé",
+    privateHandling: "Traitement sensible",
     categories: "Catégories",
     zones: "Zones",
     approve: "Approuver",
@@ -274,11 +295,22 @@ export const fr = {
     categories: {
       booking_issue: "Problème de réservation",
       provider_report: "Signaler un prestataire",
+      harassment: "Harcèlement ou intimidation",
+      unsafe_behavior: "Comportement dangereux",
+      fraud_or_scam: "Fraude ou arnaque",
+      inappropriate_contact: "Contact inapproprié",
+      misconduct: "Conduite non professionnelle",
       payment_question: "Question sur le paiement",
       account_help: "Aide compte ou dossier",
       technical_issue: "Problème technique",
       general_support: "Support général",
     },
+    safetyBlockLabel: "Demander l'arrêt du contact direct avec l'autre partie",
+    safetyBlockHint: "Option MVP pour demander à l'admin une gestion plus prudente du dossier.",
+    privacySensitiveLabel: "Ce dossier doit être traité avec plus de confidentialité",
+    privacySensitiveHint: "Utile pour les activités à domicile, les cas d'intimidation ou les situations sensibles.",
+    safetyNoteTitle: "Quand utiliser ce formulaire ?",
+    safetyNoteBody: "Utilisez-le pour un comportement inapproprié, un échange intrusif, un risque d'arnaque, ou chaque fois qu'une gestion plus sûre et plus respectueuse est nécessaire.",
     successTitle: "Demande de support reçue",
     successDescription: "Votre ticket a été créé. Vous pouvez maintenant suivre l'échange dans le fil de conversation.",
     openThread: "Ouvrir le fil",
@@ -288,5 +320,51 @@ export const fr = {
     replyLabel: "Ajouter une réponse",
     yourNameLabel: "Votre nom",
     sendReply: "Envoyer la réponse",
+  },
+  safety: {
+    title: "Centre sécurité",
+    subtitle: "Confiance, confidentialité et réactions plus sûres",
+    description:
+      "Une couche simple dans Henini pour éviter les arnaques, mieux cadrer les échanges et réagir vite si un comportement devient déplacé ou risqué.",
+    cta: "Signaler ou demander de l'aide",
+    quickActions: [
+      "Si un contact devient intrusif ou inadapté, ouvrez un ticket et demandez un blocage de contact.",
+      "Pour une activité à domicile sensible, partagez l'adresse complète seulement après validation du besoin.",
+      "Conservez captures et images utiles si vous signalez une fraude ou une intimidation.",
+    ],
+    cards: [
+      {
+        title: "Éviter les arnaques",
+        bullets: [
+          "Ne confirmez pas une demande floue sans accord clair sur l'offre, le prix et le délai.",
+          "Gardez les échanges importants dans un canal que vous pouvez relire.",
+          "Si quelqu'un réclame un paiement ou des données sensibles de façon suspecte, stoppez et signalez.",
+        ],
+      },
+      {
+        title: "Communication plus sûre",
+        bullets: [
+          "Répondez de façon claire, posée et professionnelle.",
+          "Ne demandez ni n'envoyez d'informations privées inutiles.",
+          "Si le ton devient gênant ou pressant, demandez vite une reprise par l'admin.",
+        ],
+      },
+      {
+        title: "Confidentialité des activités à domicile",
+        bullets: [
+          "Affichez surtout la wilaya et la zone, pas l'adresse exacte.",
+          "Privilégiez des points de remise ou retrait simples et sûrs si nécessaire.",
+          "Pour les microbusinesses féminins, annoncez clairement vos limites de contact et de disponibilité.",
+        ],
+      },
+      {
+        title: "Que faire en cas de mauvaise conduite",
+        bullets: [
+          "Coupez l'échange si vous ne vous sentez plus à l'aise.",
+          "Gardez les preuves utiles comme captures et images.",
+          "Créez un ticket avec la catégorie la plus proche: harcèlement, comportement dangereux ou contact inapproprié.",
+        ],
+      },
+    ],
   },
 };

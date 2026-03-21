@@ -33,6 +33,7 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   const providerZones = provider.zones
     .map((zoneSlug) => zones.find((zone) => zone.slug === zoneSlug))
     .filter((zone): zone is NonNullable<typeof zone> => Boolean(zone));
+  const primaryZone = providerZones[0] ?? null;
   const whatsappMessage = encodeURIComponent(
     locale === "ar"
       ? `السلام عليكم، أريد تأكيد حجز مع ${provider.displayName} عبر هنيني.`
@@ -42,6 +43,7 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   const secondaryFeeLabel = provider.profileType === "home_business" ? dictionary.common.deliveryFee : dictionary.common.travelFee;
   const primaryActionLabel = provider.profileType === "home_business" ? dictionary.common.requestNow : dictionary.common.bookNow;
   const bookingHint = provider.profileType === "home_business" ? dictionary.provider.businessHint : dictionary.provider.bookingHint;
+  const locationHint = provider.profileType === "home_business" ? dictionary.provider.privacyLocationHint : dictionary.provider.serviceLocationHint;
   const galleryImages =
     provider.gallery.length > 0
       ? provider.gallery
@@ -135,10 +137,12 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
               >
                 {dictionary.common.whatsapp}
               </a>
-              <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary">
-                {dictionary.common.googleMaps}
-              </a>
-              <Link href={`/${locale}/support?actor=customer&providerSlug=${provider.slug}&providerId=${provider.id}`} className="button-secondary">
+              {provider.profileType === "service_provider" ? (
+                <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary">
+                  {dictionary.common.googleMaps}
+                </a>
+              ) : null}
+              <Link href={`/${locale}/support?actor=customer&category=provider_report&providerSlug=${provider.slug}&providerId=${provider.id}`} className="button-secondary">
                 {dictionary.provider.reportIssue}
               </Link>
             </div>
@@ -186,12 +190,17 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
             <div className="map-panel mt-5">
               <iframe
                 title={locale === "ar" ? "موقع مزود الخدمة" : "Carte du prestataire"}
-                src={`https://www.google.com/maps?q=${encodeURIComponent(`${provider.displayName} ${providerZones.map((zone) => getLocalizedValue(zone.name, locale)).join(" ")} Algeria`)}&z=11&output=embed`}
+                src={
+                  primaryZone
+                    ? `https://www.openstreetmap.org/export/embed.html?bbox=${primaryZone.coordinates.longitude - 0.12}%2C${primaryZone.coordinates.latitude - 0.08}%2C${primaryZone.coordinates.longitude + 0.12}%2C${primaryZone.coordinates.latitude + 0.08}&layer=mapnik&marker=${primaryZone.coordinates.latitude}%2C${primaryZone.coordinates.longitude}`
+                    : "https://www.openstreetmap.org/export/embed.html?bbox=-0.8%2C35.6%2C3.5%2C36.6&layer=mapnik"
+                }
                 className="h-72 w-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
               <div className="border-t border-[rgba(15,95,255,0.12)] bg-white/88 p-5">
+                <p className="mb-3 text-sm leading-7 text-[var(--muted)]">{locationHint}</p>
                 <div className="flex flex-wrap gap-2">
                   {providerZones.map((zone) => (
                     <span key={zone.slug} className="chip-button min-h-0 px-3 py-2 text-xs">
@@ -199,9 +208,11 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                     </span>
                   ))}
                 </div>
-                <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary mt-4">
-                  {dictionary.common.googleMaps}
-                </a>
+                {provider.profileType === "service_provider" ? (
+                  <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary mt-4">
+                    {dictionary.common.googleMaps}
+                  </a>
+                ) : null}
               </div>
             </div>
           </div>
