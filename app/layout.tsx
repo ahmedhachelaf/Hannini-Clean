@@ -11,7 +11,7 @@ function normalizeBaseUrl(value: string) {
 }
 
 export const metadata: Metadata = {
-  title: "Henini | هنيني",
+  title: "Henini | هَنّيني",
   description: "Henini is a clean bilingual marketplace MVP for booking trusted home-service providers in Algeria.",
   applicationName: "Henini",
   metadataBase: appUrl ? new URL(normalizeBaseUrl(appUrl)) : undefined,

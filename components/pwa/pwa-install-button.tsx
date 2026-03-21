@@ -64,7 +64,7 @@ export function PwaInstallButton({ locale }: PwaInstallButtonProps) {
 
   return (
     <button type="button" onClick={handleInstall} className="button-secondary text-sm">
-      {locale === "ar" ? "ثبّت هنيني على جهازك" : "Installer Henini"}
+      {locale === "ar" ? "ثبّت هَنّيني على جهازك" : "Installer Henini"}
     </button>
   );
 }

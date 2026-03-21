@@ -122,11 +122,11 @@ export default async function GrowPage({ params }: GrowPageProps) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
-                  {locale === "ar" ? "مسار النمو داخل هنيني" : "Parcours de progression sur Henini"}
+                  {locale === "ar" ? "مسار النمو داخل هَنّيني" : "Parcours de progression sur Henini"}
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
                   {locale === "ar"
-                    ? "الفكرة ليست مجرد الظهور في السوق. هنيني يساعدك تنتقل من ملف جديد إلى نشاط موثوق، جاهز لتكرار الطلبات وفرص أكبر."
+                    ? "الفكرة ليست مجرد الظهور في السوق. هَنّيني يساعدك تنتقل من ملف جديد إلى نشاط موثوق، جاهز لتكرار الطلبات وفرص أكبر."
                     : "L'objectif n'est pas seulement d'être visible. Henini aide à passer d'un nouveau profil à une activité fiable, prête pour des demandes répétées et des opportunités plus ambitieuses."}
                 </p>
               </div>

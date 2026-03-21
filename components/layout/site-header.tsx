@@ -41,18 +41,18 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
           <Link href={`/${locale}`} aria-label={locale === "ar" ? "العودة إلى الصفحة الرئيسية" : "Retour à l'accueil"} className="flex items-center gap-3">
             <Image
               src="/brand/henini-mark.svg"
-              alt="Henini"
+              alt="هَنّيني | Henini"
               width={48}
               height={48}
               className="h-12 w-12 rounded-2xl ring-1 ring-[rgba(15,95,255,0.12)]"
             />
             <div>
-              <div className={`text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هنيني</div>
+              <div className={`text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هَنّيني</div>
               <div className="text-sm font-medium text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
             </div>
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-2 text-[0.98rem] font-medium text-[var(--muted)] md:flex">
+          <nav aria-label={locale === "ar" ? "التنقل الرئيسي" : "Navigation principale"} className="hidden items-center gap-2 text-[0.98rem] font-medium text-[var(--muted)] md:flex">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href} className="chip-button min-h-11 px-4 text-sm font-semibold">
                 {item.label}
@@ -77,7 +77,7 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
           </Suspense>
         </div>
 
-        <nav aria-label="Mobile primary" className="mt-4 flex gap-2 overflow-x-auto pb-1 md:hidden">
+        <nav aria-label={locale === "ar" ? "التنقل الرئيسي على الهاتف" : "Navigation principale mobile"} className="mt-4 flex gap-2 overflow-x-auto pb-1 md:hidden">
           {navItems.map((item) => (
             <Link
               key={item.href}
