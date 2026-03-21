@@ -44,6 +44,13 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   const primaryActionLabel = provider.profileType === "home_business" ? dictionary.common.requestNow : dictionary.common.bookNow;
   const bookingHint = provider.profileType === "home_business" ? dictionary.provider.businessHint : dictionary.provider.bookingHint;
   const locationHint = provider.profileType === "home_business" ? dictionary.provider.privacyLocationHint : dictionary.provider.serviceLocationHint;
+  const socialLinks = [
+    { key: "facebook", label: "Facebook", url: provider.socialLinks?.facebook },
+    { key: "instagram", label: "Instagram", url: provider.socialLinks?.instagram },
+    { key: "tiktok", label: "TikTok", url: provider.socialLinks?.tiktok },
+    { key: "whatsapp-business", label: "WhatsApp Business", url: provider.socialLinks?.whatsappBusiness },
+    { key: "website", label: locale === "ar" ? "الموقع الإلكتروني" : "Site web", url: provider.socialLinks?.website },
+  ].filter((item): item is { key: string; label: string; url: string } => Boolean(item.url));
   const galleryImages =
     provider.gallery.length > 0
       ? provider.gallery
@@ -124,6 +131,49 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                 </div>
               </div>
             </div>
+
+            {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
+              <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(243,248,255,0.96),rgba(255,255,255,0.98))] p-5 shadow-[0_18px_50px_rgba(15,95,255,0.12)]">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="status-pill border border-[rgba(15,95,255,0.14)] bg-white text-[var(--brand)]">
+                    {dictionary.provider.businessBuyerBadge}
+                  </span>
+                  <h2 className="text-base font-bold text-[var(--ink)]">{dictionary.provider.bulkOrdersTitle}</h2>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{dictionary.provider.bulkOrdersHint}</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {provider.bulkOrders.minimumOrderQuantity ? (
+                    <div className="rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm">
+                      <div className="text-[var(--muted)]">{dictionary.provider.minimumOrderQuantity}</div>
+                      <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.minimumOrderQuantity}</div>
+                    </div>
+                  ) : null}
+                  {provider.bulkOrders.productionCapacity ? (
+                    <div className="rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm">
+                      <div className="text-[var(--muted)]">{dictionary.provider.productionCapacity}</div>
+                      <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.productionCapacity}</div>
+                    </div>
+                  ) : null}
+                  {provider.bulkOrders.leadTime ? (
+                    <div className="rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm">
+                      <div className="text-[var(--muted)]">{dictionary.provider.leadTime}</div>
+                      <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.leadTime}</div>
+                    </div>
+                  ) : null}
+                  {provider.bulkOrders.deliveryArea ? (
+                    <div className="rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm">
+                      <div className="text-[var(--muted)]">{dictionary.provider.deliveryArea}</div>
+                      <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.deliveryArea}</div>
+                    </div>
+                  ) : null}
+                </div>
+                <div className="mt-4">
+                  <Link href={`/${locale}/book/${provider.slug}`} className="button-primary">
+                    {dictionary.provider.businessInquiryCta}
+                  </Link>
+                </div>
+              </div>
+            ) : null}
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link href={`/${locale}/book/${provider.slug}`} className="button-primary">
@@ -256,6 +306,24 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
               {provider.reviewCount}
             </p>
           </div>
+          {socialLinks.length > 0 ? (
+            <div className="mt-6 border-t border-[var(--line)] pt-5">
+              <h3 className="text-base font-bold text-[var(--ink)]">{dictionary.provider.digitalPresenceTitle}</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.key}
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="chip-button min-h-0 border-[rgba(15,95,255,0.14)] bg-[var(--soft)] px-3 py-2 text-xs font-semibold text-[var(--brand)]"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </aside>
       </section>
     </div>

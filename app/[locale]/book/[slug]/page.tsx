@@ -55,6 +55,37 @@ export default async function BookingPage({ params }: BookingPageProps) {
               ? "يمكنك إضافة صور للمشكلة وتفعيل تنبيه واتساب. في هذا الـMVP يتم تمرير هذه التفاصيل ضمن الطلب للمتابعة اليدوية."
               : "Vous pouvez ajouter des photos du problème et demander une notification WhatsApp. Dans ce MVP, ces détails sont transmis dans la demande pour suivi manuel."}
         </div>
+        {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
+          <div className="mt-5 rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-white p-4 text-sm text-[var(--muted)] shadow-[0_18px_50px_rgba(15,95,255,0.08)]">
+            <div className="font-semibold text-[var(--ink)]">{dictionary.booking.fields.businessBuyerTitle}</div>
+            <p className="mt-2 leading-7">{dictionary.booking.fields.businessBuyerHint}</p>
+            <div className="mt-3 space-y-2">
+              {provider.bulkOrders.minimumOrderQuantity ? (
+                <div>
+                  <span className="font-semibold text-[var(--ink)]">{dictionary.provider.minimumOrderQuantity}:</span>{" "}
+                  {provider.bulkOrders.minimumOrderQuantity}
+                </div>
+              ) : null}
+              {provider.bulkOrders.productionCapacity ? (
+                <div>
+                  <span className="font-semibold text-[var(--ink)]">{dictionary.provider.productionCapacity}:</span>{" "}
+                  {provider.bulkOrders.productionCapacity}
+                </div>
+              ) : null}
+              {provider.bulkOrders.leadTime ? (
+                <div>
+                  <span className="font-semibold text-[var(--ink)]">{dictionary.provider.leadTime}:</span> {provider.bulkOrders.leadTime}
+                </div>
+              ) : null}
+              {provider.bulkOrders.deliveryArea ? (
+                <div>
+                  <span className="font-semibold text-[var(--ink)]">{dictionary.provider.deliveryArea}:</span>{" "}
+                  {provider.bulkOrders.deliveryArea}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
         <Link
           href={`/${locale}/support?actor=customer&category=booking_issue&providerSlug=${provider.slug}&providerId=${provider.id}`}
           className="button-secondary mt-5"

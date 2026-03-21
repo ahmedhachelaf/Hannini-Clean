@@ -314,6 +314,35 @@ function ProviderAdminCard({
             </div>
           </div>
 
+          {provider.socialLinks && Object.values(provider.socialLinks).some(Boolean) ? (
+            <div className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4 text-sm text-[var(--muted)]">
+              <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الحضور الرقمي" : "Présence digitale"}</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {provider.socialLinks.facebook ? <span className="chip-button min-h-0 px-3 py-2 text-xs">Facebook</span> : null}
+                {provider.socialLinks.instagram ? <span className="chip-button min-h-0 px-3 py-2 text-xs">Instagram</span> : null}
+                {provider.socialLinks.tiktok ? <span className="chip-button min-h-0 px-3 py-2 text-xs">TikTok</span> : null}
+                {provider.socialLinks.whatsappBusiness ? <span className="chip-button min-h-0 px-3 py-2 text-xs">WhatsApp Business</span> : null}
+                {provider.socialLinks.website ? <span className="chip-button min-h-0 px-3 py-2 text-xs">{locale === "ar" ? "موقع" : "Site web"}</span> : null}
+              </div>
+            </div>
+          ) : null}
+
+          {provider.bulkOrders?.available ? (
+            <div className="rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(243,248,255,0.96),rgba(255,255,255,0.98))] p-4 text-sm text-[var(--muted)]">
+              <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "جاهز لطلبات الجملة أو المشترين المهنيين" : "Ouvert aux commandes en volume"}</div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {provider.bulkOrders.minimumOrderQuantity ? (
+                  <div>{locale === "ar" ? "الحد الأدنى:" : "Minimum :"} {provider.bulkOrders.minimumOrderQuantity}</div>
+                ) : null}
+                {provider.bulkOrders.productionCapacity ? (
+                  <div>{locale === "ar" ? "القدرة:" : "Capacité :"} {provider.bulkOrders.productionCapacity}</div>
+                ) : null}
+                {provider.bulkOrders.leadTime ? <div>{locale === "ar" ? "المهلة:" : "Délai :"} {provider.bulkOrders.leadTime}</div> : null}
+                {provider.bulkOrders.deliveryArea ? <div>{locale === "ar" ? "منطقة التوصيل:" : "Zone de livraison :"} {provider.bulkOrders.deliveryArea}</div> : null}
+              </div>
+            </div>
+          ) : null}
+
           {provider.gallery.length > 0 ? (
             <div className="grid gap-3 sm:grid-cols-3">
               {provider.gallery.slice(0, 3).map((imageUrl, index) => (

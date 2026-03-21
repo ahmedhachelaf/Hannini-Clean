@@ -834,6 +834,18 @@ export const providers: Provider[] = [
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 80 11 23",
     whatsappNumber: "213555801123",
+    socialLinks: {
+      facebook: "https://www.facebook.com/oumyasmine.cuisine",
+      instagram: "https://www.instagram.com/oumyasmine.cuisine",
+      whatsappBusiness: "https://wa.me/213555801123",
+    },
+    bulkOrders: {
+      available: true,
+      minimumOrderQuantity: "ابتداءً من 15 وجبة أو 6 صواني مناسبة",
+      productionCapacity: "حتى 80 وجبة يومياً للمناسبات الصغيرة والمتوسطة",
+      leadTime: "48 ساعة للطلبات المتوسطة و72 ساعة للولائم المنظمة",
+      deliveryArea: "وهران، عين الترك، وبئر الجير",
+    },
     googleMapsUrl: "https://maps.google.com/?q=Oran%20Centre%20Algeria",
     bio: {
       ar: "طبخ منزلي للمناسبات الصغيرة والعائلية مع وصفات محلية، تنظيم بسيط، وتسليم داخل وهران.",
@@ -878,6 +890,18 @@ export const providers: Provider[] = [
     languages: ["العربية"],
     phoneNumber: "+213 667 50 44 18",
     whatsappNumber: "213667504418",
+    socialLinks: {
+      facebook: "https://www.facebook.com/khadidjacouture.djelfa",
+      instagram: "https://www.instagram.com/khadidja.couture.djelfa",
+      whatsappBusiness: "https://wa.me/213667504418",
+    },
+    bulkOrders: {
+      available: true,
+      minimumOrderQuantity: "من 10 قطع أو سلسلة خياطة موسمية صغيرة",
+      productionCapacity: "20 إلى 25 قطعة أسبوعياً حسب نوع التفصيل",
+      leadTime: "من 4 إلى 7 أيام للطلبات المتوسطة",
+      deliveryArea: "الجلفة، حاسي بحبح، وعين معبد",
+    },
     googleMapsUrl: "https://maps.google.com/?q=Djelfa%20Centre%20Algeria",
     bio: {
       ar: "تفصيل نسائي، خياطة العيد، وتعديلات منزلية دقيقة بطلب مسبق وبمواعيد واضحة.",
@@ -922,6 +946,20 @@ export const providers: Provider[] = [
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 22 71 09",
     whatsappNumber: "213555227109",
+    socialLinks: {
+      facebook: "https://www.facebook.com/bentbladi.patisserie",
+      instagram: "https://www.instagram.com/bentbladi.patisserie",
+      tiktok: "https://www.tiktok.com/@bentbladi.patisserie",
+      whatsappBusiness: "https://wa.me/213555227109",
+      website: "https://bentbladi-patisserie.example.com",
+    },
+    bulkOrders: {
+      available: true,
+      minimumOrderQuantity: "من 12 علبة ضيافة أو 8 صواني حلويات",
+      productionCapacity: "حتى 150 علبة ضيافة أسبوعياً",
+      leadTime: "24 إلى 48 ساعة حسب حجم المناسبة",
+      deliveryArea: "سيدي بلعباس، تلاغ، وسفيزف",
+    },
     googleMapsUrl: "https://maps.google.com/?q=Sidi%20Bel%20Abbes%20Centre%20Algeria",
     bio: {
       ar: "حلويات منزلية للمناسبات، علب ضيافة، وصواني جاهزة بطابع محلي أنيق.",
@@ -966,6 +1004,18 @@ export const providers: Provider[] = [
     languages: ["العربية", "Français"],
     phoneNumber: "+213 666 80 12 61",
     whatsappNumber: "213666801261",
+    socialLinks: {
+      instagram: "https://www.instagram.com/zina.handmade.oran",
+      tiktok: "https://www.tiktok.com/@zina.handmade.oran",
+      whatsappBusiness: "https://wa.me/213666801261",
+    },
+    bulkOrders: {
+      available: true,
+      minimumOrderQuantity: "من 20 قطعة للهدايا أو الفعاليات",
+      productionCapacity: "40 إلى 60 قطعة أسبوعياً حسب نوع المنتج",
+      leadTime: "3 إلى 5 أيام للطلبات المخصصة",
+      deliveryArea: "بئر الجير ووهران مع تنسيق مسبق",
+    },
     googleMapsUrl: "https://maps.google.com/?q=Bir%20El%20Djir%20Oran",
     bio: {
       ar: "هدايا يدوية، تزيين بسيط، ومنتجات منزلية مصنوعة محلياً مع طلبات حسب المناسبة.",
