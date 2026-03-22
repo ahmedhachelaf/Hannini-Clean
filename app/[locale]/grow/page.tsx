@@ -77,23 +77,23 @@ export default async function GrowPage({ params }: GrowPageProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="surface-card gradient-frame rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_72%,rgba(96,165,250,0.84))] p-6 text-white shadow-[0_30px_70px_rgba(12,40,104,0.18)] sm:p-8">
+      <section className="surface-card gradient-frame rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] shadow-[0_30px_70px_rgba(12,40,104,0.18)] sm:p-8">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
           <div>
-            <div className="text-sm font-semibold uppercase tracking-[0.16em] text-white/72">{dictionary.nav.grow}</div>
+            <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">{dictionary.nav.grow}</div>
             <h1 className={`mt-3 text-4xl font-extrabold tracking-[-0.05em] sm:text-5xl ${locale === "ar" ? "arabic-display" : ""}`}>
               {dictionary.grow.title}
             </h1>
-            <p className="mt-4 text-lg font-semibold text-white/84">{dictionary.grow.subtitle}</p>
-            <p className="mt-4 max-w-3xl text-sm leading-8 text-white/82">{dictionary.grow.description}</p>
+            <p className="mt-4 text-lg font-semibold text-[var(--ink)]">{dictionary.grow.subtitle}</p>
+            <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.grow.description}</p>
           </div>
 
-          <div className="rounded-[1.5rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
-            <div className="text-sm font-semibold text-white/74">{dictionary.nav.providers}</div>
-            <div className="mt-2 text-sm leading-7 text-white/82">{dictionary.grow.laneService}</div>
-            <div className="mt-4 text-sm font-semibold text-white/74">{dictionary.nav.businesses}</div>
-            <div className="mt-2 text-sm leading-7 text-white/82">{dictionary.grow.laneBusiness}</div>
-            <div className="mt-5 rounded-[1.25rem] border border-white/12 bg-[rgba(8,18,37,0.18)] px-4 py-4 text-sm leading-7 text-white/80">
+          <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white p-5 backdrop-blur">
+            <div className="text-sm font-semibold text-[var(--ink)]">{dictionary.nav.providers}</div>
+            <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneService}</div>
+            <div className="mt-4 text-sm font-semibold text-[var(--ink)]">{dictionary.nav.businesses}</div>
+            <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneBusiness}</div>
+            <div className="mt-5 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-4 text-sm leading-7 text-[var(--ink)]">
               {dictionary.grow.academySoon}
             </div>
           </div>

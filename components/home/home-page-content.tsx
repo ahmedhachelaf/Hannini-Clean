@@ -327,22 +327,22 @@ export function HomePageContent({
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <article className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_72%,rgba(96,165,250,0.8))] p-6 text-white shadow-[0_26px_60px_rgba(12,40,104,0.18)] sm:p-7">
-          <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/72">{dictionary.nav.safety}</div>
+        <article className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] shadow-[0_26px_60px_rgba(12,40,104,0.18)] sm:p-7">
+          <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--ink)]">{dictionary.nav.safety}</div>
           <h2 className={`mt-3 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.safetyTitle}</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-8 text-white/82">{dictionary.home.safetyDescription}</p>
+          <p className="mt-4 max-w-2xl text-sm leading-8 text-[var(--ink)]">{dictionary.home.safetyDescription}</p>
           <div className="mt-5 grid gap-3">
             {[
               locale === "ar" ? "الإبلاغ عن التحرش أو التواصل غير المناسب" : "Signaler un harcèlement ou un contact inapproprié",
               locale === "ar" ? "حماية الخصوصية للأنشطة المنزلية الحساسة" : "Mieux protéger les activités à domicile sensibles",
               locale === "ar" ? "فتح طلب دعم مع متابعة واضحة داخل لوحة الإدارة" : "Ouvrir un ticket avec suivi clair côté admin",
             ].map((item) => (
-              <div key={item} className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm leading-7 text-white/84">
+              <div key={item} className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-3 text-sm leading-7 text-[var(--ink)]">
                 {item}
               </div>
             ))}
           </div>
-          <Link href={`/${locale}/safety`} className="button-secondary mt-6 border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+          <Link href={`/${locale}/safety`} className="button-secondary mt-6">
             {dictionary.home.safetyCta}
           </Link>
         </article>
@@ -525,21 +525,21 @@ export function HomePageContent({
         </div>
       </section>
 
-      <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_70%,rgba(83,146,255,0.9))] p-6 text-white sm:p-8">
-        <div className="mb-6 rounded-[1.5rem] border border-white/12 bg-white/10 p-5 backdrop-blur">
+      <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] sm:p-8">
+        <div className="mb-6 rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white p-5 backdrop-blur">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/72">{dictionary.nav.grow}</div>
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--ink)]">{dictionary.nav.grow}</div>
               <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
                 {dictionary.home.growTitle}
               </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-8 text-white/82">{dictionary.home.growDescription}</p>
+              <p className="mt-3 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.home.growDescription}</p>
             </div>
             <div className="flex flex-col gap-3 lg:max-w-sm">
-              <span className="rounded-[1.25rem] border border-white/14 bg-[rgba(8,18,37,0.18)] px-4 py-3 text-sm font-semibold text-white/84">
+              <span className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-3 text-sm font-semibold text-[var(--ink)]">
                 {dictionary.home.growSoon}
               </span>
-              <Link href={`/${locale}/grow`} className="button-secondary border-white/20 bg-white/12 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+              <Link href={`/${locale}/grow`} className="button-secondary">
                 {dictionary.home.growCta}
               </Link>
             </div>
@@ -551,11 +551,11 @@ export function HomePageContent({
             <h2 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
               {dictionary.home.joinTitle}
             </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-8 text-white/82">
+            <p className="mt-4 max-w-2xl text-sm leading-8 text-[var(--ink)]">
               {dictionary.home.joinDescription}
             </p>
           </div>
-          <Link href={`/${locale}/join`} className="button-secondary border-white/20 bg-white/12 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+          <Link href={`/${locale}/join`} className="button-secondary">
             {dictionary.home.joinCta}
           </Link>
         </div>

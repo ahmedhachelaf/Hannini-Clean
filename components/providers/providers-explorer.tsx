@@ -140,14 +140,14 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
 
   return (
     <>
-      <section className="surface-card gradient-frame rounded-[2rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.92)_70%,rgba(96,165,250,0.84))] p-6 text-white shadow-[0_30px_70px_rgba(12,40,104,0.2)] sm:p-8">
+      <section className="surface-card gradient-frame rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(226,238,255,0.96)_58%,rgba(205,224,255,0.92))] p-6 text-[var(--ink)] shadow-[0_30px_70px_rgba(12,40,104,0.2)] sm:p-8">
         <h1 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h1>
-        <p className="max-w-2xl text-sm leading-7 text-white/82">{labels.description}</p>
+        <p className="max-w-2xl text-sm leading-7 text-[var(--ink)]">{labels.description}</p>
         <div className="mt-5 flex flex-wrap gap-3">
-          <span className="status-pill border border-white/16 bg-white/10 text-white">
+          <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
             {locale === "ar" ? `${providers.length} مزود ظاهر` : `${providers.length} prestataires visibles`}
           </span>
-          <span className="status-pill border border-white/16 bg-white/10 text-white">
+          <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
             {locale === "ar" ? "خريطة وقائمة مترابطتان" : "Carte et liste synchronisees"}
           </span>
         </div>
