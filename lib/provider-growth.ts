@@ -35,6 +35,7 @@ export type OpportunityKey =
 export type ReadinessCheck = {
   key: ReadinessCheckKey;
   complete: boolean;
+  weight: number;
 };
 
 export type JourneyStep = {
@@ -42,22 +43,25 @@ export type JourneyStep = {
   complete: boolean;
 };
 
+export type ReadinessTier = "starter" | "building" | "good" | "strong";
+
 export function getProviderReadiness(provider: Provider) {
   const checks: ReadinessCheck[] = [
-    { key: "category", complete: Boolean(provider.categorySlug) },
-    { key: "location", complete: provider.zones.length > 0 },
-    { key: "contact", complete: Boolean(provider.phoneNumber || provider.whatsappNumber) },
+    { key: "category", complete: Boolean(provider.categorySlug), weight: 10 },
+    { key: "location", complete: provider.zones.length > 0, weight: 12 },
+    { key: "contact", complete: Boolean(provider.phoneNumber || provider.whatsappNumber), weight: 14 },
     {
       key: "description",
       complete:
         Boolean(provider.bio.ar?.trim() || provider.bio.fr?.trim()) &&
         Boolean(provider.shortTagline.ar?.trim() || provider.shortTagline.fr?.trim()),
+      weight: 16,
     },
-    { key: "pricing", complete: provider.hourlyRate > 0 },
-    { key: "portfolio", complete: provider.gallery.length > 0 },
-    { key: "availability", complete: provider.availability.length > 0 },
-    { key: "moderation", complete: provider.status === "approved" },
-    { key: "trust", complete: provider.isVerified || provider.reviewCount > 0 },
+    { key: "pricing", complete: provider.hourlyRate > 0, weight: provider.profileType === "home_business" ? 6 : 10 },
+    { key: "portfolio", complete: provider.gallery.length > 0, weight: 16 },
+    { key: "availability", complete: provider.availability.length > 0, weight: 8 },
+    { key: "moderation", complete: provider.status === "approved", weight: 12 },
+    { key: "trust", complete: provider.isVerified || provider.reviewCount > 0, weight: 6 },
     {
       key: "digital",
       complete: Boolean(
@@ -67,23 +71,33 @@ export function getProviderReadiness(provider: Provider) {
           provider.socialLinks?.whatsappBusiness ||
           provider.socialLinks?.website,
       ),
+      weight: 6,
     },
     {
       key: "bulk",
       complete: provider.profileType === "home_business" ? Boolean(provider.bulkOrders?.available) : true,
+      weight: 8,
     },
   ];
 
   const relevantChecks = checks.filter((check) => !(provider.profileType === "service_provider" && check.key === "bulk"));
   const completed = relevantChecks.filter((check) => check.complete).length;
   const total = relevantChecks.length;
-  const score = Math.round((completed / total) * 100);
+  const completedWeight = relevantChecks.filter((check) => check.complete).reduce((sum, check) => sum + check.weight, 0);
+  const totalWeight = relevantChecks.reduce((sum, check) => sum + check.weight, 0);
+  const score = Math.round((completedWeight / totalWeight) * 100);
+  const scoreTier: ReadinessTier = score >= 85 ? "strong" : score >= 65 ? "good" : score >= 40 ? "building" : "starter";
+  const strengthSignals = relevantChecks.filter((check) => check.complete).slice(0, 4);
 
   return {
     score,
     completed,
     total,
+    scoreTier,
     checks: relevantChecks,
+    completedWeight,
+    totalWeight,
+    strengthSignals,
     nextSteps: relevantChecks.filter((check) => !check.complete).slice(0, 3),
   };
 }

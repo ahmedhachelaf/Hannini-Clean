@@ -35,6 +35,12 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
   const readiness = getProviderReadiness(provider);
   const growthStage = getGrowthStage(provider);
   const opportunities = getOpportunityTypes(provider).slice(0, 3);
+  const readinessTierLabels = {
+    starter: locale === "ar" ? "بداية قوية" : "Bon début",
+    building: locale === "ar" ? "يتحسن" : "En progrès",
+    good: locale === "ar" ? "جاهز بشكل جيد" : "Bien préparé",
+    strong: locale === "ar" ? "جاهز بقوة" : "Très solide",
+  };
   const stageLabels = {
     starting: locale === "ar" ? "بداية المسار" : "Début",
     building: locale === "ar" ? "يبني الثقة" : "En progression",
@@ -117,9 +123,34 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
         <div>
           <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "جاهزية الملف:" : "Préparation :"}</span> {readiness.score}%
         </div>
+        <div className="overflow-hidden rounded-full bg-[rgba(15,95,255,0.08)]">
+          <div
+            className="h-2 rounded-full bg-[linear-gradient(90deg,#0f5fff,#4f8dff)]"
+            style={{ width: `${Math.max(readiness.score, 8)}%` }}
+            aria-hidden="true"
+          />
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="font-semibold text-[var(--brand)]">{readinessTierLabels[readiness.scoreTier]}</span>
+          <span>
+            {locale === "ar"
+              ? `${readiness.completed} من ${readiness.total} عناصر مكتملة`
+              : `${readiness.completed}/${readiness.total} éléments complétés`}
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">
+        {provider.gallery.length > 0 ? (
+          <span className="chip-button min-h-0 px-3 py-2 text-xs">
+            {locale === "ar" ? `معرض ${provider.gallery.length}` : `Portfolio ${provider.gallery.length}`}
+          </span>
+        ) : null}
+        {provider.socialLinks && Object.values(provider.socialLinks).some(Boolean) ? (
+          <span className="chip-button min-h-0 px-3 py-2 text-xs">
+            {locale === "ar" ? "حضور رقمي" : "Présence digitale"}
+          </span>
+        ) : null}
         {opportunities.map((opportunity) => (
           <span key={opportunity} className="chip-button min-h-0 px-3 py-2 text-xs">
             {opportunityLabels[opportunity]}

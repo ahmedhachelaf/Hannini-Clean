@@ -415,6 +415,11 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <div className="flex flex-col gap-1">
             <h4 className="text-sm font-extrabold text-[var(--ink)]">{copy.socialTitle}</h4>
             <p className="text-sm leading-7 text-[var(--muted)]">{copy.socialHint}</p>
+            <p className="text-xs leading-6 text-[var(--muted)]">
+              {locale === "ar"
+                ? "أضف فقط الروابط التي تمثل نشاطك فعلاً. هذا يساعد على رفع جاهزية الملف وبناء الثقة دون أن يكون إلزامياً."
+                : "Ajoutez seulement les liens qui représentent vraiment votre activité. Ils renforcent la préparation du profil sans être obligatoires."}
+            </p>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label>
@@ -525,6 +530,15 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <label>
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workPhotos}</span>
             <input name="workPhotos" type="file" accept="image/*" multiple className="input-base py-3" />
+            <p className="mt-2 text-xs leading-6 text-[var(--muted)]">
+              {locale === "ar"
+                ? profileType === "home_business"
+                  ? "يكفي 1 إلى 3 صور واضحة: صواني، حلويات، خياطة، أو منتجات يدوية جاهزة للتسليم."
+                  : "يكفي 1 إلى 3 صور واضحة: أعمال إصلاح، قبل/بعد، أو نماذج توضح جودة الخدمة."
+                : profileType === "home_business"
+                  ? "1 à 3 photos nettes suffisent : plateaux, pâtisseries, couture ou produits artisanaux prêts à livrer."
+                  : "1 à 3 photos nettes suffisent : réparations, avant/après ou exemples montrant la qualité du service."}
+            </p>
           </label>
           <label>
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.verificationDocument}</span>

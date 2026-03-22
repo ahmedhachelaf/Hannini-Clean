@@ -10,6 +10,42 @@ type ProviderProfilePageProps = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
+function getSocialBadge(key: string) {
+  switch (key) {
+    case "facebook":
+      return "f";
+    case "instagram":
+      return "ig";
+    case "tiktok":
+      return "tt";
+    case "whatsapp-business":
+      return "wa";
+    case "website":
+      return "www";
+    default:
+      return "•";
+  }
+}
+
+function getGalleryThemes(captions: string[], profileType: "service_provider" | "home_business", locale: "ar" | "fr") {
+  const text = captions.join(" ").toLowerCase();
+  const tags: string[] = [];
+
+  if (profileType === "service_provider") {
+    if (text.includes("before") || text.includes("after") || text.includes("قبل") || text.includes("بعد")) {
+      tags.push(locale === "ar" ? "قبل / بعد" : "Avant / après");
+    }
+    tags.push(locale === "ar" ? "أعمال ميدانية" : "Interventions terrain");
+  } else {
+    if (text.includes("cake") || text.includes("tray") || text.includes("حلويات") || text.includes("صينية")) {
+      tags.push(locale === "ar" ? "طلبات مناسبات" : "Commandes d'occasion");
+    }
+    tags.push(locale === "ar" ? "إنتاج منزلي" : "Production maison");
+  }
+
+  return Array.from(new Set(tags)).slice(0, 3);
+}
+
 export default async function ProviderProfilePage({ params }: ProviderProfilePageProps) {
   const { locale, slug } = await params;
 
@@ -100,6 +136,13 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
       : provider.galleryCaptions && provider.galleryCaptions.length > 0
         ? provider.galleryCaptions.map((_, index) => `/gallery/work-${(index % 3) + 1}.svg`)
         : [];
+  const galleryThemes = getGalleryThemes(provider.galleryCaptions ?? [], provider.profileType, locale);
+  const readinessTierLabels = {
+    starter: locale === "ar" ? "بداية واعدة" : "Bon départ",
+    building: locale === "ar" ? "يتحسن بسرعة" : "En progression",
+    good: locale === "ar" ? "جاهز بشكل جيد" : "Bien préparé",
+    strong: locale === "ar" ? "جاهز بقوة للفرص" : "Très prêt pour les opportunités",
+  };
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -179,13 +222,23 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
               <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(232,242,255,0.92))] p-5 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-base font-bold text-[var(--ink)]">{locale === "ar" ? "جاهزية الملف" : "Niveau de préparation"}</h2>
-                  <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{readiness.score}%</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{readiness.score}%</span>
+                    <span className="chip-button min-h-0 px-3 py-2 text-xs">{readinessTierLabels[readiness.scoreTier]}</span>
+                  </div>
                 </div>
                 <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
                   {locale === "ar"
                     ? `أكمل هذا الملف ${readiness.completed} من ${readiness.total} عناصر تساعده على بناء الثقة والظهور لفرص أفضل.`
                     : `Ce profil a complété ${readiness.completed} éléments sur ${readiness.total} pour inspirer confiance et accéder à de meilleures opportunités.`}
                 </p>
+                <div className="mt-4 overflow-hidden rounded-full bg-[rgba(15,95,255,0.08)]">
+                  <div
+                    className="h-2 rounded-full bg-[linear-gradient(90deg,#0f5fff,#4f8dff)]"
+                    style={{ width: `${Math.max(readiness.score, 8)}%` }}
+                    aria-hidden="true"
+                  />
+                </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {readiness.checks.map((check) => (
                     <span
@@ -202,6 +255,12 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                   <div className="mt-4 rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4 text-sm leading-7 text-[var(--muted)]">
                     <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الخطوة التالية" : "Étape suivante"}:</span>{" "}
                     {readiness.nextSteps.map((step) => readinessLabels[step.key]).join(locale === "ar" ? " • " : " • ")}
+                  </div>
+                ) : null}
+                {readiness.strengthSignals.length > 0 ? (
+                  <div className="mt-4 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+                    <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "ما يقوّي هذا الملف الآن:" : "Ce qui renforce déjà ce profil :"}</span>{" "}
+                    {readiness.strengthSignals.map((signal) => readinessLabels[signal.key]).join(locale === "ar" ? " • " : " • ")}
                   </div>
                 ) : null}
               </div>
@@ -314,24 +373,54 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
           <div className="surface-card rounded-[1.75rem] p-6">
             <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.provider.galleryTitle}</h2>
             {galleryImages.length > 0 ? (
-              <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                {galleryImages.map((imageUrl, index) => (
-                  <div key={`${imageUrl}-${index}`} className="overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white">
-                    <Image
-                      src={imageUrl}
-                      alt={provider.galleryCaptions?.[index] ?? provider.displayName}
-                      width={640}
-                      height={480}
-                      className="h-48 w-full object-cover"
-                    />
-                    {provider.galleryCaptions?.[index] ? (
-                      <div className="border-t border-[var(--line)] px-4 py-3 text-xs leading-6 text-[var(--muted)]">
-                        {provider.galleryCaptions[index]}
+              <>
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                  {locale === "ar"
+                    ? "نماذج واقعية من الأعمال أو المنتجات لمساعدة الزبائن على تقييم الجودة والأسلوب قبل التواصل."
+                    : "Des exemples concrets de travaux ou de produits pour aider les clients à juger la qualité avant de vous contacter."}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {galleryThemes.map((theme) => (
+                    <span key={theme} className="chip-button min-h-0 px-3 py-2 text-xs">
+                      {theme}
+                    </span>
+                  ))}
+                  <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                    {locale === "ar" ? `${galleryImages.length} عيّنة عمل` : `${galleryImages.length} échantillons`}
+                  </span>
+                </div>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {galleryImages.map((imageUrl, index) => (
+                    <div
+                      key={`${imageUrl}-${index}`}
+                      className={`overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white shadow-[0_18px_38px_rgba(12,40,104,0.08)] ${
+                        index === 0 ? "sm:col-span-2 lg:row-span-2" : ""
+                      }`}
+                    >
+                      <div className={index === 0 ? "relative h-72 sm:min-h-[19rem]" : "relative h-48"}>
+                        <Image
+                          src={imageUrl}
+                          alt={provider.galleryCaptions?.[index] ?? provider.displayName}
+                          width={640}
+                          height={480}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+                      <div className="border-t border-[var(--line)] bg-white px-4 py-4">
+                        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">
+                          {locale === "ar" ? `عينة ${index + 1}` : `Sample ${index + 1}`}
+                        </div>
+                        <div className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                          {provider.galleryCaptions?.[index] ??
+                            (locale === "ar"
+                              ? "صورة مرفوعة ضمن معرض الأعمال للمساعدة على بناء الثقة."
+                              : "Image ajoutée au portfolio pour renforcer la confiance.")}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-[var(--soft)] px-5 py-6 text-sm leading-7 text-[var(--muted)]">
                 {locale === "ar"
@@ -438,16 +527,25 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
           {socialLinks.length > 0 ? (
             <div className="mt-6 border-t border-[var(--line)] pt-5">
               <h3 className="text-base font-bold text-[var(--ink)]">{dictionary.provider.digitalPresenceTitle}</h3>
-              <div className="mt-3 flex flex-wrap gap-2">
+              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+                {locale === "ar"
+                  ? "روابط رقمية اختيارية تساعد على استكشاف أمثلة إضافية من الأعمال أو متابعة النشاط عبر القنوات المعروفة."
+                  : "Des liens numériques optionnels pour découvrir d'autres exemples ou suivre l'activité sur des canaux déjà connus."}
+              </p>
+              <div className="mt-3 grid gap-3">
                 {socialLinks.map((link) => (
                   <a
                     key={link.key}
                     href={link.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="chip-button min-h-0 border-[rgba(15,95,255,0.14)] bg-[var(--soft)] px-3 py-2 text-xs font-semibold text-[var(--brand)]"
+                    className="flex items-center gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-[var(--soft)] px-4 py-3 text-sm font-semibold text-[var(--brand)] transition hover:border-[rgba(15,95,255,0.28)] hover:bg-white"
                   >
-                    {link.label}
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[11px] font-extrabold uppercase text-[var(--brand)] shadow-[0_10px_20px_rgba(15,95,255,0.12)]">
+                      {getSocialBadge(link.key)}
+                    </span>
+                    <span className="flex-1">{link.label}</span>
+                    <span className="text-xs text-[var(--muted)]">{locale === "ar" ? "افتح الرابط" : "Ouvrir"}</span>
                   </a>
                 ))}
               </div>

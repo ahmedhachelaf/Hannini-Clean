@@ -335,6 +335,12 @@ function ProviderAdminCard({
     business_buyers: locale === "ar" ? "مهني" : "Acheteurs pro",
     bulk_ready: locale === "ar" ? "جملة" : "Volume",
   };
+  const readinessTierLabels = {
+    starter: locale === "ar" ? "بداية واعدة" : "Bon départ",
+    building: locale === "ar" ? "قابل للتحسن" : "En progression",
+    good: locale === "ar" ? "جاهز جيداً" : "Bien préparé",
+    strong: locale === "ar" ? "جاهز بقوة" : "Très solide",
+  };
 
   return (
     <article className="rounded-[1.5rem] border border-[var(--line)] bg-white p-5">
@@ -381,9 +387,19 @@ function ProviderAdminCard({
           <div className="rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(243,248,255,0.96),rgba(255,255,255,0.98))] p-4 text-sm text-[var(--muted)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الجاهزية والنمو" : "Préparation et progression"}</div>
-              <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{readiness.score}%</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{readiness.score}%</span>
+                <span className="chip-button min-h-0 px-3 py-2 text-xs">{readinessTierLabels[readiness.scoreTier]}</span>
+              </div>
             </div>
             <div className="mt-2">{locale === "ar" ? "المرحلة الحالية:" : "Étape actuelle :"} {stageLabels[growthStage]}</div>
+            <div className="mt-3 overflow-hidden rounded-full bg-[rgba(15,95,255,0.08)]">
+              <div
+                className="h-2 rounded-full bg-[linear-gradient(90deg,#0f5fff,#4f8dff)]"
+                style={{ width: `${Math.max(readiness.score, 8)}%` }}
+                aria-hidden="true"
+              />
+            </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {readiness.checks.slice(0, 6).map((check) => (
                 <span
@@ -437,11 +453,11 @@ function ProviderAdminCard({
             <div className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4 text-sm text-[var(--muted)]">
               <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الحضور الرقمي" : "Présence digitale"}</div>
               <div className="mt-3 flex flex-wrap gap-2">
-                {provider.socialLinks.facebook ? <span className="chip-button min-h-0 px-3 py-2 text-xs">Facebook</span> : null}
-                {provider.socialLinks.instagram ? <span className="chip-button min-h-0 px-3 py-2 text-xs">Instagram</span> : null}
-                {provider.socialLinks.tiktok ? <span className="chip-button min-h-0 px-3 py-2 text-xs">TikTok</span> : null}
-                {provider.socialLinks.whatsappBusiness ? <span className="chip-button min-h-0 px-3 py-2 text-xs">WhatsApp Business</span> : null}
-                {provider.socialLinks.website ? <span className="chip-button min-h-0 px-3 py-2 text-xs">{locale === "ar" ? "موقع" : "Site web"}</span> : null}
+                {provider.socialLinks.facebook ? <a href={provider.socialLinks.facebook} target="_blank" rel="noreferrer" className="chip-button min-h-0 px-3 py-2 text-xs">Facebook</a> : null}
+                {provider.socialLinks.instagram ? <a href={provider.socialLinks.instagram} target="_blank" rel="noreferrer" className="chip-button min-h-0 px-3 py-2 text-xs">Instagram</a> : null}
+                {provider.socialLinks.tiktok ? <a href={provider.socialLinks.tiktok} target="_blank" rel="noreferrer" className="chip-button min-h-0 px-3 py-2 text-xs">TikTok</a> : null}
+                {provider.socialLinks.whatsappBusiness ? <a href={provider.socialLinks.whatsappBusiness} target="_blank" rel="noreferrer" className="chip-button min-h-0 px-3 py-2 text-xs">WhatsApp Business</a> : null}
+                {provider.socialLinks.website ? <a href={provider.socialLinks.website} target="_blank" rel="noreferrer" className="chip-button min-h-0 px-3 py-2 text-xs">{locale === "ar" ? "موقع" : "Site web"}</a> : null}
               </div>
             </div>
           ) : null}
@@ -463,16 +479,19 @@ function ProviderAdminCard({
           ) : null}
 
           {provider.gallery.length > 0 ? (
-            <div className="grid gap-3 sm:grid-cols-3">
-              {provider.gallery.slice(0, 3).map((imageUrl, index) => (
-                <div key={`${provider.id}-${imageUrl}-${index}`} className="overflow-hidden rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imageUrl} alt={provider.galleryCaptions?.[index] ?? provider.displayName} className="h-28 w-full object-cover" />
-                  <div className="border-t border-[var(--line)] bg-white px-3 py-2 text-xs text-[var(--muted)]">
-                    {provider.galleryCaptions?.[index] ?? (locale === "ar" ? `عينة ${index + 1}` : `Sample ${index + 1}`)}
+            <div className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
+              <div className="mb-3 font-semibold text-[var(--ink)]">{locale === "ar" ? "معرض الأعمال للمراجعة" : "Portfolio pour revue"}</div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {provider.gallery.slice(0, 3).map((imageUrl, index) => (
+                  <div key={`${provider.id}-${imageUrl}-${index}`} className="overflow-hidden rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] shadow-[0_14px_28px_rgba(12,40,104,0.08)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt={provider.galleryCaptions?.[index] ?? provider.displayName} className="h-32 w-full object-cover" />
+                    <div className="border-t border-[var(--line)] bg-white px-3 py-3 text-xs leading-6 text-[var(--muted)]">
+                      {provider.galleryCaptions?.[index] ?? (locale === "ar" ? `عينة ${index + 1}` : `Sample ${index + 1}`)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ) : null}
         </div>
