@@ -35,6 +35,17 @@ type HomePageContentProps = {
       businessesLaneTitle: string;
       businessesLaneDescription: string;
       businessesLaneCta: string;
+      clarityEyebrow: string;
+      clarityTitle: string;
+      clarityTagline: string;
+      whatTitle: string;
+      whatBody: string;
+      whoTitle: string;
+      whoItems: string[];
+      howTitle: string;
+      howSteps: string[];
+      whyTitle: string;
+      whyItems: string[];
       featuredTitle: string;
       featuredDescription: string;
       businessFeaturedTitle: string;
@@ -264,6 +275,59 @@ export function HomePageContent({
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+        <article className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] shadow-[0_24px_60px_rgba(12,40,104,0.16)] sm:p-7">
+          <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">{dictionary.home.clarityEyebrow}</div>
+          <h2 className={`mt-3 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.clarityTitle}</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink)]">{dictionary.home.clarityTagline}</p>
+
+          <div className="mt-6 rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,95,255,0.06)]">
+            <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.whatTitle}</div>
+            <p className="mt-2 text-base font-semibold leading-8 text-[var(--ink)]">{dictionary.home.whatBody}</p>
+          </div>
+
+          <div className="mt-5 rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-5 py-5 shadow-[0_10px_24px_rgba(15,95,255,0.06)]">
+            <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.whoTitle}</div>
+            <div className="mt-3 grid gap-3">
+              {dictionary.home.whoItems.map((item) => (
+                <div key={item} className="rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm leading-7 text-[var(--ink)]">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </article>
+
+        <article className="surface-card rounded-[2rem] p-6 sm:p-7">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div className="rounded-[1.6rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.9))] p-5 shadow-[0_14px_32px_rgba(15,95,255,0.08)]">
+              <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.howTitle}</div>
+              <div className="mt-4 grid gap-3">
+                {dictionary.home.howSteps.map((step, index) => (
+                  <div key={step} className="flex items-start gap-3 rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(15,95,255,0.06)]">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--navy)] text-sm font-extrabold text-white">
+                      {index + 1}
+                    </span>
+                    <p className="text-sm leading-7 text-[var(--ink)]">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[1.6rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.9))] p-5 shadow-[0_14px_32px_rgba(15,95,255,0.08)]">
+              <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.whyTitle}</div>
+              <div className="mt-4 grid gap-3">
+                {dictionary.home.whyItems.map((item) => (
+                  <div key={item} className="rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm leading-7 text-[var(--ink)] shadow-[0_10px_24px_rgba(15,95,255,0.06)]">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </article>
       </section>
 
       <section id="featured-providers" className="space-y-6">
