@@ -296,12 +296,10 @@ export const fr = {
     laneService: "Utile pour les prestataires de services à domicile",
     laneBusiness: "Utile pour les activités à domicile et micro-entreprises locales",
     tipTitle: "Conseil du jour",
-    tips: [
-      "Clarifiez le prix et le service avant de commencer pour éviter les malentendus.",
-      "Utilisez des photos claires et récentes pour inspirer confiance.",
-      "Confirmez l’horaire ou la livraison par écrit avant d’intervenir.",
-      "Gardez les échanges essentiels dans un canal facile à retrouver.",
-    ],
+    tipTodayBadge: "Change doucement",
+    tipFirstVisitBadge: "Commencez par celui-ci",
+    tipNext: "Un autre conseil",
+    tipCountLabel: "Conseils disponibles :",
     communityTitle: "Du terrain",
     communityItems: [
       {

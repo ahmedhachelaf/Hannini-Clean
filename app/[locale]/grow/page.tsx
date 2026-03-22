@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getDictionary, isLocale } from "@/lib/i18n";
 import { notFound } from "next/navigation";
+import { TipOfDayCard } from "@/components/grow/tip-of-the-day-card";
 
 type GrowPageProps = {
   params: Promise<{ locale: string }>;
@@ -14,8 +15,6 @@ export default async function GrowPage({ params }: GrowPageProps) {
   }
 
   const dictionary = getDictionary(locale);
-  const tipIndex = new Date().getUTCDate() % dictionary.grow.tips.length;
-  const activeTip = dictionary.grow.tips[tipIndex];
   const pathwaySteps = [
     locale === "ar" ? "انضممت" : "Rejoint",
     locale === "ar" ? "أكملت الملف" : "Profil complété",
@@ -173,18 +172,17 @@ export default async function GrowPage({ params }: GrowPageProps) {
           </div>
 
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-            <article className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.92))] p-6 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.grow.tipTitle}</h2>
-                <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
-                  {locale === "ar" ? "قصير ومفيد" : "Court et utile"}
-                </span>
-              </div>
-              <div className="mt-5 rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white px-5 py-5 shadow-[0_12px_28px_rgba(15,95,255,0.06)]">
-                <p className="text-base font-semibold leading-8 text-[var(--ink)]">{activeTip}</p>
-              </div>
-              <p className="mt-4 text-xs leading-6 text-[var(--muted)]">{dictionary.grow.liveSoon}</p>
-            </article>
+            <TipOfDayCard
+              locale={locale}
+              liveSoon={dictionary.grow.liveSoon}
+              labels={{
+                title: dictionary.grow.tipTitle,
+                todayBadge: dictionary.grow.tipTodayBadge,
+                firstVisitBadge: dictionary.grow.tipFirstVisitBadge,
+                rotateLabel: dictionary.grow.tipNext,
+                totalLabel: dictionary.grow.tipCountLabel,
+              }}
+            />
 
             <article className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.92))] p-6 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
               <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.grow.communityTitle}</h2>
