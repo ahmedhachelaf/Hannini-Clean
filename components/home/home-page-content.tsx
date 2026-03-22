@@ -473,7 +473,7 @@ export function HomePageContent({
               {locale === "ar" ? "مسارات الفرص" : "Types d'opportunités"}
             </div>
             <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
-              {locale === "ar" ? "هنيني يساعدك تكبر من أول طلب إلى فرص أكبر" : "Henini aide à grandir du premier client vers de meilleures opportunités"}
+              {locale === "ar" ? "هَنّيني يساعدك تنتقل من أول طلب إلى فرص أوضح وأكبر" : "Hannini aide à passer du premier client à des opportunités plus solides"}
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
               {locale === "ar"

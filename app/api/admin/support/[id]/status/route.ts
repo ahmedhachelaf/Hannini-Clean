@@ -42,7 +42,7 @@ export async function POST(request: Request, context: RouteContext) {
       if (payload.replyMessage.trim()) {
         appendDemoSupportMessage(id, {
           authorRole: "admin",
-          authorName: "Henini Admin",
+          authorName: "Hannini Admin",
           message: payload.replyMessage.trim(),
           attachmentNames,
         });
@@ -70,7 +70,7 @@ export async function POST(request: Request, context: RouteContext) {
       const replyPayload = supportReplySchema.parse({
         caseId: id,
         authorRole: "admin",
-        authorName: "Henini Admin",
+        authorName: "Hannini Admin",
         message: payload.replyMessage.trim(),
         attachmentNames,
       });

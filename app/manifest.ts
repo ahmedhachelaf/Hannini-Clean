@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Henini",
-    short_name: "Henini",
+    name: "Hannini",
+    short_name: "Hannini",
     description: "Trusted home-services marketplace for Algeria with Arabic-first booking and WhatsApp confirmation.",
     lang: "ar",
     start_url: "/ar",

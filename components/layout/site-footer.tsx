@@ -25,7 +25,7 @@ export function SiteFooter({ locale, nav }: SiteFooterProps) {
           <p className="text-[0.98rem] leading-8 text-[var(--muted)]">
             {locale === "ar"
               ? "هَنّيني منصة خدمات منزلية عملية بواجهة عربية أولاً، وملفات موثوقة، وحجز بالتاريخ والوقت، وتأكيد عبر واتساب."
-              : "Henini est un MVP de marketplace de services à domicile avec interface claire, profils fiables, réservation datée et confirmation via WhatsApp."}
+              : "Hannini est un MVP de marketplace de services à domicile avec interface claire, profils fiables, réservation datée et confirmation via WhatsApp."}
           </p>
           <p className="text-[0.95rem] font-semibold text-[var(--muted)]">© Ahmed Hachelaf</p>
         </div>

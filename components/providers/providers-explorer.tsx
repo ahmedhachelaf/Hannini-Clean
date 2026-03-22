@@ -163,23 +163,23 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
       ) : (
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
           <div className="map-panel sticky top-28 overflow-hidden rounded-[2rem] shadow-[0_30px_70px_rgba(12,40,104,0.14)]">
-            <div className="relative min-h-[440px] overflow-hidden bg-[linear-gradient(180deg,rgba(13,28,69,0.98),rgba(20,92,255,0.9)_75%,rgba(147,197,253,0.78))] p-4 text-white sm:min-h-[520px] sm:p-6">
+            <div className="relative min-h-[440px] overflow-hidden bg-[linear-gradient(180deg,rgba(13,28,69,0.92),rgba(20,92,255,0.82)_74%,rgba(147,197,253,0.56))] p-4 text-white sm:min-h-[520px] sm:p-6">
               <iframe
                 title={locale === "ar" ? "خريطة النتائج" : "Carte des résultats"}
                 src={mapFrameSrc}
-                className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-100"
+                className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-100 saturate-[0.9]"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,23,56,0.08),rgba(9,23,56,0.28)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,23,56,0.03),rgba(9,23,56,0.14)_100%)]" />
 
-              <div className="absolute inset-x-4 top-4 z-10 rounded-[1.5rem] border border-white/14 bg-[rgba(8,18,37,0.24)] p-4 backdrop-blur sm:inset-x-6 sm:top-6">
+              <div className="absolute inset-x-4 top-4 z-10 rounded-[1.5rem] border border-white/20 bg-[rgba(8,18,37,0.18)] p-4 backdrop-blur sm:inset-x-6 sm:top-6">
                 <div className="text-sm font-semibold text-white/76">{locale === "ar" ? "خريطة المزودين" : "Carte des prestataires"}</div>
                 <div className="mt-1 text-lg font-extrabold">{locale === "ar" ? "نتائج حسب الولاية والفئة" : "Resultats par wilaya et categorie"}</div>
                 <div className="mt-2 text-xs text-white/72">
                   {locale === "ar" ? "الولاية الحالية:" : "Wilaya active :"} {activeProvinceName}
                 </div>
-                <div className="mt-2 text-xs leading-6 text-white/74">
+                <div className="mt-2 text-xs leading-6 text-white/82">
                   {locale === "ar"
                     ? "المؤشرات مبنية على مراكز المناطق التقريبية للمساعدة على فهم الانتشار، وليس على عناوين منزلية دقيقة."
                     : "Les repères s'appuient sur des centres de zones approximatifs pour montrer la couverture, pas des adresses personnelles précises."}
@@ -197,7 +197,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
               </div>
 
               <div className="absolute inset-0 z-10 mt-28 sm:mt-24">
-                <div className="absolute inset-[10%] rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]">
+                <div className="absolute inset-[10%] rounded-[2rem] border border-white/14 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))]">
                   {providers.map((provider, index) => {
                     const position = getMarkerPosition(provider, index);
                     const selected = provider.id === selectedId;
@@ -244,7 +244,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                 </div>
               </div>
 
-              <div className="absolute inset-x-4 bottom-4 z-10 rounded-[1.35rem] border border-white/14 bg-[rgba(8,18,37,0.34)] p-4 backdrop-blur sm:inset-x-6 sm:bottom-6">
+              <div className="absolute inset-x-4 bottom-4 z-10 rounded-[1.35rem] border border-white/16 bg-[rgba(8,18,37,0.26)] p-4 backdrop-blur sm:inset-x-6 sm:bottom-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-white/84">
                     {locale === "ar" ? "اضغط على البطاقة أو المؤشر لمزامنة الخريطة" : "Cliquez sur une carte ou un repere pour synchroniser la selection"}

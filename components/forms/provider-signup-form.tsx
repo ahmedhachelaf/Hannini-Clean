@@ -174,7 +174,7 @@ function getCopy(locale: Locale): FormCopy {
     extraFee: "Frais de déplacement ou livraison",
     maps: "Lien Google Maps",
     socialTitle: "Présence digitale",
-    socialHint: "Optionnel : permet d'afficher vos canaux numériques de façon propre sur votre profil Henini.",
+    socialHint: "Optionnel : permet d'afficher vos canaux numériques de façon propre sur votre profil Hannini.",
     facebook: "Lien Facebook",
     instagram: "Lien Instagram",
     tiktok: "Lien TikTok",
@@ -198,7 +198,7 @@ function getCopy(locale: Locale): FormCopy {
     ageTitle: "Confirmation d'âge",
     ageConfirmation: "Je confirme avoir 16 ans ou plus",
     conductTitle: "Code de conduite et sécurité",
-    conductAgreement: "J'accepte le code de conduite et les règles de sécurité de Henini",
+    conductAgreement: "J'accepte le code de conduite et les règles de sécurité de Hannini",
     conductLink: "Lire le code de conduite et les règles de sécurité",
     conductHint: "Le harcèlement, l'exploitation, la fraude, la fausse représentation, les activités illégales et tout tort envers les enfants ou mineurs sont interdits.",
     pendingHint: "Après envoi, la candidature apparaît dans l'admin avec le statut pending pour revue manuelle. Aucun email automatique n'est envoyé pour le moment.",
@@ -474,7 +474,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
               <p className="text-xs leading-6 text-[var(--muted)]">
                 {locale === "ar"
                   ? "هذه المعلومات اختيارية لكنها تساعد هنيني على إظهار أنك جاهز لطلبات المناسبات، الشركات، أو المشترين الذين يحتاجون كميات أكبر."
-                  : "Ces informations restent optionnelles, mais elles aident Henini à montrer que votre activité peut répondre à des commandes d'événements, d'entreprises ou d'acheteurs en volume."}
+                  : "Ces informations restent optionnelles, mais elles aident Hannini à montrer que votre activité peut répondre à des commandes d'événements, d'entreprises ou d'acheteurs en volume."}
               </p>
             </div>
             <label className="mt-4 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">

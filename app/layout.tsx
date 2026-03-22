@@ -11,15 +11,15 @@ function normalizeBaseUrl(value: string) {
 }
 
 export const metadata: Metadata = {
-  title: "Henini | هَنّيني",
-  description: "Henini is a clean bilingual marketplace MVP for booking trusted home-service providers in Algeria.",
-  applicationName: "Henini",
+  title: "Hannini | هَنّيني",
+  description: "Hannini is a clean bilingual marketplace MVP for booking trusted home-service providers in Algeria.",
+  applicationName: "Hannini",
   metadataBase: appUrl ? new URL(normalizeBaseUrl(appUrl)) : undefined,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Henini",
+    title: "Hannini",
   },
   icons: {
     icon: [

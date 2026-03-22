@@ -33,10 +33,14 @@ export default async function SupportPage({ params, searchParams }: SupportPageP
       <div className="space-y-6">
         <section className="surface-card rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] shadow-[0_24px_60px_rgba(12,40,104,0.18)]">
           <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
-            {locale === "ar" ? "دعم سريع" : "Support rapide"}
+            {locale === "ar" ? "الدعم داخل مركز الأمان" : "Support dans le centre sécurité"}
           </div>
           <h1 className={`mt-3 text-3xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.support.title}</h1>
-          <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.support.description}</p>
+          <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--ink)]">
+            {locale === "ar"
+              ? "هذا النموذج جزء من مركز الأمان في هَنّيني: استخدمه لطلب مساعدة، الإبلاغ عن سلوك غير مريح، أو فتح متابعة واضحة مرتبطة بالحجز أو بالمزوّد أو بالمنصة."
+              : "Ce formulaire fait partie du centre sécurité de Hannini : utilisez-le pour demander de l'aide, signaler un comportement gênant ou ouvrir un suivi clair lié à une réservation, un prestataire ou la plateforme."}
+          </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {quickCategories.map((category) => (
               <a
@@ -80,7 +84,7 @@ export default async function SupportPage({ params, searchParams }: SupportPageP
           href={`/${locale}/safety`}
           className="button-secondary mt-6"
         >
-          {dictionary.safety.cta}
+          {locale === "ar" ? "العودة إلى مركز الأمان" : "Retour au centre sécurité"}
         </a>
       </aside>
     </div>

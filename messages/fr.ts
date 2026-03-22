@@ -8,15 +8,15 @@ export const fr = {
     business: "Pour les entreprises",
     grow: "Apprendre & développer",
     safety: "Centre sécurité",
-    join: "Rejoindre Henini",
+    join: "Rejoindre Hannini",
     support: "Support",
     admin: "Admin",
   },
   conduct: {
     eyebrow: "Code de conduite et sécurité",
-    title: "Des règles claires pour protéger la confiance et la sécurité sur Henini",
+    title: "Des règles claires pour protéger la confiance et la sécurité sur Hannini",
     description:
-      "Ces règles protègent les clients, les prestataires et les activités à domicile, surtout les profils plus sensibles. Henini doit rester un espace fiable, clair et sans abus ni exploitation.",
+      "Ces règles protègent les clients, les prestataires et les activités à domicile, surtout les profils plus sensibles. Hannini doit rester un espace fiable, clair et sans abus ni exploitation.",
     linkLabel: "Code de conduite",
     reportingTitle: "Quand faut-il signaler immédiatement ?",
     reportingDescription:
@@ -45,7 +45,7 @@ export const fr = {
       {
         title: "Mineurs et âge minimum",
         bullets: [
-          "Un prestataire ou une activité doit avoir au moins 16 ans pour créer un profil sur Henini.",
+          "Un prestataire ou une activité doit avoir au moins 16 ans pour créer un profil sur Hannini.",
           "Toute exploitation d'enfant ou de mineur, ou toute participation à un travail dangereux, est interdite.",
           "Tout indice d'exploitation ou de mise en danger d'un mineur est traité comme un signalement grave.",
           "En cas de doute concernant un enfant ou un mineur, il faut signaler immédiatement via le support.",
@@ -94,7 +94,7 @@ export const fr = {
     badge: "Marketplace de services a domicile en Algerie",
     title: "Trouvez un artisan fiable dans votre wilaya en quelques etapes simples.",
     description:
-      "Henini aide les foyers a comparer les artisans dans les wilayas de lancement comme Oran, Djelfa et Sidi Bel Abbes, avec zones visibles, prix prestataire et confirmation WhatsApp.",
+      "Hannini aide les foyers a repérer plus vite des artisans fiables dans les wilayas de lancement comme Oran, Djelfa et Sidi Bel Abbes, avec zones visibles, repères de prix et confirmation WhatsApp.",
     searchPlaceholder: "Rechercher un service ou un prestataire",
     provinceLabel: "Wilaya",
     zoneLabel: "Ville ou zone",
@@ -112,28 +112,28 @@ export const fr = {
     businessFeaturedTitle: "Activités à domicile recommandées",
     businessFeaturedDescription:
       "Un espace dédié aux initiatives locales, aux microbusinesses de quartier et aux revenus à domicile encadrés avec soin.",
-    growTitle: "Apprendre & développer",
+    growTitle: "Développer & grandir",
     growDescription:
-      "Un espace léger pour aider artisans et activités à domicile à améliorer leur profil, leur tarification, la confiance client et leur communication.",
+      "Un espace léger pour aider artisans et activités à domicile à mieux se présenter, rassurer leurs clients et progresser sans perdre le côté concret de l'application.",
     growCta: "Ouvrir la section Apprendre & développer",
     growSoon: "Hannini Academy arrive bientôt — restez à l'écoute",
     safetyTitle: "Sécurité et confiance d'abord",
     safetyDescription:
       "Des repères simples pour signaler un comportement risqué, protéger la vie privée et mieux encadrer les échanges, surtout pour les activités à domicile.",
     safetyCta: "Ouvrir le centre sécurité",
-    spotlightTitle: "Parcours inspirants sur Henini",
+    spotlightTitle: "Parcours inspirants sur Hannini",
     spotlightDescription:
       "Des profils qui grandissent avec sérieux, confiance client et ancrage local, sans perdre le côté humain du voisinage.",
     joinTitle: "Vous êtes artisan ou atelier local ?",
     joinDescription:
-      "Créez votre profil comme prestataire de service ou activité à domicile. L'équipe Henini vérifie chaque demande avant publication.",
+      "Créez votre profil comme prestataire de service ou activité à domicile. L'équipe Hannini vérifie chaque demande avant publication.",
     joinCta: "Déposer une candidature",
     statsProviders: "prestataires démo",
     statsZones: "zones couvertes",
     statsCategories: "catégories clés",
   },
   listing: {
-    title: "Prestataires disponibles sur Henini",
+    title: "Prestataires disponibles sur Hannini",
     description: "Filtrez par metier, wilaya, zone ou nom et utilisez la carte pour trouver le bon professionnel.",
     searchLabel: "Nom ou service",
     categoryLabel: "Catégorie",
@@ -149,7 +149,7 @@ export const fr = {
     emptyDescription: "Essayez une autre catégorie, une autre zone ou un mot-clé plus large.",
   },
   businesses: {
-    title: "Activités à domicile de confiance sur Henini",
+    title: "Activités à domicile de confiance sur Hannini",
     description: "Découvrez cuisine maison, couture, pâtisseries et créations locales dans une expérience simple et modérée.",
     emptyTitle: "Aucune activité à domicile ne correspond à votre recherche",
     emptyDescription: "Essayez une autre wilaya, une autre catégorie ou un mot-clé plus large.",
@@ -163,7 +163,7 @@ export const fr = {
     browseProviders: "Voir les prestataires",
     browseBusinesses: "Voir les activités à domicile",
     valuePoints: [
-      "Demandes ponctuelles ou récurrentes avec suivi clair par l'équipe Henini.",
+      "Demandes ponctuelles ou récurrentes avec suivi clair par l'équipe Hannini.",
       "Mise en relation manuelle avec des profils approuvés et cohérents avec votre besoin.",
       "Pensé pour bureaux, associations, écoles, événements et besoins locaux plus structurés.",
     ],
@@ -179,10 +179,10 @@ export const fr = {
       },
       {
         title: "Accès à des profils plus adaptés",
-        description: "Henini aide à filtrer et à proposer des prestataires ou activités à domicile plus crédibles localement.",
+        description: "Hannini aide à filtrer et à proposer des prestataires ou activités à domicile plus crédibles localement.",
       },
     ],
-    trustTitle: "Pourquoi ce parcours dans Henini ?",
+    trustTitle: "Pourquoi ce parcours dans Hannini ?",
     trustItems: [
       "Le canal entreprise respecte la logique de confiance déjà présente dans l'application.",
       "L'admin relit la demande puis propose manuellement des profils approuvés quand c'est pertinent.",
@@ -190,7 +190,7 @@ export const fr = {
     ],
     form: {
       title: "Envoyer une demande entreprise",
-      description: "Décrivez votre besoin et l'équipe Henini pourra relire la demande puis suggérer des profils adaptés.",
+      description: "Décrivez votre besoin et l'équipe Hannini pourra relire la demande puis suggérer des profils adaptés.",
       companyName: "Nom de l'entreprise ou de l'organisation",
       contactName: "Nom du contact",
       phone: "Téléphone ou WhatsApp",
@@ -208,7 +208,7 @@ export const fr = {
       homeBusiness: "Activité à domicile",
       either: "Peu importe",
       attachment: "Pièce jointe (optionnel)",
-      consent: "J'accepte que l'équipe Henini relise cette demande et fasse une mise en relation manuelle avec des profils adaptés.",
+      consent: "J'accepte que l'équipe Hannini relise cette demande et fasse une mise en relation manuelle avec des profils adaptés.",
       helper: "Dans ce MVP, la mise en relation reste manuelle et limitée à des profils approuvés sur la plateforme.",
       successTitle: "Demande entreprise reçue",
       successDescription: "Elle apparaît maintenant dans l'admin pour revue et mise en relation manuelle.",
@@ -268,17 +268,17 @@ export const fr = {
     supportLink: "Besoin d'aide sur cette réservation ? Ouvrir une demande de support",
   },
   join: {
-    title: "Rejoindre Henini",
+    title: "Rejoindre Hannini",
     description:
-      "Vous pouvez rejoindre Henini comme prestataire de service ou activité à domicile. Le formulaire est volontairement simple pour ce MVP, puis l'équipe effectue une revue avant publication. Aucun email automatique n'est encore envoyé.",
+      "Vous pouvez rejoindre Hannini comme prestataire de service ou activité à domicile. Le formulaire reste volontairement simple pour ce MVP, puis l'équipe effectue une revue avant publication. Aucun email automatique n'est encore envoyé.",
     successTitle: "Votre demande a bien ete recue",
     successDescription: "Votre candidature a ete enregistree et reste maintenant en attente de revue.",
   },
   grow: {
-    title: "Apprendre & développer",
+    title: "Développer & grandir",
     subtitle: "Démarrer et améliorer votre activité",
     description:
-      "Une couche légère dans Henini pour aider prestataires et activités à domicile à mieux se présenter, inspirer confiance et mieux gérer leurs demandes, sans transformer l'application en LMS complet.",
+      "Une couche légère dans Hannini pour aider prestataires et activités à domicile à mieux se présenter, inspirer confiance et mieux gérer leurs demandes, sans transformer l'application en espace de formation lourd.",
     academySoon: "Hannini Academy arrive bientôt — un contenu plus riche viendra plus tard.",
     laneService: "Utile pour les prestataires de services à domicile",
     laneBusiness: "Utile pour les activités à domicile et micro-entreprises locales",
@@ -371,7 +371,7 @@ export const fr = {
       },
       {
         title: "Construire la confiance et les avis",
-        description: "La confiance sur Henini vient de la clarté, de la régularité et de bons retours clients.",
+      description: "La confiance sur Hannini vient de la clarté, de la régularité et de bons retours clients.",
         bullets: [
           "Respectez l'horaire annoncé.",
           "Gardez une description honnête de votre offre.",
@@ -419,7 +419,7 @@ export const fr = {
     },
   },
   admin: {
-    title: "Administration Henini",
+    title: "Administration Hannini",
     description: "Suivez les prestataires, les réservations, les avis et les référentiels.",
     loginTitle: "Connexion admin",
     loginDescription: "Entrez le mot de passe administrateur pour ouvrir le tableau de bord.",
@@ -513,7 +513,7 @@ export const fr = {
     title: "Centre sécurité",
     subtitle: "Confiance, confidentialité et réactions plus sûres",
     description:
-      "Une couche simple dans Henini pour éviter les arnaques, mieux cadrer les échanges et réagir vite si un comportement devient déplacé ou risqué.",
+      "Une couche simple dans Hannini pour éviter les arnaques, mieux cadrer les échanges et réagir vite si un comportement devient déplacé ou risqué.",
     cta: "Signaler ou demander de l'aide",
     quickActions: [
       "Si un contact devient intrusif ou inadapté, ouvrez un ticket et demandez un blocage de contact.",

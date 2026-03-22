@@ -72,7 +72,7 @@ export function PwaInstallButton({ locale }: PwaInstallButtonProps) {
           <p className="mt-1 text-xs leading-6 text-white/82">
             {locale === "ar"
               ? "ثبّت هَنّيني للوصول السريع من هاتفك أو جهازك."
-              : "Ajoutez Henini pour un acces rapide depuis votre appareil."}
+              : "Ajoutez Hannini pour un acces rapide depuis votre appareil."}
           </p>
         </div>
         <button

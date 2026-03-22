@@ -74,7 +74,7 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   const whatsappMessage = encodeURIComponent(
     locale === "ar"
       ? `السلام عليكم، أريد تأكيد حجز مع ${provider.displayName} عبر هَنّيني.`
-      : `Bonjour, je souhaite confirmer une réservation avec ${provider.displayName} via Henini.`,
+      : `Bonjour, je souhaite confirmer une réservation avec ${provider.displayName} via Hannini.`,
   );
   const priceLabel = provider.profileType === "home_business" ? dictionary.common.startingPrice : dictionary.common.hourlyRate;
   const secondaryFeeLabel = provider.profileType === "home_business" ? dictionary.common.deliveryFee : dictionary.common.travelFee;

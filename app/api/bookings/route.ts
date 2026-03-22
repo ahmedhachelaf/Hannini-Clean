@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       .join("\n");
 
     const whatsappMessage = encodeURIComponent(
-      `Bonjour / السلام عليكم. Booking via Henini:\n` +
+      `Bonjour / السلام عليكم. Booking via Hannini:\n` +
         `Client: ${payload.customerName}\n` +
         `Phone: ${payload.phoneNumber}\n` +
         `Date: ${payload.date} ${payload.time}\n` +

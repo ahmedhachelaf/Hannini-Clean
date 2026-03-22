@@ -63,6 +63,40 @@ export default async function SafetyPage({ params }: SafetyPageProps) {
           </article>
         ))}
       </section>
+
+      <section className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(231,240,255,0.9))] p-6 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">
+              {locale === "ar" ? "الدعم داخل مركز الأمان" : "Support dans le centre sécurité"}
+            </div>
+            <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+              {locale === "ar" ? "إذا احتجت مساعدة أو متابعة واضحة" : "Si vous avez besoin d'aide ou d'un suivi clair"}
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-8 text-[var(--ink)]">
+              {locale === "ar"
+                ? "يمكنك فتح طلب دعم من هنا عند وجود تحرش، سلوك غير آمن، احتيال، أو حاجة إلى تدخل الإدارة. سيظهر الطلب داخل لوحة الإدارة بحالة متابعة واضحة."
+                : "Vous pouvez ouvrir une demande de support depuis ici en cas de harcèlement, comportement dangereux, fraude ou besoin d'un relais admin. La demande apparaît ensuite dans l'admin avec un suivi clair."}
+            </p>
+          </div>
+          <Link href={`/${locale}/support`} className="button-secondary">
+            {locale === "ar" ? "افتح الدعم" : "Ouvrir le support"}
+          </Link>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            locale === "ar" ? "الإبلاغ عن التحرش أو الإساءة" : "Signaler un harcèlement ou une intimidation",
+            locale === "ar" ? "الإبلاغ عن احتيال أو نصب" : "Signaler une fraude ou une arnaque",
+            locale === "ar" ? "طلب حظر التواصل أو متابعة أكثر خصوصية" : "Demander un blocage de contact ou un traitement plus discret",
+            locale === "ar" ? "فتح طلب دعم عام مرتبط بالحجز أو بالمزوّد" : "Ouvrir un support lié à une réservation ou à un prestataire",
+          ].map((item) => (
+            <div key={item} className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm leading-7 text-[var(--ink)]">
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

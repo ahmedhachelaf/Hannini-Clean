@@ -1,4 +1,4 @@
-const CACHE_NAME = "henini-shell-v1";
+const CACHE_NAME = "hannini-shell-v1";
 const OFFLINE_ASSETS = ["/", "/ar", "/fr", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

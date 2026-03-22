@@ -124,25 +124,31 @@ export default async function GrowPage({ params }: GrowPageProps) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
-                  {locale === "ar" ? "مسار النمو داخل هَنّيني" : "Parcours de progression sur Henini"}
+                  {locale === "ar" ? "رحلة التقدّم داخل هَنّيني" : "Parcours de progression sur Hannini"}
                 </h2>
                 <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
                   {locale === "ar"
-                    ? "الفكرة ليست مجرد الظهور في السوق. هَنّيني يساعدك تنتقل من ملف جديد إلى نشاط موثوق، جاهز لتكرار الطلبات وفرص أكبر."
-                    : "L'objectif n'est pas seulement d'être visible. Henini aide à passer d'un nouveau profil à une activité fiable, prête pour des demandes répétées et des opportunités plus ambitieuses."}
+                    ? "الفكرة ليست مجرد الظهور. هَنّيني يساعدك تتحرك خطوة بخطوة من ملف جديد إلى نشاط يبعث على الثقة ويستقبل فرصاً أوضح وأكبر."
+                    : "L'objectif n'est pas seulement d'être visible. Hannini vous aide à avancer, étape après étape, d'un nouveau profil vers une activité plus fiable et mieux préparée."}
                 </p>
               </div>
               <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
-                {locale === "ar" ? "خفيف وعملي" : "Léger et utile"}
+                {locale === "ar" ? "رحلة خفيفة وعملية" : "Parcours léger et utile"}
               </span>
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               {pathwaySteps.map((step, index) => (
                 <div key={step} className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm leading-7 text-[var(--muted)] shadow-[0_10px_24px_rgba(15,95,255,0.06)]">
-                  <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--navy)] text-sm font-extrabold text-white">
-                    {index + 1}
+                  <div className="mb-3 flex items-center gap-3">
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--navy)] text-sm font-extrabold text-white">
+                      {index + 1}
+                    </div>
+                    <div className="h-px flex-1 bg-[linear-gradient(90deg,rgba(20,92,255,0.28),rgba(20,92,255,0.03))]" aria-hidden="true" />
                   </div>
-                  <div className="font-semibold text-[var(--ink)]">{step}</div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">
+                    {locale === "ar" ? `مرحلة ${index + 1}` : `Étape ${index + 1}`}
+                  </div>
+                  <div className="mt-2 font-semibold text-[var(--ink)]">{step}</div>
                 </div>
               ))}
             </div>

@@ -47,7 +47,7 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
           >
             <Image
               src="/brand/henini-mark.svg"
-              alt="هَنّيني | Henini"
+              alt="هَنّيني | Hannini"
               width={48}
               height={48}
               className="h-12 w-12 rounded-2xl ring-1 ring-[rgba(15,95,255,0.12)]"
