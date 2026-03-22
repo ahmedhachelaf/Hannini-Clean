@@ -77,12 +77,15 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
           </Suspense>
         </div>
 
-        <nav aria-label={locale === "ar" ? "التنقل الرئيسي على الهاتف" : "Navigation principale mobile"} className="mt-4 flex gap-2 overflow-x-auto pb-1 md:hidden">
+        <nav
+          aria-label={locale === "ar" ? "التنقل الرئيسي على الهاتف" : "Navigation principale mobile"}
+          className="mt-4 flex flex-wrap gap-2 pb-1 md:hidden"
+        >
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="chip-button min-h-11 shrink-0 px-4 text-sm font-semibold"
+              className="chip-button min-h-11 max-w-full px-4 text-sm font-semibold"
             >
               {item.label}
             </Link>

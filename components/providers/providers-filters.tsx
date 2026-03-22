@@ -60,7 +60,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       aria-label={locale === "ar" ? "تصفية والبحث عن المزودين" : "Filtrer et rechercher des prestataires"}
       className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(8,23,69,0.98),rgba(14,67,191,0.94)_62%,rgba(48,114,255,0.88))] p-5 text-white shadow-[0_28px_60px_rgba(8,34,99,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
     >
-      <label className="min-w-[240px] flex-1">
+      <label className="min-w-0 flex-1">
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.searchLabel}</span>
         <input
           type="search"
@@ -122,11 +122,11 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         </select>
       </label>
 
-      <div className="flex gap-3">
-        <button type="submit" className="button-primary">
+      <div className="flex flex-wrap gap-3 sm:flex-nowrap">
+        <button type="submit" className="button-primary w-full sm:w-auto">
           {locale === "ar" ? "تطبيق" : "Appliquer"}
         </button>
-        <a href={actionPath} className="button-secondary">
+        <a href={actionPath} className="button-secondary w-full sm:w-auto">
           {labels.reset}
         </a>
       </div>

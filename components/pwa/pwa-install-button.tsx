@@ -63,8 +63,26 @@ export function PwaInstallButton({ locale }: PwaInstallButtonProps) {
   }
 
   return (
-    <button type="button" onClick={handleInstall} className="button-secondary text-sm">
-      {locale === "ar" ? "ثبّت هَنّيني على جهازك" : "Installer Henini"}
-    </button>
+    <div className="surface-card w-full max-w-[22rem] rounded-[1.5rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(10,31,87,0.96),rgba(18,78,211,0.94)_62%,rgba(63,140,255,0.9))] p-3 text-white shadow-[0_22px_48px_rgba(8,34,99,0.3)]">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-extrabold tracking-[0.01em]">
+            {locale === "ar" ? "تنزيل التطبيق" : "Installer l’application"}
+          </div>
+          <p className="mt-1 text-xs leading-6 text-white/82">
+            {locale === "ar"
+              ? "ثبّت هَنّيني للوصول السريع من هاتفك أو جهازك."
+              : "Ajoutez Henini pour un acces rapide depuis votre appareil."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleInstall}
+          className="button-secondary min-h-12 shrink-0 border-white/10 bg-white px-4 text-sm font-bold text-[var(--navy)] shadow-[0_18px_36px_rgba(8,18,37,0.22)]"
+        >
+          {locale === "ar" ? "تثبيت" : "Installer"}
+        </button>
+      </div>
+    </div>
   );
 }

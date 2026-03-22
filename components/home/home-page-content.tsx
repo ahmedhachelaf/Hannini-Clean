@@ -195,12 +195,12 @@ export function HomePageContent({
 
             <div className="mt-7">
               <div className="mb-3 text-sm font-semibold text-white/82">{dictionary.home.categoryLabel}</div>
-              <div className="flex gap-3 overflow-x-auto pb-2" aria-label={dictionary.home.categoryLabel}>
+              <div className="flex flex-wrap gap-3 pb-2" aria-label={dictionary.home.categoryLabel}>
                 {serviceCategories.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/${locale}/providers?category=${category.slug}`}
-                    className="chip-button border-white/10 bg-[rgba(8,23,69,0.34)] text-white shadow-[0_10px_24px_rgba(8,18,37,0.18)] text-sm"
+                    className="chip-button max-w-full border-white/10 bg-[rgba(8,23,69,0.34)] text-sm text-white shadow-[0_10px_24px_rgba(8,18,37,0.18)]"
                   >
                     <span>{category.icon}</span>
                     <span>{getLocalizedValue(category.name, locale)}</span>
