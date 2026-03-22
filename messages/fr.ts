@@ -11,6 +11,56 @@ export const fr = {
     support: "Support",
     admin: "Admin",
   },
+  conduct: {
+    eyebrow: "Code de conduite et sécurité",
+    title: "Des règles claires pour protéger la confiance et la sécurité sur Henini",
+    description:
+      "Ces règles protègent les clients, les prestataires et les activités à domicile, surtout les profils plus sensibles. Henini doit rester un espace fiable, clair et sans abus ni exploitation.",
+    linkLabel: "Code de conduite",
+    reportingTitle: "Quand faut-il signaler immédiatement ?",
+    reportingDescription:
+      "En cas de harcèlement, contact inapproprié, fraude, exploitation, activité illégale ou risque pour un enfant ou un mineur, ouvrez tout de suite une demande de support ou de sécurité.",
+    reportUnsafe: "Signaler un comportement dangereux",
+    joinCta: "Retourner à la candidature",
+    sections: [
+      {
+        title: "Comportements interdits",
+        bullets: [
+          "Le harcèlement, les menaces, l'intimidation et tout abus verbal ou comportemental sont interdits.",
+          "La fraude, l'arnaque, la tromperie volontaire et les fausses informations sur une offre sont interdites.",
+          "La discrimination ou l'humiliation fondée sur le genre, l'âge, le handicap ou l'origine sociale sont interdites.",
+          "La plateforme ne peut pas être utilisée pour une activité illégale ou dangereuse.",
+        ],
+      },
+      {
+        title: "Protection de la vie privée et des activités à domicile",
+        bullets: [
+          "Une adresse complète de domicile ne doit pas être exposée publiquement pour une activité sensible ou à domicile.",
+          "Les limites de contact doivent être respectées, sans insistance déplacée par téléphone ou WhatsApp.",
+          "Les détails précis ne doivent être partagés qu'en cas de besoin réel et avec un minimum de confiance.",
+          "Les signalements liés à la sécurité ou à la vie privée sont traités avec une sensibilité renforcée.",
+        ],
+      },
+      {
+        title: "Mineurs et âge minimum",
+        bullets: [
+          "Un prestataire ou une activité doit avoir au moins 16 ans pour créer un profil sur Henini.",
+          "Toute exploitation d'enfant ou de mineur, ou toute participation à un travail dangereux, est interdite.",
+          "Tout indice d'exploitation ou de mise en danger d'un mineur est traité comme un signalement grave.",
+          "En cas de doute concernant un enfant ou un mineur, il faut signaler immédiatement via le support.",
+        ],
+      },
+      {
+        title: "Présentation honnête et confiance",
+        bullets: [
+          "Les photos et exemples publiés doivent refléter le vrai niveau de service ou de production.",
+          "N'affichez pas une expérience, une vérification ou une capacité que vous n'avez pas réellement.",
+          "Gardez des canaux de communication clairs et professionnels, en particulier sur WhatsApp.",
+          "Une violation peut conduire à un rejet, un masquage, un retrait de badge ou une restriction de visibilité.",
+        ],
+      },
+    ],
+  },
   common: {
     viewAll: "Voir tout",
     bookNow: "Réserver",

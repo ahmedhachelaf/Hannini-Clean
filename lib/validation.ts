@@ -99,12 +99,30 @@ export const providerSignupSchema = z.object({
   productionCapacity: z.string().optional().or(z.literal("")).default(""),
   leadTime: z.string().optional().or(z.literal("")).default(""),
   deliveryArea: z.string().optional().or(z.literal("")).default(""),
+  ageConfirmed: z.boolean().default(false),
+  conductAccepted: z.boolean().default(false),
 }).superRefine((value, ctx) => {
   if (!value.phoneNumber && !value.whatsappNumber) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["phoneNumber"],
       message: "phone_or_whatsapp_required",
+    });
+  }
+
+  if (!value.ageConfirmed) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["ageConfirmed"],
+      message: "age_confirmation_required",
+    });
+  }
+
+  if (!value.conductAccepted) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["conductAccepted"],
+      message: "conduct_acceptance_required",
     });
   }
 });

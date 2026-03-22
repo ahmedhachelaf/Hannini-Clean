@@ -432,6 +432,12 @@ function ProviderAdminCard({
               {locale === "ar" ? "وثيقة التحقق:" : "Document :"} {provider.verification.documentName ?? (locale === "ar" ? "غير مرفق" : "Non fourni")}
             </div>
             <div className="mt-1">
+              {locale === "ar" ? "تأكيد 16+:" : "Confirmation 16+ :"} {provider.verification.ageConfirmed ? (locale === "ar" ? "مؤكد" : "Confirmé") : (locale === "ar" ? "غير مؤكد" : "Non confirmé")}
+            </div>
+            <div className="mt-1">
+              {locale === "ar" ? "الموافقة على القواعد:" : "Accord conduite :"} {provider.verification.conductAccepted ? (locale === "ar" ? "مؤكد" : "Confirmé") : (locale === "ar" ? "غير مؤكد" : "Non confirmé")}
+            </div>
+            <div className="mt-1">
               {locale === "ar" ? "ملاحظات الإدارة:" : "Notes admin :"} {provider.verification.notes ?? (locale === "ar" ? "لا توجد" : "Aucune")}
             </div>
             <div className="mt-1">

@@ -209,6 +209,15 @@ function deriveProviderStatus(
   return approvalStatus;
 }
 
+function parseVerificationNotes(notes: string | null | undefined) {
+  const value = notes ?? "";
+
+  return {
+    ageConfirmed: value.includes("[age_confirmed]"),
+    conductAccepted: value.includes("[conduct_accepted]"),
+  };
+}
+
 function sortProviders(providers: Provider[], sort: SortOption = "top") {
   const nextProviders = [...providers];
 
@@ -282,6 +291,7 @@ function mapProviderRow(row: ProviderRow): Provider {
   const coordinates = getZoneCoordinates(providerZones[0]);
   const verification = row.provider_verifications?.[0];
   const derivedStatus = deriveProviderStatus(row.approval_status, verification?.notes);
+  const verificationFlags = parseVerificationNotes(verification?.notes);
   const categorySlug = row.provider_services?.[0]?.category_slug ?? "handyman";
   const profileType = categoryDetailsBySlug.get(categorySlug)?.lane ?? "service_provider";
 
@@ -341,6 +351,8 @@ function mapProviderRow(row: ProviderRow): Provider {
       status: verification?.status ?? "pending",
       documentName: verification?.document_name ?? null,
       notes: verification?.notes ?? null,
+      ageConfirmed: verificationFlags.ageConfirmed,
+      conductAccepted: verificationFlags.conductAccepted,
     },
     availability:
       row.availability?.map((slot) => ({

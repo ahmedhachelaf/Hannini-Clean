@@ -115,6 +115,8 @@ export type Provider = {
     status: "pending" | "verified" | "rejected";
     documentName?: string | null;
     notes?: string | null;
+    ageConfirmed?: boolean;
+    conductAccepted?: boolean;
   };
 };
 
@@ -198,6 +200,8 @@ export type ProviderSignupInput = {
   productionCapacity?: string;
   leadTime?: string;
   deliveryArea?: string;
+  ageConfirmed: boolean;
+  conductAccepted: boolean;
 };
 
 export type BookingInput = {

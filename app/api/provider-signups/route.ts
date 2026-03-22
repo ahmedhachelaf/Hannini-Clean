@@ -58,6 +58,8 @@ export async function POST(request: Request) {
       productionCapacity: String(formData.get("productionCapacity") ?? ""),
       leadTime: String(formData.get("leadTime") ?? ""),
       deliveryArea: String(formData.get("deliveryArea") ?? ""),
+      ageConfirmed: String(formData.get("ageConfirmed") ?? "") === "on",
+      conductAccepted: String(formData.get("conductAccepted") ?? "") === "on",
     });
 
     const primaryPhone = payload.phoneNumber || payload.whatsappNumber;
@@ -225,6 +227,10 @@ export async function POST(request: Request) {
         payload.availableForBulkOrders
           ? `Bulk orders: yes${payload.minimumOrderQuantity ? ` | MOQ ${payload.minimumOrderQuantity}` : ""}${payload.productionCapacity ? ` | Capacity ${payload.productionCapacity}` : ""}${payload.leadTime ? ` | Lead time ${payload.leadTime}` : ""}${payload.deliveryArea ? ` | Delivery ${payload.deliveryArea}` : ""}`
           : "",
+        payload.ageConfirmed ? "[age_confirmed]" : "",
+        payload.conductAccepted ? "[conduct_accepted]" : "",
+        payload.ageConfirmed ? (locale === "ar" ? "أكد 16+" : "Confirmed 16+") : "",
+        payload.conductAccepted ? (locale === "ar" ? "وافق على قواعد السلوك والأمان" : "Accepted code of conduct and safety rules") : "",
       ]
         .filter(Boolean)
         .join(" | "),
@@ -264,6 +270,18 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
       return locale === "ar"
         ? "يرجى إدخال رقم هاتف أو رقم واتساب واحد على الأقل."
         : "Veuillez renseigner au moins un numéro de téléphone ou WhatsApp.";
+    }
+
+    if (issue.message === "age_confirmation_required") {
+      return locale === "ar"
+        ? "يجب تأكيد أن عمرك 16 سنة أو أكثر قبل إرسال الطلب."
+        : "Vous devez confirmer avoir au moins 16 ans avant d'envoyer la candidature.";
+    }
+
+    if (issue.message === "conduct_acceptance_required") {
+      return locale === "ar"
+        ? "يجب الموافقة على قواعد السلوك والأمان قبل إرسال الطلب."
+        : "Vous devez accepter le code de conduite et les règles de sécurité avant d'envoyer la candidature.";
     }
 
     if (issue.path[0] === "shortDescription") {

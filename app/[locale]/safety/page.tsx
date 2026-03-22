@@ -36,9 +36,14 @@ export default async function SafetyPage({ params }: SafetyPageProps) {
                 </div>
               ))}
             </div>
-            <Link href={`/${locale}/support?category=unsafe_behavior`} className="button-secondary mt-5 border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
-              {dictionary.safety.cta}
-            </Link>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href={`/${locale}/support?category=unsafe_behavior`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+                {dictionary.safety.cta}
+              </Link>
+              <Link href={`/${locale}/conduct`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+                {dictionary.conduct.linkLabel}
+              </Link>
+            </div>
           </div>
         </div>
       </section>

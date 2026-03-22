@@ -74,6 +74,12 @@ type FormCopy = {
   profilePhoto: string;
   workPhotos: string;
   verificationDocument: string;
+  ageTitle: string;
+  ageConfirmation: string;
+  conductTitle: string;
+  conductAgreement: string;
+  conductLink: string;
+  conductHint: string;
   pendingHint: string;
   submitService: string;
   submitBusiness: string;
@@ -129,6 +135,12 @@ function getCopy(locale: Locale): FormCopy {
       profilePhoto: "الصورة الشخصية أو الشعار",
       workPhotos: "صور الأعمال",
       verificationDocument: "وثيقة التحقق",
+      ageTitle: "تأكيد العمر",
+      ageConfirmation: "أؤكد أن عمري 16 سنة أو أكثر",
+      conductTitle: "قواعد السلوك والأمان",
+      conductAgreement: "أوافق على قواعد السلوك والأمان في هَنّيني",
+      conductLink: "اقرأ قواعد السلوك والأمان",
+      conductHint: "نمنع التحرش، الاستغلال، الاحتيال، التضليل، الأنشطة غير القانونية، وأي سلوك يضر بالأطفال أو القاصرين.",
       pendingHint: "بعد الإرسال سيظهر الطلب في لوحة الإدارة بحالة pending للمراجعة اليدوية. لا يوجد بريد إلكتروني تلقائي حالياً.",
       submitService: "إرسال طلب مزود الخدمة",
       submitBusiness: "إرسال طلب النشاط المنزلي",
@@ -183,6 +195,12 @@ function getCopy(locale: Locale): FormCopy {
     profilePhoto: "Photo ou logo",
     workPhotos: "Photos de réalisations",
     verificationDocument: "Document de vérification",
+    ageTitle: "Confirmation d'âge",
+    ageConfirmation: "Je confirme avoir 16 ans ou plus",
+    conductTitle: "Code de conduite et sécurité",
+    conductAgreement: "J'accepte le code de conduite et les règles de sécurité de Henini",
+    conductLink: "Lire le code de conduite et les règles de sécurité",
+    conductHint: "Le harcèlement, l'exploitation, la fraude, la fausse représentation, les activités illégales et tout tort envers les enfants ou mineurs sont interdits.",
     pendingHint: "Après envoi, la candidature apparaît dans l'admin avec le statut pending pour revue manuelle. Aucun email automatique n'est envoyé pour le moment.",
     submitService: "Envoyer la candidature prestataire",
     submitBusiness: "Envoyer la candidature activité à domicile",
@@ -558,6 +576,34 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <div className="mt-1">{result.message}</div>
         </div>
       ) : null}
+
+      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
+        <div className="flex flex-col gap-1">
+          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.conductTitle}</h3>
+          <p className="text-sm leading-7 text-[var(--muted)]">{copy.conductHint}</p>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
+            <input name="ageConfirmed" type="checkbox" required aria-required="true" className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]" />
+            <span className="text-sm font-semibold text-[var(--ink)]">
+              {copy.ageConfirmation} <span className="text-[var(--navy)]">• {copy.required}</span>
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
+            <input name="conductAccepted" type="checkbox" required aria-required="true" className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]" />
+            <span className="text-sm font-semibold leading-7 text-[var(--ink)]">
+              {copy.conductAgreement} <span className="text-[var(--navy)]">• {copy.required}</span>
+              <span className="mt-2 block text-sm font-medium text-[var(--muted)]">
+                <a href={`/${locale}/conduct`} target="_blank" rel="noreferrer" className="text-[var(--accent-strong)] underline underline-offset-4">
+                  {copy.conductLink}
+                </a>
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
 
       <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit">
         {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : profileType === "home_business" ? copy.submitBusiness : copy.submitService}
