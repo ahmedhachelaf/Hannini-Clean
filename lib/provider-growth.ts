@@ -114,7 +114,7 @@ export function getProviderJourney(provider: Provider) {
         Boolean(provider.bio.ar?.trim() || provider.bio.fr?.trim()),
     },
     { key: "portfolio_added", complete: provider.gallery.length > 0 },
-    { key: "reviewed", complete: provider.status !== "pending" },
+    { key: "reviewed", complete: !["submitted", "under_review", "needs_more_info"].includes(provider.status) },
     { key: "approved", complete: provider.status === "approved" },
     { key: "first_client", complete: provider.completedJobs >= 1 },
     { key: "first_5_jobs", complete: provider.completedJobs >= 5 },

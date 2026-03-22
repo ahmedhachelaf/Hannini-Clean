@@ -9,6 +9,8 @@ import {
 import { findDemoBusinessRequest, listDemoBusinessRequests } from "@/lib/business-request-store";
 import { formatDate } from "@/lib/format";
 import { defaultLocale } from "@/lib/i18n";
+import { deriveLifecycleStatus, parseProviderLifecycleMeta, stripProviderLifecycleTags } from "@/lib/provider-lifecycle";
+import { findDemoProvider, findDemoProviderBySlug, listDemoProviders } from "@/lib/provider-store";
 import { getProviderScore } from "@/lib/ranking";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { findDemoSupportCase, listDemoSupportCases } from "@/lib/support-store";
@@ -41,7 +43,7 @@ type ProviderRow = {
   completed_jobs_count: number | null;
   response_time_minutes: number | null;
   is_verified: boolean | null;
-  approval_status: Provider["status"];
+  approval_status: "pending" | "approved" | "rejected" | "needs_more_info";
   featured: boolean | null;
   years_experience: number | null;
   hourly_rate: number | null;
@@ -220,27 +222,19 @@ function getProvinceName(provinceSlug: string | undefined) {
   return provinceLabels.get(provinceSlug ?? "") ?? { ar: "غير محدد", fr: "Non defini" };
 }
 
-function deriveProviderStatus(
-  approvalStatus: ProviderStatus,
-  verificationNotes: string | null | undefined,
-) {
-  if (approvalStatus === "needs_more_info") {
-    return "needs_more_info" as const;
-  }
-
-  if (verificationNotes?.includes("[needs_more_info]")) {
-    return "needs_more_info" as const;
-  }
-
-  return approvalStatus;
-}
-
 function parseVerificationNotes(notes: string | null | undefined) {
-  const value = notes ?? "";
+  const value = parseProviderLifecycleMeta(notes);
 
   return {
-    ageConfirmed: value.includes("[age_confirmed]"),
-    conductAccepted: value.includes("[conduct_accepted]"),
+    ageConfirmed: value.ageConfirmed,
+    conductAccepted: value.conductAccepted,
+    policyAccepted: value.policyAccepted,
+    acceptedAt: value.acceptedAt,
+    conductVersion: value.conductVersion,
+    policyVersion: value.policyVersion,
+    rejectionReason: value.rejectionReason,
+    adminNote: value.adminNote,
+    managementToken: value.managementToken,
   };
 }
 
@@ -316,7 +310,7 @@ function mapProviderRow(row: ProviderRow): Provider {
   const providerZones = row.service_areas?.map((zone) => zone.zone_slug) ?? [];
   const coordinates = getZoneCoordinates(providerZones[0]);
   const verification = row.provider_verifications?.[0];
-  const derivedStatus = deriveProviderStatus(row.approval_status, verification?.notes);
+  const derivedStatus = deriveLifecycleStatus(row.approval_status, verification?.notes);
   const verificationFlags = parseVerificationNotes(verification?.notes);
   const categorySlug = row.provider_services?.[0]?.category_slug ?? "handyman";
   const profileType = categoryDetailsBySlug.get(categorySlug)?.lane ?? "service_provider";
@@ -376,9 +370,16 @@ function mapProviderRow(row: ProviderRow): Provider {
     verification: {
       status: verification?.status ?? "pending",
       documentName: verification?.document_name ?? null,
-      notes: verification?.notes ?? null,
+      notes: stripProviderLifecycleTags(verification?.notes),
       ageConfirmed: verificationFlags.ageConfirmed,
       conductAccepted: verificationFlags.conductAccepted,
+      policyAccepted: verificationFlags.policyAccepted,
+      acceptedAt: verificationFlags.acceptedAt,
+      conductVersion: verificationFlags.conductVersion,
+      policyVersion: verificationFlags.policyVersion,
+      rejectionReason: verificationFlags.rejectionReason,
+      adminNote: verificationFlags.adminNote,
+      managementToken: verificationFlags.managementToken,
     },
     availability:
       row.availability?.map((slot) => ({
@@ -860,11 +861,18 @@ export async function getZones() {
 }
 
 export async function getProviders(filters: Filters = {}, includeAllStatuses = false) {
-  const supabaseProviders = (await fetchSupabaseProviders()) ?? [];
-  const providers = [...supabaseProviders, ...seedProviders.filter((seed) => !supabaseProviders.some((provider) => provider.slug === seed.slug))];
+  const resolvedProviders = hasSupabaseServerEnv()
+    ? ((await fetchSupabaseProviders()) ?? [])
+    : listDemoProviders();
+  const mergedProviders = hasSupabaseServerEnv()
+    ? [
+        ...resolvedProviders,
+        ...seedProviders.filter((seed) => !resolvedProviders.some((provider) => provider.slug === seed.slug)),
+      ]
+    : resolvedProviders;
   const visibleProviders = includeAllStatuses
-    ? providers
-    : providers.filter((provider) => provider.status === "approved");
+    ? mergedProviders
+    : mergedProviders.filter((provider) => provider.status === "approved");
   return applyProviderFilters(visibleProviders, filters);
 }
 
@@ -874,11 +882,39 @@ export async function getFeaturedProviders(profileType: ProfileType = "service_p
 }
 
 export async function getProviderBySlug(slug: string, includePending = false) {
+  if (!hasSupabaseServerEnv()) {
+    const provider = findDemoProviderBySlug(slug);
+
+    if (!provider) {
+      return null;
+    }
+
+    if (!includePending && provider.status !== "approved") {
+      return null;
+    }
+
+    return provider;
+  }
+
   const providers = await getProviders({}, includePending);
   return providers.find((provider) => provider.slug === slug) ?? null;
 }
 
 export async function getProviderById(id: string, includePending = false) {
+  if (!hasSupabaseServerEnv()) {
+    const provider = findDemoProvider(id);
+
+    if (!provider) {
+      return null;
+    }
+
+    if (!includePending && provider.status !== "approved") {
+      return null;
+    }
+
+    return provider;
+  }
+
   const providers = await getProviders({}, includePending);
   return providers.find((provider) => provider.id === id) ?? null;
 }

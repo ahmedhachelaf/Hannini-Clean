@@ -15,6 +15,8 @@ type ProviderActionsProps = {
     needsMoreInfo: string;
     verify: string;
     unverify: string;
+    suspend: string;
+    reactivate: string;
   };
 };
 
@@ -23,8 +25,10 @@ export function ProviderActions({ providerId, locale, status, isVerified, labels
   const [pending, setPending] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [note, setNote] = useState("");
   const canVerify = status === "approved" && !isVerified;
   const isPubliclyVisible = status === "approved";
+  const canReactivate = status === "suspended" || status === "deactivated_by_provider";
 
   async function runAction(path: string, action: string) {
     setPending(action);
@@ -34,6 +38,12 @@ export function ProviderActions({ providerId, locale, status, isVerified, labels
     try {
       const response = await fetch(path, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          note,
+        }),
       });
 
       const data = (await response.json()) as { ok?: boolean; message?: string };
@@ -89,6 +99,17 @@ export function ProviderActions({ providerId, locale, status, isVerified, labels
           <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
             {locale === "ar" ? "قرارات المراجعة" : "Décisions de revue"}
           </div>
+          <textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            rows={3}
+            className="input-base mt-2 min-h-20 resize-y text-sm"
+            placeholder={
+              locale === "ar"
+                ? "ملاحظة داخلية أو سبب الرفض/التعليق (اختياري)"
+                : "Note interne ou motif de rejet/suspension (optionnel)"
+            }
+          />
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
@@ -113,6 +134,22 @@ export function ProviderActions({ providerId, locale, status, isVerified, labels
               onClick={() => runAction(`/api/admin/providers/${providerId}/reject`, "reject")}
             >
               {pending === "reject" ? (locale === "ar" ? "..." : "...") : labels.reject}
+            </button>
+            <button
+              type="button"
+              disabled={pending !== null || status === "suspended"}
+              className="rounded-full border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-50"
+              onClick={() => runAction(`/api/admin/providers/${providerId}/suspend`, "suspend")}
+            >
+              {pending === "suspend" ? (locale === "ar" ? "..." : "...") : labels.suspend}
+            </button>
+            <button
+              type="button"
+              disabled={pending !== null || !canReactivate}
+              className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 disabled:opacity-50"
+              onClick={() => runAction(`/api/admin/providers/${providerId}/reactivate`, "reactivate")}
+            >
+              {pending === "reactivate" ? (locale === "ar" ? "..." : "...") : labels.reactivate}
             </button>
           </div>
         </div>

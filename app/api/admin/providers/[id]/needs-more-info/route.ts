@@ -6,16 +6,18 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
 
   const { id } = await context.params;
+  const body = await request.json().catch(() => ({}));
 
   const result = await updateProviderModeration({
     providerId: id,
     approvalStatus: "needs_more_info",
+    adminNote: typeof body.note === "string" ? body.note : undefined,
     verification: {
       status: "pending",
       notes: "[needs_more_info] Additional business details requested by admin.",

@@ -1,0 +1,162 @@
+"use client";
+
+import { useState } from "react";
+import type { Locale, Provider, Zone } from "@/lib/types";
+
+type ProviderSelfServiceFormProps = {
+  locale: Locale;
+  provider: Provider;
+  token: string;
+  zones: Zone[];
+};
+
+export function ProviderSelfServiceForm({ locale, provider, token, zones }: ProviderSelfServiceFormProps) {
+  const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
+  const [workshopName, setWorkshopName] = useState(provider.workshopName ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(provider.phoneNumber);
+  const [whatsappNumber, setWhatsappNumber] = useState(provider.whatsappNumber);
+  const [shortDescription, setShortDescription] = useState(provider.bio[locale]);
+  const [zoneSlug, setZoneSlug] = useState(provider.zones[0] ?? zones[0]?.slug ?? "");
+
+  async function run(action: "update" | "deactivate" | "reactivate" | "request_deletion") {
+    setPending(action);
+    setMessage("");
+    setIsError(false);
+
+    try {
+      const response = await fetch(`/api/providers/${provider.id}/self-service`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token,
+          action,
+          workshopName,
+          phoneNumber,
+          whatsappNumber,
+          shortDescription,
+          zoneSlug,
+        }),
+      });
+
+      const data = (await response.json()) as { ok?: boolean; message?: string };
+
+      if (!response.ok || !data.ok) {
+        setIsError(true);
+        setMessage(
+          data.message ??
+            (locale === "ar" ? "تعذر تحديث الملف حالياً." : "Impossible de mettre à jour le profil pour le moment."),
+        );
+        return;
+      }
+
+      setMessage(
+        locale === "ar"
+          ? action === "update"
+            ? "تم حفظ التحديثات بنجاح."
+            : action === "deactivate"
+              ? "تم إيقاف ظهور الملف مؤقتاً."
+              : action === "reactivate"
+                ? "تمت إعادة تفعيل الظهور."
+                : "تم تسجيل طلب المغادرة للمراجعة."
+          : action === "update"
+            ? "Les modifications ont bien été enregistrées."
+            : action === "deactivate"
+              ? "Le profil est maintenant mis en pause."
+              : action === "reactivate"
+                ? "Le profil est de nouveau actif."
+                : "La demande de départ a bien été enregistrée.");
+      window.location.reload();
+    } catch {
+      setIsError(true);
+      setMessage(locale === "ar" ? "تعذر تحديث الملف حالياً." : "Impossible de mettre à jour le profil pour le moment.");
+    } finally {
+      setPending(null);
+    }
+  }
+
+  return (
+    <div className="surface-card rounded-[1.75rem] p-6">
+      <h1 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+        {locale === "ar" ? "إدارة ملف مزود الخدمة" : "Gérer votre profil prestataire"}
+      </h1>
+      <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+        {locale === "ar"
+          ? "يمكنك تحديث معلوماتك، إيقاف الظهور مؤقتاً، أو طلب مغادرة المنصة مع الحفاظ على السجل الإداري عند الحاجة."
+          : "Vous pouvez mettre à jour vos informations, mettre votre visibilité en pause ou demander votre départ tout en gardant l'historique administratif nécessaire."}
+      </p>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "اسم النشاط" : "Nom de l'activité"}
+          </span>
+          <input value={workshopName} onChange={(event) => setWorkshopName(event.target.value)} className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "الهاتف" : "Téléphone"}
+          </span>
+          <input value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "واتساب" : "WhatsApp"}
+          </span>
+          <input value={whatsappNumber} onChange={(event) => setWhatsappNumber(event.target.value)} className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "المدينة أو المنطقة" : "Ville ou zone"}
+          </span>
+          <select value={zoneSlug} onChange={(event) => setZoneSlug(event.target.value)} className="input-base">
+            {zones.map((zone) => (
+              <option key={zone.slug} value={zone.slug}>
+                {zone.name[locale]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <label className="mt-4 block">
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+          {locale === "ar" ? "وصف النشاط" : "Description"}
+        </span>
+        <textarea
+          value={shortDescription}
+          onChange={(event) => setShortDescription(event.target.value)}
+          rows={4}
+          className="input-base min-h-28 resize-y"
+        />
+      </label>
+
+      {message ? (
+        <div
+          role={isError ? "alert" : "status"}
+          className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${isError ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
+        >
+          {message}
+        </div>
+      ) : null}
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <button type="button" disabled={pending !== null} onClick={() => run("update")} className="button-primary disabled:opacity-60">
+          {pending === "update" ? (locale === "ar" ? "جارٍ الحفظ..." : "Enregistrement...") : locale === "ar" ? "حفظ التحديثات" : "Enregistrer"}
+        </button>
+        <button type="button" disabled={pending !== null} onClick={() => run("deactivate")} className="button-secondary disabled:opacity-60">
+          {pending === "deactivate" ? (locale === "ar" ? "..." : "...") : locale === "ar" ? "إيقاف الظهور مؤقتاً" : "Mettre en pause"}
+        </button>
+        <button type="button" disabled={pending !== null} onClick={() => run("reactivate")} className="button-secondary disabled:opacity-60">
+          {pending === "reactivate" ? (locale === "ar" ? "..." : "...") : locale === "ar" ? "إعادة التفعيل" : "Réactiver"}
+        </button>
+        <button type="button" disabled={pending !== null} onClick={() => run("request_deletion")} className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 disabled:opacity-60">
+          {pending === "request_deletion" ? (locale === "ar" ? "..." : "...") : locale === "ar" ? "طلب مغادرة المنصة" : "Demander la suppression"}
+        </button>
+      </div>
+    </div>
+  );
+}

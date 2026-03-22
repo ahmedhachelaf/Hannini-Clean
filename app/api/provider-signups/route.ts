@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { categories as seedCategories, zones as seedZones } from "@/data/seed";
+import {
+  CURRENT_CONDUCT_VERSION,
+  CURRENT_POLICY_VERSION,
+  createProviderManagementToken,
+  mergeProviderLifecycleNotes,
+} from "@/lib/provider-lifecycle";
+import { createDemoProviderApplication } from "@/lib/provider-store";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { providerSignupSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
@@ -60,6 +67,7 @@ export async function POST(request: Request) {
       deliveryArea: String(formData.get("deliveryArea") ?? ""),
       ageConfirmed: String(formData.get("ageConfirmed") ?? "") === "on",
       conductAccepted: String(formData.get("conductAccepted") ?? "") === "on",
+      policyAccepted: String(formData.get("policyAccepted") ?? "") === "on",
     });
 
     const primaryPhone = payload.phoneNumber || payload.whatsappNumber;
@@ -73,11 +81,15 @@ export async function POST(request: Request) {
       )}`;
 
     if (!hasSupabaseServerEnv()) {
+      const { provider, managementToken } = createDemoProviderApplication(payload, locale);
+      revalidateMarketplacePaths(provider.slug);
+
       return NextResponse.json({
         ok: true,
         demoMode: true,
-        providerId: `demo-provider-${Date.now().toString(36)}`,
-        providerSlug: generatedSlug,
+        providerId: provider.id,
+        providerSlug: provider.slug,
+        manageUrl: `/${locale}/join/manage?provider=${provider.id}&token=${managementToken}`,
         message:
           locale === "ar"
             ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
@@ -91,7 +103,10 @@ export async function POST(request: Request) {
       throw new Error("Supabase client is not available.");
     }
 
-    await supabase.from("users").upsert(
+    const acceptedAt = new Date().toISOString();
+    const managementToken = createProviderManagementToken();
+
+    const userUpsert = await supabase.from("users").upsert(
       {
         full_name: payload.fullName,
         phone_number: primaryPhone,
@@ -102,8 +117,12 @@ export async function POST(request: Request) {
       },
     );
 
+    if (userUpsert.error) {
+      throw new Error(localizeServerWriteError("user", locale));
+    }
+
     const selectedCategory = seedCategories.find((category) => category.slug === payload.categorySlug);
-    await supabase.from("categories").upsert(
+    const categoryUpsert = await supabase.from("categories").upsert(
       {
         slug: payload.categorySlug,
         icon: selectedCategory?.icon ?? "🧰",
@@ -114,6 +133,10 @@ export async function POST(request: Request) {
       },
       { onConflict: "slug" },
     );
+
+    if (categoryUpsert.error) {
+      throw new Error(localizeServerWriteError("category", locale));
+    }
 
     const providerInsertBase = {
       slug: generatedSlug,
@@ -173,23 +196,31 @@ export async function POST(request: Request) {
 
     const providerId = providerRecord.id;
 
-    await supabase.from("provider_services").insert({
+    const serviceInsert = await supabase.from("provider_services").insert({
       provider_id: providerId,
       category_slug: payload.categorySlug,
       is_primary: true,
     });
 
+    if (serviceInsert.error) {
+      throw new Error(localizeServerWriteError("service", locale));
+    }
+
     if (payload.zones.length > 0) {
-      await supabase.from("service_areas").insert(
+      const areaInsert = await supabase.from("service_areas").insert(
         payload.zones.map((zoneSlug) => ({
           provider_id: providerId,
           zone_slug: zoneSlug,
         })),
       );
+
+      if (areaInsert.error) {
+        throw new Error(localizeServerWriteError("zone", locale));
+      }
     }
 
     if ((payload.weekdays?.length ?? 0) > 0) {
-      await supabase.from("availability").insert(
+      const availabilityInsert = await supabase.from("availability").insert(
         payload.weekdays!.map((weekday) => ({
           provider_id: providerId,
           day_key: weekday,
@@ -199,10 +230,14 @@ export async function POST(request: Request) {
           end_time: payload.endTime ?? "18:00",
         })),
       );
+
+      if (availabilityInsert.error) {
+        throw new Error(localizeServerWriteError("availability", locale));
+      }
     }
 
     if (payload.workPhotoNames.length > 0) {
-      await supabase.from("provider_photos").insert(
+      const photoInsert = await supabase.from("provider_photos").insert(
         payload.workPhotoNames.slice(0, 3).map((photoName, index) => ({
           provider_id: providerId,
           url: `/gallery/work-${(index % 3) + 1}.svg`,
@@ -210,13 +245,25 @@ export async function POST(request: Request) {
           sort_order: index,
         })),
       );
+
+      if (photoInsert.error) {
+        throw new Error(localizeServerWriteError("gallery", locale));
+      }
     }
 
-    await supabase.from("provider_verifications").insert({
-      provider_id: providerId,
-      status: "pending",
-      document_name: payload.verificationDocumentName ?? null,
-      notes: [
+    const verificationNotes = mergeProviderLifecycleNotes(
+      "",
+      {
+        ageConfirmed: payload.ageConfirmed,
+        conductAccepted: payload.conductAccepted,
+        policyAccepted: payload.policyAccepted,
+        acceptedAt,
+        conductVersion: CURRENT_CONDUCT_VERSION,
+        policyVersion: CURRENT_POLICY_VERSION,
+        statusOverride: "submitted",
+        managementToken,
+      },
+      [
         payload.profilePhotoName ? `Profile photo: ${payload.profilePhotoName}` : "",
         payload.workPhotoNames.length > 0 ? `Work photos: ${payload.workPhotoNames.join(", ")}` : "",
         payload.facebookUrl ? `Facebook: ${payload.facebookUrl}` : "",
@@ -227,14 +274,22 @@ export async function POST(request: Request) {
         payload.availableForBulkOrders
           ? `Bulk orders: yes${payload.minimumOrderQuantity ? ` | MOQ ${payload.minimumOrderQuantity}` : ""}${payload.productionCapacity ? ` | Capacity ${payload.productionCapacity}` : ""}${payload.leadTime ? ` | Lead time ${payload.leadTime}` : ""}${payload.deliveryArea ? ` | Delivery ${payload.deliveryArea}` : ""}`
           : "",
-        payload.ageConfirmed ? "[age_confirmed]" : "",
-        payload.conductAccepted ? "[conduct_accepted]" : "",
         payload.ageConfirmed ? (locale === "ar" ? "أكد 16+" : "Confirmed 16+") : "",
         payload.conductAccepted ? (locale === "ar" ? "وافق على قواعد السلوك والأمان" : "Accepted code of conduct and safety rules") : "",
-      ]
-        .filter(Boolean)
-        .join(" | "),
+        payload.policyAccepted ? (locale === "ar" ? "وافق على الشروط والسياسات ذات الصلة" : "Accepted applicable policies and terms") : "",
+      ],
+    );
+
+    const verificationInsert = await supabase.from("provider_verifications").insert({
+      provider_id: providerId,
+      status: "pending",
+      document_name: payload.verificationDocumentName ?? null,
+      notes: verificationNotes,
     });
+
+    if (verificationInsert.error) {
+      throw new Error(localizeServerWriteError("verification", locale));
+    }
 
     revalidateMarketplacePaths(generatedSlug);
 
@@ -242,6 +297,7 @@ export async function POST(request: Request) {
       ok: true,
       providerId,
       providerSlug: generatedSlug,
+      manageUrl: `/${locale}/join/manage?provider=${providerId}&token=${managementToken}`,
       message:
         locale === "ar"
           ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
@@ -284,6 +340,12 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
         : "Vous devez accepter le code de conduite et les règles de sécurité avant d'envoyer la candidature.";
     }
 
+    if (issue.message === "policy_acceptance_required") {
+      return locale === "ar"
+        ? "يجب الموافقة على الشروط والسياسات ذات الصلة قبل إرسال الطلب."
+        : "Vous devez accepter les conditions et politiques applicables avant d'envoyer la candidature.";
+    }
+
     if (issue.path[0] === "shortDescription") {
       return locale === "ar"
         ? "يرجى إضافة وصف قصير وبسيط عن نشاطك أو خدمتك."
@@ -310,4 +372,31 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
   }
 
   return locale === "ar" ? "تعذر إرسال الطلب حالياً." : "Impossible d'envoyer la demande pour le moment.";
+}
+
+function localizeServerWriteError(
+  step: "user" | "category" | "service" | "zone" | "availability" | "gallery" | "verification",
+  locale: "ar" | "fr",
+) {
+  if (locale === "ar") {
+    return {
+      user: "تعذر حفظ بيانات الحساب الأساسية.",
+      category: "تعذر حفظ فئة النشاط المختارة.",
+      service: "تعذر ربط النشاط بالفئة المختارة.",
+      zone: "تعذر حفظ مناطق الخدمة.",
+      availability: "تعذر حفظ أوقات التوفر.",
+      gallery: "تعذر حفظ صور الأعمال.",
+      verification: "تعذر حفظ وثيقة التحقق وبيانات المراجعة.",
+    }[step];
+  }
+
+  return {
+    user: "Impossible d'enregistrer les informations de base du compte.",
+    category: "Impossible d'enregistrer la catégorie sélectionnée.",
+    service: "Impossible de relier le profil à la catégorie choisie.",
+    zone: "Impossible d'enregistrer les zones de service.",
+    availability: "Impossible d'enregistrer les disponibilités.",
+    gallery: "Impossible d'enregistrer les photos de réalisations.",
+    verification: "Impossible d'enregistrer le document de vérification et les données de revue.",
+  }[step];
 }

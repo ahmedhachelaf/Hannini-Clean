@@ -1,4 +1,6 @@
 import type { ProviderStatus } from "@/lib/types";
+import { mergeProviderLifecycleNotes, parseProviderLifecycleMeta } from "@/lib/provider-lifecycle";
+import { updateDemoProviderModeration } from "@/lib/provider-store";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
@@ -12,6 +14,8 @@ type ModerationUpdateInput = {
   approvalStatus?: ProviderStatus;
   isVerified?: boolean;
   verification?: VerificationUpdate;
+  adminNote?: string;
+  rejectionReason?: string;
 };
 
 export async function updateProviderModeration({
@@ -19,9 +23,24 @@ export async function updateProviderModeration({
   approvalStatus,
   isVerified,
   verification,
+  adminNote,
+  rejectionReason,
 }: ModerationUpdateInput) {
   if (!hasSupabaseServerEnv()) {
-    return { ok: true as const, demoMode: true as const, slug: undefined };
+    const provider = updateDemoProviderModeration(providerId, {
+      status: approvalStatus,
+      isVerified,
+      verificationStatus: verification?.status,
+      adminNote,
+      rejectionReason,
+    });
+
+    if (!provider) {
+      return { ok: false as const, message: "Provider not found." };
+    }
+
+    revalidateMarketplacePaths(provider.slug);
+    return { ok: true as const, demoMode: true as const, slug: provider.slug };
   }
 
   const supabase = createServerSupabaseClient();
@@ -41,9 +60,17 @@ export async function updateProviderModeration({
   }
 
   const providerPatch: Record<string, unknown> = {};
+  const dbApprovalStatus =
+    approvalStatus === "approved" ||
+    approvalStatus === "rejected" ||
+    approvalStatus === "needs_more_info"
+      ? approvalStatus
+      : approvalStatus === "submitted" || approvalStatus === "under_review"
+        ? "pending"
+        : undefined;
 
-  if (approvalStatus) {
-    providerPatch.approval_status = approvalStatus;
+  if (dbApprovalStatus) {
+    providerPatch.approval_status = dbApprovalStatus;
   }
 
   if (typeof isVerified === "boolean") {
@@ -65,12 +92,72 @@ export async function updateProviderModeration({
       .eq("provider_id", providerId)
       .maybeSingle();
 
+    const currentMeta = parseProviderLifecycleMeta(existingVerification?.notes);
+    const nextApprovalStatus =
+      approvalStatus === "submitted" || approvalStatus === "under_review"
+        ? "under_review"
+        : approvalStatus;
+
     const verificationUpdate = await supabase.from("provider_verifications").upsert(
       {
         provider_id: providerId,
         document_name: existingVerification?.document_name ?? null,
         status: verification.status ?? existingVerification?.status ?? "pending",
-        notes: verification.notes ?? existingVerification?.notes ?? null,
+        notes: mergeProviderLifecycleNotes(
+          verification.notes ?? existingVerification?.notes ?? null,
+          {
+            ageConfirmed: currentMeta.ageConfirmed,
+            conductAccepted: currentMeta.conductAccepted,
+            policyAccepted: currentMeta.policyAccepted,
+            acceptedAt: currentMeta.acceptedAt,
+            conductVersion: currentMeta.conductVersion,
+            policyVersion: currentMeta.policyVersion,
+            managementToken: currentMeta.managementToken,
+            statusOverride:
+              nextApprovalStatus && nextApprovalStatus !== "approved" && nextApprovalStatus !== "rejected"
+                ? nextApprovalStatus
+                : null,
+            adminNote,
+            rejectionReason,
+          },
+        ),
+      },
+      { onConflict: "provider_id" },
+    );
+
+    if (verificationUpdate.error) {
+      return { ok: false as const, message: verificationUpdate.error.message };
+    }
+  }
+
+  if (!verification && (adminNote || rejectionReason)) {
+    const { data: existingVerification } = await supabase
+      .from("provider_verifications")
+      .select("document_name, notes, status")
+      .eq("provider_id", providerId)
+      .maybeSingle();
+
+    const currentMeta = parseProviderLifecycleMeta(existingVerification?.notes);
+    const verificationUpdate = await supabase.from("provider_verifications").upsert(
+      {
+        provider_id: providerId,
+        document_name: existingVerification?.document_name ?? null,
+        status: existingVerification?.status ?? "pending",
+        notes: mergeProviderLifecycleNotes(existingVerification?.notes ?? null, {
+          ageConfirmed: currentMeta.ageConfirmed,
+          conductAccepted: currentMeta.conductAccepted,
+          policyAccepted: currentMeta.policyAccepted,
+          acceptedAt: currentMeta.acceptedAt,
+          conductVersion: currentMeta.conductVersion,
+          policyVersion: currentMeta.policyVersion,
+          managementToken: currentMeta.managementToken,
+          statusOverride:
+            approvalStatus && approvalStatus !== "approved" && approvalStatus !== "rejected"
+              ? approvalStatus
+              : null,
+          adminNote,
+          rejectionReason,
+        }),
       },
       { onConflict: "provider_id" },
     );

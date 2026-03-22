@@ -16,22 +16,22 @@ export async function POST(request: Request, context: RouteContext) {
 
   const result = await updateProviderModeration({
     providerId: id,
-    approvalStatus: "rejected",
-    rejectionReason: typeof body.note === "string" ? body.note : undefined,
+    approvalStatus: "suspended",
+    isVerified: false,
     adminNote: typeof body.note === "string" ? body.note : undefined,
     verification: {
-      status: "rejected",
-      notes: "Application rejected by admin.",
+      status: "pending",
+      notes: "Provider suspended by admin.",
     },
   });
 
   if ("demoMode" in result && result.demoMode) {
-    return NextResponse.json({ ok: true, demoMode: true, message: "Provider rejected in demo mode." });
+    return NextResponse.json({ ok: true, demoMode: true, message: "Provider suspended in demo mode." });
   }
 
   if (!result.ok) {
     return NextResponse.json({ ok: false, message: result.message }, { status: 400 });
   }
 
-  return NextResponse.json({ ok: true, message: "Provider rejected." });
+  return NextResponse.json({ ok: true, message: "Provider suspended." });
 }

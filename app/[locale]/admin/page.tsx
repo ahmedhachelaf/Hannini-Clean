@@ -49,12 +49,35 @@ export default async function AdminPage({ params }: AdminPageProps) {
   };
   const providerStatusLabels = {
     approved: dictionary.common.approved,
-    pending: dictionary.common.pending,
+    draft: locale === "ar" ? "مسودة" : "Brouillon",
+    submitted: locale === "ar" ? "مرسل" : "Soumis",
+    under_review: locale === "ar" ? "قيد المراجعة" : "En revue",
     rejected: dictionary.common.rejected,
     needs_more_info: dictionary.admin.needsMoreInfo,
+    suspended: locale === "ar" ? "معلّق" : "Suspendu",
+    deactivated_by_provider: locale === "ar" ? "أوقفه المزود" : "Désactivé par le prestataire",
+    pending_deletion: locale === "ar" ? "بانتظار الحذف" : "Suppression demandée",
+    deleted: locale === "ar" ? "محذوف" : "Supprimé",
   };
-  const pendingProviders = dashboard.providers.filter((provider) => provider.status === "pending" || provider.status === "needs_more_info");
-  const reviewedProviders = dashboard.providers.filter((provider) => provider.status === "approved" || provider.status === "rejected");
+  const providerActionLabels = {
+    approve: dictionary.admin.approve,
+    reject: dictionary.admin.reject,
+    needsMoreInfo: dictionary.admin.needsMoreInfo,
+    verify: dictionary.admin.verify,
+    unverify: dictionary.admin.unverify,
+    suspend: locale === "ar" ? "تعليق" : "Suspendre",
+    reactivate: locale === "ar" ? "إعادة التفعيل" : "Réactiver",
+  };
+  const pendingProviders = dashboard.providers.filter((provider) =>
+    provider.status === "submitted" || provider.status === "under_review" || provider.status === "needs_more_info",
+  );
+  const reviewedProviders = dashboard.providers.filter((provider) =>
+    provider.status === "approved" ||
+    provider.status === "rejected" ||
+    provider.status === "suspended" ||
+    provider.status === "deactivated_by_provider" ||
+    provider.status === "pending_deletion",
+  );
   const approvedProviders = dashboard.providers.filter((provider) => provider.status === "approved");
   const verifiedProviders = dashboard.providers.filter((provider) => provider.isVerified);
   const supportCasesNeedingAttention = dashboard.supportCases.filter(
@@ -110,7 +133,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
                     providerStatusLabel={providerStatusLabels[provider.status]}
                     categoryLabel={getLocalizedValue(categoryMap.get(provider.categorySlug)?.name ?? { ar: provider.categorySlug, fr: provider.categorySlug }, locale)}
                     zoneLabels={provider.zones.map((zoneSlug) => getLocalizedValue(zoneMap.get(zoneSlug)?.name ?? { ar: zoneSlug, fr: zoneSlug }, locale))}
-                    labels={dictionary.admin}
+                    labels={providerActionLabels}
                   />
                 ))
               )}
@@ -131,7 +154,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
                   providerStatusLabel={providerStatusLabels[provider.status]}
                   categoryLabel={getLocalizedValue(categoryMap.get(provider.categorySlug)?.name ?? { ar: provider.categorySlug, fr: provider.categorySlug }, locale)}
                   zoneLabels={provider.zones.map((zoneSlug) => getLocalizedValue(zoneMap.get(zoneSlug)?.name ?? { ar: zoneSlug, fr: zoneSlug }, locale))}
-                  labels={dictionary.admin}
+                  labels={providerActionLabels}
                 />
               ))}
             </div>
@@ -415,6 +438,8 @@ function ProviderAdminCard({
     needsMoreInfo: string;
     verify: string;
     unverify: string;
+    suspend: string;
+    reactivate: string;
   };
 }) {
   const readiness = getProviderReadiness(provider);
@@ -468,6 +493,8 @@ function ProviderAdminCard({
                       ? "border border-amber-200 bg-amber-50 text-amber-700"
                       : provider.status === "rejected"
                         ? "status-pill--danger"
+                        : provider.status === "suspended"
+                          ? "border border-slate-300 bg-slate-100 text-slate-700"
                         : "status-pill--pending"
                 }`}
               >
@@ -549,8 +576,21 @@ function ProviderAdminCard({
               {locale === "ar" ? "الموافقة على القواعد:" : "Accord conduite :"} {provider.verification.conductAccepted ? (locale === "ar" ? "مؤكد" : "Confirmé") : (locale === "ar" ? "غير مؤكد" : "Non confirmé")}
             </div>
             <div className="mt-1">
+              {locale === "ar" ? "الموافقة على السياسات:" : "Accord politiques :"} {provider.verification.policyAccepted ? (locale === "ar" ? "مؤكد" : "Confirmé") : (locale === "ar" ? "غير مؤكد" : "Non confirmé")}
+            </div>
+            <div className="mt-1">
               {locale === "ar" ? "ملاحظات الإدارة:" : "Notes admin :"} {provider.verification.notes ?? (locale === "ar" ? "لا توجد" : "Aucune")}
             </div>
+            {provider.verification.rejectionReason ? (
+              <div className="mt-1">
+                {locale === "ar" ? "سبب الرفض:" : "Motif du rejet :"} {provider.verification.rejectionReason}
+              </div>
+            ) : null}
+            {provider.verification.adminNote ? (
+              <div className="mt-1">
+                {locale === "ar" ? "ملاحظة داخلية:" : "Note interne :"} {provider.verification.adminNote}
+              </div>
+            ) : null}
             <div className="mt-1">
               {locale === "ar" ? "صور الأعمال:" : "Photos :"} {provider.galleryCaptions?.length ?? provider.gallery.length}
             </div>

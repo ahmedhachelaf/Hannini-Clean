@@ -78,6 +78,8 @@ type FormCopy = {
   ageConfirmation: string;
   conductTitle: string;
   conductAgreement: string;
+  policyAgreement: string;
+  policyLink: string;
   conductLink: string;
   conductHint: string;
   pendingHint: string;
@@ -139,6 +141,8 @@ function getCopy(locale: Locale): FormCopy {
       ageConfirmation: "أؤكد أن عمري 16 سنة أو أكثر",
       conductTitle: "قواعد السلوك والأمان",
       conductAgreement: "أوافق على قواعد السلوك والأمان في هَنّيني",
+      policyAgreement: "اطّلعت على الشروط والسياسات ذات الصلة وأوافق عليها",
+      policyLink: "عرض الشروط والسياسات",
       conductLink: "اقرأ قواعد السلوك والأمان",
       conductHint: "نمنع التحرش، الاستغلال، الاحتيال، التضليل، الأنشطة غير القانونية، وأي سلوك يضر بالأطفال أو القاصرين.",
       pendingHint: "بعد الإرسال سيظهر الطلب في لوحة الإدارة بحالة pending للمراجعة اليدوية. لا يوجد بريد إلكتروني تلقائي حالياً.",
@@ -199,6 +203,8 @@ function getCopy(locale: Locale): FormCopy {
     ageConfirmation: "Je confirme avoir 16 ans ou plus",
     conductTitle: "Code de conduite et sécurité",
     conductAgreement: "J'accepte le code de conduite et les règles de sécurité de Hannini",
+    policyAgreement: "J’ai lu les conditions et politiques applicables et je les accepte",
+    policyLink: "Voir les conditions et politiques",
     conductLink: "Lire le code de conduite et les règles de sécurité",
     conductHint: "Le harcèlement, l'exploitation, la fraude, la fausse représentation, les activités illégales et tout tort envers les enfants ou mineurs sont interdits.",
     pendingHint: "Après envoi, la candidature apparaît dans l'admin avec le statut pending pour revue manuelle. Aucun email automatique n'est envoyé pour le moment.",
@@ -218,6 +224,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const [provinceSlug, setProvinceSlug] = useState<string>(zones[0]?.provinceSlug ?? "");
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [hasAcceptedConduct, setHasAcceptedConduct] = useState(false);
+  const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
 
   const provinceGroups = useMemo(
     () =>
@@ -236,7 +243,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const provinceZones = provinceGroups.find((group) => group.slug === provinceSlug)?.zones ?? [];
   const primaryCategorySlug = laneCategories[0]?.slug ?? "";
   const primaryZoneSlug = provinceZones[0]?.slug ?? "";
-  const canSubmit = isAgeConfirmed && hasAcceptedConduct;
+  const canSubmit = isAgeConfirmed && hasAcceptedConduct && hasAcceptedPolicy;
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -577,6 +584,11 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
         <div aria-live="polite" className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
           <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
           <div className="mt-1">{result.message}</div>
+          {result.ok && result.manageUrl ? (
+            <a href={result.manageUrl} className="mt-3 inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+              {locale === "ar" ? "إدارة ملفك أو إيقاف ظهوره مؤقتاً" : "Gérer votre profil ou le mettre en pause"}
+            </a>
+          ) : null}
         </div>
       ) : null}
 
@@ -627,14 +639,37 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
               </span>
             </span>
           </label>
+
+          <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
+            <input
+              name="policyAccepted"
+              type="checkbox"
+              required
+              aria-required="true"
+              checked={hasAcceptedPolicy}
+              onChange={(event) => {
+                setHasAcceptedPolicy(event.target.checked);
+                setResult(null);
+              }}
+              className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+            />
+            <span className="text-sm font-semibold leading-7 text-[var(--ink)]">
+              {copy.policyAgreement} <span className="text-[var(--navy)]">• {copy.required}</span>
+              <span className="mt-2 block text-sm font-medium text-[var(--muted)]">
+                <a href={`/${locale}/conduct`} target="_blank" rel="noreferrer" className="text-[var(--accent-strong)] underline underline-offset-4">
+                  {copy.policyLink}
+                </a>
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 
       {!canSubmit ? (
         <p className="text-sm font-medium text-[var(--muted)]">
           {locale === "ar"
-            ? "أكّد العمر ووافق على قواعد السلوك لإرسال الطلب."
-            : "Confirmez votre age et acceptez le code de conduite pour envoyer la demande."}
+            ? "أكّد العمر ووافق على قواعد السلوك والشروط لإرسال الطلب."
+            : "Confirmez votre âge et acceptez les règles ainsi que les politiques pour envoyer la demande."}
         </p>
       ) : null}
 

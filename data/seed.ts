@@ -588,7 +588,7 @@ export const providers: Provider[] = [
     completedJobs: 46,
     responseTimeMinutes: 49,
     isVerified: false,
-    status: "pending",
+    status: "submitted",
     featured: false,
     yearsExperience: 10,
     hourlyRate: 2900,

@@ -2,7 +2,17 @@ export type Locale = "ar" | "fr";
 
 export type SortOption = "top" | "rating" | "response" | "jobs";
 
-export type ProviderStatus = "approved" | "pending" | "rejected" | "needs_more_info";
+export type ProviderStatus =
+  | "draft"
+  | "submitted"
+  | "under_review"
+  | "approved"
+  | "rejected"
+  | "needs_more_info"
+  | "suspended"
+  | "deactivated_by_provider"
+  | "pending_deletion"
+  | "deleted";
 
 export type ProfileType = "service_provider" | "home_business";
 
@@ -123,6 +133,13 @@ export type Provider = {
     notes?: string | null;
     ageConfirmed?: boolean;
     conductAccepted?: boolean;
+    policyAccepted?: boolean;
+    acceptedAt?: string | null;
+    conductVersion?: string | null;
+    policyVersion?: string | null;
+    rejectionReason?: string | null;
+    adminNote?: string | null;
+    managementToken?: string | null;
   };
 };
 
@@ -230,6 +247,7 @@ export type ProviderSignupInput = {
   deliveryArea?: string;
   ageConfirmed: boolean;
   conductAccepted: boolean;
+  policyAccepted: boolean;
 };
 
 export type BookingInput = {
@@ -314,6 +332,7 @@ export type SignupSubmissionResult = {
   message: string;
   providerId?: string;
   providerSlug?: string;
+  manageUrl?: string;
   demoMode?: boolean;
 };
 

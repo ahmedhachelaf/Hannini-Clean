@@ -125,6 +125,7 @@ export const providerSignupSchema = z.object({
   deliveryArea: z.string().optional().or(z.literal("")).default(""),
   ageConfirmed: z.boolean().default(false),
   conductAccepted: z.boolean().default(false),
+  policyAccepted: z.boolean().default(false),
 }).superRefine((value, ctx) => {
   if (!value.phoneNumber && !value.whatsappNumber) {
     ctx.addIssue({
@@ -147,6 +148,14 @@ export const providerSignupSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["conductAccepted"],
       message: "conduct_acceptance_required",
+    });
+  }
+
+  if (!value.policyAccepted) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["policyAccepted"],
+      message: "policy_acceptance_required",
     });
   }
 });
