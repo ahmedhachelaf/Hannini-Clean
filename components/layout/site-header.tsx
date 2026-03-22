@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
 import type { Locale } from "@/lib/types";
 
 type SiteHeaderProps = {
@@ -20,6 +21,18 @@ type SiteHeaderProps = {
     };
     localeLabel: string;
     alternateLocaleLabel: string;
+    install: {
+      title: string;
+      helper: string;
+      button: string;
+      compact: string;
+      menuLabel: string;
+      fallbackTitle: string;
+      fallbackDescription: string;
+      android: string;
+      ios: string;
+      desktop: string;
+    };
   };
 };
 
@@ -66,21 +79,26 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
             ))}
           </nav>
 
-          <Suspense
-            fallback={
-              <span className="inline-flex min-h-11 max-w-full items-center self-start rounded-full border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--muted)] sm:self-auto">
-                {dictionary.localeLabel}
-              </span>
-            }
-          >
-            <LanguageSwitcher
-              locale={locale}
-              labels={{
-                current: dictionary.localeLabel,
-                alternate: dictionary.alternateLocaleLabel,
-              }}
-            />
-          </Suspense>
+          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <div className="hidden md:block">
+              <PwaInstallButton locale={locale} copy={dictionary.install} variant="inline" />
+            </div>
+            <Suspense
+              fallback={
+                <span className="inline-flex min-h-11 max-w-full items-center rounded-full border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--muted)]">
+                  {dictionary.localeLabel}
+                </span>
+              }
+            >
+              <LanguageSwitcher
+                locale={locale}
+                labels={{
+                  current: dictionary.localeLabel,
+                  alternate: dictionary.alternateLocaleLabel,
+                }}
+              />
+            </Suspense>
+          </div>
         </div>
 
         <nav
@@ -96,6 +114,9 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
               {item.label}
             </Link>
           ))}
+          <div className="shrink-0">
+            <PwaInstallButton locale={locale} copy={dictionary.install} variant="inline" />
+          </div>
         </nav>
       </div>
     </header>

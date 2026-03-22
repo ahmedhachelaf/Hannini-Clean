@@ -12,6 +12,19 @@ export const fr = {
     support: "Support",
     admin: "Admin",
   },
+  install: {
+    title: "Installer l’application",
+    helper: "Ajouter Hannini à votre téléphone",
+    button: "Installer l’application",
+    compact: "Installer",
+    menuLabel: "Installer l’application",
+    fallbackTitle: "Installation manuelle",
+    fallbackDescription:
+      "Si la fenêtre d’installation n’apparaît pas automatiquement, vous pouvez ajouter l’application depuis le navigateur.",
+    android: "Utilisez le menu du navigateur puis Ajouter à l’écran d’accueil.",
+    ios: "Touchez Partager puis Ajouter à l’écran d’accueil.",
+    desktop: "Si votre navigateur le permet, utilisez le bouton d’installation ou le menu du navigateur.",
+  },
   conduct: {
     eyebrow: "Code de conduite et sécurité",
     title: "Des règles claires pour protéger la confiance et la sécurité sur Hannini",
