@@ -160,6 +160,7 @@ img {
   border-radius: 999px;
   filter: blur(20px);
   opacity: 0.9;
+  pointer-events: none;
 }
 
 .section-title {
@@ -350,5 +351,22 @@ button:disabled {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-shell {
+    min-height: auto;
+  }
+
+  .hero-shell .button-primary,
+  .hero-shell .button-secondary,
+  .hero-shell .chip-button {
+    min-height: 3.25rem;
+  }
+
+  .hero-orb {
+    filter: blur(14px);
+    opacity: 0.7;
   }
 }

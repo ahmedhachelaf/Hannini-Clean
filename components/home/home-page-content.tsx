@@ -104,12 +104,12 @@ export function HomePageContent({
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
-      <section id="hero" className="surface-card hero-shell gradient-frame relative overflow-hidden rounded-[2rem] p-5 text-white sm:p-7 lg:p-10">
-        <div className="hero-orb -left-10 top-8 h-44 w-44 bg-[rgba(125,180,255,0.46)]" />
-        <div className="hero-orb right-10 top-16 h-40 w-40 bg-[rgba(255,255,255,0.22)]" />
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start">
-          <div>
-            <span className="inline-flex rounded-full border border-white/18 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/84 shadow-[0_10px_24px_rgba(8,18,37,0.14)] backdrop-blur">
+      <section id="hero" className="surface-card hero-shell gradient-frame relative isolate overflow-visible rounded-[2rem] p-4 text-white sm:overflow-hidden sm:p-7 lg:p-10">
+        <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(125,180,255,0.42)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
+        <div className="hero-orb right-2 top-4 h-24 w-24 bg-[rgba(255,255,255,0.14)] sm:right-10 sm:top-16 sm:h-40 sm:w-40" />
+        <div className="relative z-[1] grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:gap-8">
+          <div className="min-w-0">
+            <span className="inline-flex rounded-full border border-white/12 bg-[rgba(8,23,69,0.34)] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(8,18,37,0.22)] backdrop-blur">
               {dictionary.home.badge}
             </span>
 
@@ -121,23 +121,23 @@ export function HomePageContent({
               {dictionary.home.title}
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-white/80 sm:text-lg">
+            <p className="mt-5 max-w-2xl text-base leading-8 text-white/88 sm:text-lg">
               {dictionary.home.description}
             </p>
 
             <div className="mt-8 space-y-4">
-              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/72">{dictionary.home.lanesTitle}</div>
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/82">{dictionary.home.lanesTitle}</div>
               <div className="grid gap-4 lg:grid-cols-2">
                 <Link
                   href={`/${locale}/providers`}
-                  className="rounded-[1.75rem] border border-white/16 bg-[linear-gradient(180deg,rgba(255,255,255,0.18),rgba(255,255,255,0.08))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.18)] backdrop-blur"
+                  className="rounded-[1.75rem] border border-white/12 bg-[linear-gradient(180deg,rgba(8,23,69,0.34),rgba(15,47,126,0.24))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.2)] backdrop-blur"
                 >
-                  <div className="text-sm font-semibold text-white/70">{locale === "ar" ? "المسار الأول" : "Volet 1"}</div>
+                  <div className="text-sm font-semibold text-white/82">{locale === "ar" ? "المسار الأول" : "Volet 1"}</div>
                   <div className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.servicesLaneTitle}</div>
-                  <p className="mt-3 text-sm leading-7 text-white/78">{dictionary.home.servicesLaneDescription}</p>
+                  <p className="mt-3 text-sm leading-7 text-white/88">{dictionary.home.servicesLaneDescription}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {serviceCategories.slice(0, 4).map((category) => (
-                      <span key={category.slug} className="chip-button border-white/14 bg-white/10 text-white text-xs">
+                      <span key={category.slug} className="chip-button border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
                         {category.icon} {getLocalizedValue(category.name, locale)}
                       </span>
                     ))}
@@ -147,14 +147,14 @@ export function HomePageContent({
 
                 <Link
                   href={`/${locale}/businesses`}
-                  className="rounded-[1.75rem] border border-white/16 bg-[linear-gradient(180deg,rgba(180,220,255,0.2),rgba(255,255,255,0.08))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.18)] backdrop-blur"
+                  className="rounded-[1.75rem] border border-white/12 bg-[linear-gradient(180deg,rgba(16,44,112,0.34),rgba(33,83,182,0.24))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.2)] backdrop-blur"
                 >
-                  <div className="text-sm font-semibold text-white/70">{locale === "ar" ? "المسار الثاني" : "Volet 2"}</div>
+                  <div className="text-sm font-semibold text-white/82">{locale === "ar" ? "المسار الثاني" : "Volet 2"}</div>
                   <div className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.businessesLaneTitle}</div>
-                  <p className="mt-3 text-sm leading-7 text-white/78">{dictionary.home.businessesLaneDescription}</p>
+                  <p className="mt-3 text-sm leading-7 text-white/88">{dictionary.home.businessesLaneDescription}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {businessCategories.slice(0, 4).map((category) => (
-                      <span key={category.slug} className="chip-button border-white/14 bg-white/10 text-white text-xs">
+                      <span key={category.slug} className="chip-button border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
                         {category.icon} {getLocalizedValue(category.name, locale)}
                       </span>
                     ))}
@@ -176,16 +176,16 @@ export function HomePageContent({
             />
 
             <div className="mt-4 flex flex-wrap gap-3">
-              <Link href={`/${locale}/providers`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+              <Link href={`/${locale}/providers`} className="button-secondary border-white/10 bg-[rgba(8,23,69,0.34)] text-white shadow-[0_18px_36px_rgba(8,18,37,0.2)]">
                 {dictionary.nav.providers}
               </Link>
-              <Link href={`/${locale}/businesses`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+              <Link href={`/${locale}/businesses`} className="button-secondary border-white/10 bg-[rgba(8,23,69,0.34)] text-white shadow-[0_18px_36px_rgba(8,18,37,0.2)]">
                 {dictionary.nav.businesses}
               </Link>
-              <Link href={`/${locale}/grow`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+              <Link href={`/${locale}/grow`} className="button-secondary border-white/10 bg-[rgba(8,23,69,0.34)] text-white shadow-[0_18px_36px_rgba(8,18,37,0.2)]">
                 {dictionary.nav.grow}
               </Link>
-              <Link href={`/${locale}/safety`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+              <Link href={`/${locale}/safety`} className="button-secondary border-white/10 bg-[rgba(8,23,69,0.34)] text-white shadow-[0_18px_36px_rgba(8,18,37,0.2)]">
                 {dictionary.nav.safety}
               </Link>
               <Link href={`/${locale}/join`} className="button-primary">
@@ -194,13 +194,13 @@ export function HomePageContent({
             </div>
 
             <div className="mt-7">
-              <div className="mb-3 text-sm font-semibold text-white/72">{dictionary.home.categoryLabel}</div>
+              <div className="mb-3 text-sm font-semibold text-white/82">{dictionary.home.categoryLabel}</div>
               <div className="flex gap-3 overflow-x-auto pb-2" aria-label={dictionary.home.categoryLabel}>
                 {serviceCategories.map((category) => (
                   <Link
                     key={category.slug}
                     href={`/${locale}/providers?category=${category.slug}`}
-                    className="chip-button border-white/14 bg-white/10 text-white shadow-[0_10px_24px_rgba(8,18,37,0.12)] text-sm"
+                    className="chip-button border-white/10 bg-[rgba(8,23,69,0.34)] text-white shadow-[0_10px_24px_rgba(8,18,37,0.18)] text-sm"
                   >
                     <span>{category.icon}</span>
                     <span>{getLocalizedValue(category.name, locale)}</span>
@@ -210,18 +210,18 @@ export function HomePageContent({
             </div>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid min-w-0 gap-4">
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
-              <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-5 shadow-[0_18px_34px_rgba(8,18,37,0.14)] backdrop-blur">
-                <div className="text-sm text-white/72">{dictionary.home.statsProviders}</div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-[rgba(8,23,69,0.32)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
+                <div className="text-sm text-white/82">{dictionary.home.statsProviders}</div>
                 <div className="mt-2 text-3xl font-extrabold text-white">{summary.providersCount}</div>
               </div>
-              <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-5 shadow-[0_18px_34px_rgba(8,18,37,0.14)] backdrop-blur">
-                <div className="text-sm text-white/72">{dictionary.home.statsZones}</div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-[rgba(8,23,69,0.32)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
+                <div className="text-sm text-white/82">{dictionary.home.statsZones}</div>
                 <div className="mt-2 text-3xl font-extrabold text-white">{summary.zonesCount}</div>
               </div>
-              <div className="rounded-[1.5rem] border border-white/14 bg-white/10 p-5 shadow-[0_18px_34px_rgba(8,18,37,0.14)] backdrop-blur">
-                <div className="text-sm text-white/72">{dictionary.home.statsCategories}</div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-[rgba(8,23,69,0.32)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
+                <div className="text-sm text-white/82">{dictionary.home.statsCategories}</div>
                 <div className="mt-2 text-3xl font-extrabold text-white">{summary.categoriesCount}</div>
               </div>
             </div>
