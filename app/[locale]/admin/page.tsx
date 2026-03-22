@@ -47,6 +47,11 @@ export default async function AdminPage({ params }: AdminPageProps) {
   };
   const pendingProviders = dashboard.providers.filter((provider) => provider.status === "pending" || provider.status === "needs_more_info");
   const reviewedProviders = dashboard.providers.filter((provider) => provider.status === "approved" || provider.status === "rejected");
+  const approvedProviders = dashboard.providers.filter((provider) => provider.status === "approved");
+  const verifiedProviders = dashboard.providers.filter((provider) => provider.isVerified);
+  const supportCasesNeedingAttention = dashboard.supportCases.filter(
+    (supportCase) => supportCase.status !== "resolved" || supportCase.requestSafetyBlock || supportCase.privacySensitive,
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -61,6 +66,20 @@ export default async function AdminPage({ params }: AdminPageProps) {
       <section className="surface-card rounded-[1.75rem] p-6">
         <div className="mb-5 flex items-center justify-between gap-4">
           <h2 className="text-xl font-extrabold">{dictionary.admin.providers}</h2>
+        </div>
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "بانتظار القرار" : "En attente de décision"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">{pendingProviders.length}</div>
+          </div>
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "مقبولون ويظهرون للعموم" : "Approuvés et visibles"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">{approvedProviders.length}</div>
+          </div>
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "موثّقون" : "Vérifiés"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">{verifiedProviders.length}</div>
+          </div>
         </div>
         <div className="space-y-8">
           <div>
@@ -148,6 +167,24 @@ export default async function AdminPage({ params }: AdminPageProps) {
       <section className="surface-card rounded-[1.75rem] p-6">
         <div className="mb-5 flex items-center justify-between gap-4">
           <h2 className="text-xl font-extrabold">{dictionary.admin.supportCases}</h2>
+        </div>
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "حالات مفتوحة أو قيد المتابعة" : "Cas ouverts ou en suivi"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">{supportCasesNeedingAttention.length}</div>
+          </div>
+          <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-4">
+            <div className="text-sm font-semibold text-rose-700">{locale === "ar" ? "طلبات حظر التواصل" : "Demandes de blocage"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-rose-800">
+              {dashboard.supportCases.filter((supportCase) => supportCase.requestSafetyBlock).length}
+            </div>
+          </div>
+          <div className="rounded-[1.25rem] border border-blue-200 bg-blue-50 px-4 py-4">
+            <div className="text-sm font-semibold text-blue-700">{locale === "ar" ? "حالات حساسة" : "Cas sensibles"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-blue-800">
+              {dashboard.supportCases.filter((supportCase) => supportCase.privacySensitive).length}
+            </div>
+          </div>
         </div>
         <div className="space-y-5">
           {dashboard.supportCases.map((supportCase) => (
@@ -321,6 +358,15 @@ function ProviderAdminCard({
               </span>
               <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">{categoryLabel}</span>
               {provider.isVerified ? <span className="status-pill status-pill--verified">{locale === "ar" ? "شارة موثّق" : "Badge vérifié"}</span> : null}
+              <span className={`status-pill ${provider.status === "approved" ? "status-pill--verified" : "status-pill--pending"}`}>
+                {provider.status === "approved"
+                  ? locale === "ar"
+                    ? "ظاهر للعموم"
+                    : "Visible publiquement"
+                  : locale === "ar"
+                    ? "مخفي عن القوائم العامة"
+                    : "Masqué des listes publiques"}
+              </span>
             </div>
             <p className="mt-2 text-sm text-[var(--muted)]">{zoneLabels.join(locale === "ar" ? " • " : " • ")}</p>
           </div>
@@ -374,6 +420,16 @@ function ProviderAdminCard({
             </div>
             <div className="mt-1">
               {locale === "ar" ? "صور الأعمال:" : "Photos :"} {provider.galleryCaptions?.length ?? provider.gallery.length}
+            </div>
+            <div className="mt-1">
+              {locale === "ar" ? "نتيجة الإجراء:" : "Effet public :"}{" "}
+              {provider.status === "approved"
+                ? locale === "ar"
+                  ? "الملف يمكن أن يظهر في القوائم العامة."
+                  : "Le profil peut apparaître dans les listes publiques."
+                : locale === "ar"
+                  ? "الملف يبقى خارج القوائم العامة حتى القبول."
+                  : "Le profil reste hors des listes publiques tant qu'il n'est pas approuvé."}
             </div>
           </div>
 

@@ -59,7 +59,17 @@ export function SupportCaseActions({ locale, supportCase, labels }: SupportCaseA
   };
 
   return (
-    <form action={handleSubmit} className="rounded-[1.5rem] border border-[var(--line)] bg-white p-4">
+    <form action={handleSubmit} className="rounded-[1.5rem] border border-[var(--line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.92))] p-4">
+      <div className="mb-4 rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+        <div className="font-semibold text-[var(--ink)]">
+          {locale === "ar" ? "معالجة الطلب" : "Traitement du ticket"}
+        </div>
+        <p className="mt-2">
+          {locale === "ar"
+            ? "حدّد الحالة الحالية، ثم أضف رداً موجزاً إذا كنت تحتاج توضيحاً أو تريد إغلاق الحالة بشكل واضح."
+            : "Choisissez le statut actuel, puis ajoutez une réponse courte si vous avez besoin d'une précision ou si vous clôturez le dossier."}
+        </p>
+      </div>
       <div className="grid gap-4">
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.supportStatus}</span>
@@ -86,7 +96,13 @@ export function SupportCaseActions({ locale, supportCase, labels }: SupportCaseA
       </div>
 
       {message ? (
-        <p className={`mt-3 text-xs font-medium ${isError ? "text-rose-700" : "text-emerald-700"}`}>{message}</p>
+        <p
+          role={isError ? "alert" : "status"}
+          aria-live="polite"
+          className={`mt-3 text-xs font-medium ${isError ? "text-rose-700" : "text-emerald-700"}`}
+        >
+          {message}
+        </p>
       ) : null}
 
       <button type="submit" disabled={pending} className="button-primary mt-4">

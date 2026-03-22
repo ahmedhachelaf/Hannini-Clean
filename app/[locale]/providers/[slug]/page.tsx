@@ -401,18 +401,39 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
           <h2 className="text-xl font-extrabold">{dictionary.provider.aboutTitle}</h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-[var(--muted)]">
             <p>{getLocalizedValue(provider.bio, locale)}</p>
-            <p>
-              <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "واتساب:" : "WhatsApp :"}</span>{" "}
-              {provider.whatsappNumber}
-            </p>
-            <p>
-              <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الهاتف:" : "Téléphone :"}</span>{" "}
-              {provider.phoneNumber}
-            </p>
+            {provider.profileType === "home_business" ? (
+              <div className="rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-[var(--soft)] px-4 py-4">
+                <div className="font-semibold text-[var(--ink)]">
+                  {locale === "ar" ? "تواصل يحافظ على الخصوصية" : "Contact avec plus de confidentialité"}
+                </div>
+                <p className="mt-2">
+                  {locale === "ar"
+                    ? "تفاصيل التواصل المباشر الكاملة لا تظهر هنا افتراضياً للنشاطات المنزلية. استخدم زر الطلب أو واتساب لبدء تواصل منظم، ثم تتم مشاركة التفاصيل المناسبة بعد التأكيد."
+                    : "Les coordonnées directes complètes ne sont pas affichées ici par défaut pour les activités à domicile. Utilisez le bouton de demande ou WhatsApp pour démarrer un échange encadré, puis les détails utiles sont partagés après confirmation."}
+                </p>
+              </div>
+            ) : (
+              <>
+                <p>
+                  <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "واتساب:" : "WhatsApp :"}</span>{" "}
+                  {provider.whatsappNumber}
+                </p>
+                <p>
+                  <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الهاتف:" : "Téléphone :"}</span>{" "}
+                  {provider.phoneNumber}
+                </p>
+              </>
+            )}
             <p>
               <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "عدد التقييمات:" : "Nombre d'avis :"}</span>{" "}
               {provider.reviewCount}
             </p>
+            {providerZones.length > 0 ? (
+              <p>
+                <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الولاية والمنطقة:" : "Wilaya et zone :"}</span>{" "}
+                {primaryZone ? `${getLocalizedValue(primaryZone.provinceName, locale)} • ${getLocalizedValue(primaryZone.name, locale)}` : providerZones.map((zone) => getLocalizedValue(zone.name, locale)).join(" • ")}
+              </p>
+            ) : null}
           </div>
           {socialLinks.length > 0 ? (
             <div className="mt-6 border-t border-[var(--line)] pt-5">

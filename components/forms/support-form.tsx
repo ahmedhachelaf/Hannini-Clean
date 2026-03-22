@@ -42,6 +42,33 @@ type SupportFormProps = {
 export function SupportForm({ locale, defaultValues, labels }: SupportFormProps) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SupportSubmissionResult | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState(defaultValues?.category ?? "general_support");
+  const categoryHints = {
+    harassment:
+      locale === "ar"
+        ? "استخدم هذا الخيار إذا كان هناك كلام مسيء، ضغط، أو سلوك شخصي غير مقبول."
+        : "Utilisez cette catégorie en cas de paroles déplacées, pression ou comportement personnel inacceptable.",
+    unsafe_behavior:
+      locale === "ar"
+        ? "للحالات التي تشعر فيها أن التواصل أو اللقاء أو الترتيب غير آمن."
+        : "Pour les situations où l'échange, la rencontre ou l'organisation vous semble peu sûre.",
+    fraud_or_scam:
+      locale === "ar"
+        ? "إذا شككت في احتيال، طلب غير طبيعي، أو محاولة استغلال مالي."
+        : "Si vous suspectez une fraude, une demande anormale ou une tentative d'arnaque.",
+    inappropriate_contact:
+      locale === "ar"
+        ? "إذا كان التواصل متكرراً بشكل مزعج أو خرج عن إطار الخدمة."
+        : "Si le contact devient insistant, gênant ou sort du cadre du service.",
+    provider_report:
+      locale === "ar"
+        ? "للإبلاغ عن مزود أو نشاط معين مع مرجع واضح."
+        : "Pour signaler un prestataire ou une activité précise avec une référence claire.",
+    general_support:
+      locale === "ar"
+        ? "لأي مساعدة عامة أو مشكلة لا تدخل في الفئات السابقة."
+        : "Pour toute aide générale ou un problème qui n'entre pas dans les autres catégories.",
+  };
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -70,8 +97,14 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(231,240,255,0.94))] p-6"
     >
       <div>
-        <h1 className={`text-3xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h1>
+        <h2 className={`text-3xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
+        <div className="mt-4 rounded-[1.25rem] border border-[rgba(20,92,255,0.14)] bg-[var(--soft)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+          {categoryHints[selectedCategory as keyof typeof categoryHints] ??
+            (locale === "ar"
+              ? "اشرح المشكلة بوضوح قصير، وأضف المرجع أو الصورة فقط إذا كانت تساعد الإدارة على الفهم."
+              : "Expliquez le problème clairement en quelques lignes et ajoutez une référence ou une image seulement si cela aide l'équipe à comprendre.")}
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -84,7 +117,12 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         </label>
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.categoryLabel}</span>
-          <select name="category" defaultValue={defaultValues?.category ?? "general_support"} className="input-base">
+          <select
+            name="category"
+            value={selectedCategory}
+            onChange={(event) => setSelectedCategory(event.target.value)}
+            className="input-base"
+          >
             {Object.entries(labels.categories).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -95,13 +133,32 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       </div>
 
       <label>
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.subjectLabel}</span>
-        <input name="subject" required className="input-base" />
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+          {labels.subjectLabel} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
+        </span>
+        <input
+          name="subject"
+          required
+          className="input-base"
+          placeholder={locale === "ar" ? "مثال: تواصل غير مناسب بعد الحجز" : "Exemple : contact inapproprié après réservation"}
+        />
       </label>
 
       <label>
-        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.messageLabel}</span>
-        <textarea name="message" required rows={6} className="input-base min-h-36 resize-y" />
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+          {labels.messageLabel} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
+        </span>
+        <textarea
+          name="message"
+          required
+          rows={6}
+          className="input-base min-h-36 resize-y"
+          placeholder={
+            locale === "ar"
+              ? "اكتب ما حدث، متى حصل، ومن هو الطرف المعني، وما الذي تحتاجه من الإدارة الآن."
+              : "Expliquez ce qui s'est passé, quand, avec qui, et ce que vous attendez de l'équipe maintenant."
+          }
+        />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -160,7 +217,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       </div>
 
       {result?.ok ? (
-        <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
+        <div role="status" aria-live="polite" className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
           <div className="font-semibold">{labels.successTitle}</div>
           <div className="mt-1">{labels.successDescription}</div>
           {result.caseId ? (
@@ -171,7 +228,11 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         </div>
       ) : null}
 
-      {result?.message && !result.ok ? <p className="text-sm text-rose-700">{result.message}</p> : null}
+      {result?.message && !result.ok ? (
+        <p role="alert" aria-live="polite" className="text-sm font-medium text-rose-700">
+          {result.message}
+        </p>
+      ) : null}
 
       <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit">
         {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : locale === "ar" ? "إرسال الطلب" : "Envoyer la demande"}
