@@ -17,7 +17,13 @@ values
   ('oran-centre', 'Oran', 'وهران الوسط', 'Oran Centre', 1),
   ('bir-el-djir', 'Oran', 'بئر الجير', 'Bir El Djir', 2),
   ('es-senia', 'Oran', 'السانيا', 'Es Senia', 3),
-  ('ain-turk', 'Oran', 'عين الترك', 'Ain Turk', 4)
+  ('ain-turk', 'Oran', 'عين الترك', 'Ain Turk', 4),
+  ('algiers-centre', 'Algiers', 'الجزائر الوسط', 'Alger Centre', 5),
+  ('bab-ezzouar', 'Algiers', 'باب الزوار', 'Bab Ezzouar', 6),
+  ('hydra', 'Algiers', 'حيدرة', 'Hydra', 7),
+  ('bir-mourad-rais', 'Algiers', 'بئر مراد رايس', 'Bir Mourad Rais', 8),
+  ('cheraga', 'Algiers', 'الشراقة', 'Cheraga', 9),
+  ('rouiba', 'Algiers', 'رويبة', 'Rouiba', 10)
 on conflict (slug) do nothing;
 
 insert into public.users (id, full_name, phone_number, role)

@@ -107,7 +107,7 @@ export const fr = {
     badge: "Marketplace de services a domicile en Algerie",
     title: "Trouvez un artisan fiable dans votre wilaya en quelques etapes simples.",
     description:
-      "Hannini aide les foyers a repérer plus vite des artisans fiables dans les wilayas de lancement comme Oran, Djelfa et Sidi Bel Abbes, avec zones visibles, repères de prix et confirmation WhatsApp.",
+      "Hannini aide les foyers a repérer plus vite des artisans fiables dans les wilayas de lancement comme Oran, Djelfa, Sidi Bel Abbes et Alger, avec zones visibles, repères de prix et confirmation WhatsApp.",
     searchPlaceholder: "Rechercher un service ou un prestataire",
     provinceLabel: "Wilaya",
     zoneLabel: "Ville ou zone",

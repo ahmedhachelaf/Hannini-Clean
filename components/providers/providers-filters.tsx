@@ -89,7 +89,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
           name="province"
           value={province}
           onChange={(event) => setProvince(event.target.value)}
-          className="input-base"
+          className="input-base min-w-0 text-sm sm:text-base"
         >
           <option value="">{locale === "ar" ? "كل الولايات" : "Toutes les wilayas"}</option>
           {provinces.map((item) => (
@@ -102,8 +102,16 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
 
       <label className="lg:w-56">
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.zoneLabel}</span>
-        <select name="zone" defaultValue={values.zone ?? ""} className="input-base">
-          <option value="">{locale === "ar" ? "كل المدن والمناطق" : "Toutes les villes et zones"}</option>
+        <select name="zone" defaultValue={values.zone ?? ""} className="input-base min-w-0 text-sm sm:text-base" disabled={!province}>
+          <option value="">
+            {province
+              ? locale === "ar"
+                ? "كل المدن والمناطق"
+                : "Toutes les villes et zones"
+              : locale === "ar"
+                ? "اختر الولاية أولاً"
+                : "Choisissez d'abord la wilaya"}
+          </option>
           {filteredZones.map((zone) => (
             <option key={zone.slug} value={zone.slug}>
               {getLocalizedValue(zone.name, locale)}

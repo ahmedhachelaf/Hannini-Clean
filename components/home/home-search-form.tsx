@@ -50,7 +50,7 @@ export function HomeSearchForm({ locale, zones, labels }: HomeSearchFormProps) {
         name="province"
         value={province}
         onChange={(event) => setProvince(event.target.value)}
-        className="input-base"
+        className="input-base min-w-0 text-sm sm:text-base"
         aria-label={labels.provinceLabel}
       >
         <option value="">{labels.provinceLabel}</option>
@@ -61,8 +61,8 @@ export function HomeSearchForm({ locale, zones, labels }: HomeSearchFormProps) {
         ))}
       </select>
 
-      <select name="zone" className="input-base" aria-label={labels.zoneLabel}>
-        <option value="">{labels.zoneLabel}</option>
+      <select name="zone" className="input-base min-w-0 text-sm sm:text-base" aria-label={labels.zoneLabel} disabled={!province}>
+        <option value="">{province ? labels.zoneLabel : locale === "ar" ? "اختر الولاية أولاً" : "Choisissez d'abord la wilaya"}</option>
         {filteredZones.map((zone) => (
           <option key={zone.slug} value={zone.slug}>
             {getLocalizedValue(zone.name, locale)}
