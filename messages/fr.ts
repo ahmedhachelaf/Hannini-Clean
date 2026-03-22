@@ -282,6 +282,48 @@ export const fr = {
     academySoon: "Hannini Academy arrive bientôt — un contenu plus riche viendra plus tard.",
     laneService: "Utile pour les prestataires de services à domicile",
     laneBusiness: "Utile pour les activités à domicile et micro-entreprises locales",
+    tipTitle: "Conseil du jour",
+    tips: [
+      "Clarifiez le prix et le service avant de commencer pour éviter les malentendus.",
+      "Utilisez des photos claires et récentes pour inspirer confiance.",
+      "Confirmez l’horaire ou la livraison par écrit avant d’intervenir.",
+      "Gardez les échanges essentiels dans un canal facile à retrouver.",
+    ],
+    communityTitle: "Du terrain",
+    communityItems: [
+      {
+        quote: "De meilleures photos et une présentation plus claire ont rendu mes demandes plus sérieuses.",
+        author: "Prestataire à domicile",
+      },
+      {
+        quote: "Répondre vite et clairement sur le prix et le délai m’a aidée à gagner la confiance.",
+        author: "Activité à domicile",
+      },
+      {
+        quote: "Quand j’explique le périmètre du service dès le départ, les échanges sont plus simples.",
+        author: "Prestataire indépendante",
+      },
+    ],
+    miniCardsTitle: "Repères courts et utiles",
+    miniCards: [
+      {
+        title: "Prix clairs",
+        description: "Dites ce que couvre votre tarif et ce qui peut s’ajouter pour éviter les surprises.",
+      },
+      {
+        title: "Communication pro",
+        description: "Un premier message simple et net donne tout de suite un cadre plus sérieux.",
+      },
+      {
+        title: "Inspirer confiance",
+        description: "Des exemples réels, des délais tenus et un ton régulier renforcent votre crédibilité.",
+      },
+      {
+        title: "Meilleures photos",
+        description: "Des images nettes, lumineuses et fidèles au résultat rassurent plus vite.",
+      },
+    ],
+    liveSoon: "Des sessions en direct et conseils plus approfondis arriveront plus tard",
     safetyTitle: "Sécurité et limites professionnelles",
     safetyDescription:
       "Des repères courts pour fixer un cadre clair, protéger votre vie privée et réagir vite quand un client devient difficile ou intrusif.",
