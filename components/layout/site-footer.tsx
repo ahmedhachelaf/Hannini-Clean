@@ -7,6 +7,7 @@ type SiteFooterProps = {
     home: string;
     providers: string;
     businesses: string;
+    business: string;
     grow: string;
     safety: string;
     join: string;
@@ -33,6 +34,7 @@ export function SiteFooter({ locale, nav }: SiteFooterProps) {
           <Link className="chip-button min-h-11 px-4" href={`/${locale}`}>{nav.home}</Link>
           <Link className="chip-button min-h-11 px-4" href={`/${locale}/providers`}>{nav.providers}</Link>
           <Link className="chip-button min-h-11 px-4" href={`/${locale}/businesses`}>{nav.businesses}</Link>
+          <Link className="chip-button min-h-11 px-4" href={`/${locale}/business`}>{nav.business}</Link>
           <Link className="chip-button min-h-11 px-4" href={`/${locale}/grow`}>{nav.grow}</Link>
           <Link className="chip-button min-h-11 px-4" href={`/${locale}/safety`}>{nav.safety}</Link>
           <Link className="chip-button min-h-11 px-4" href={`/${locale}/join`}>{nav.join}</Link>

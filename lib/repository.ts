@@ -1,10 +1,12 @@
 import {
   bookings as seedBookings,
+  businessRequests as seedBusinessRequests,
   categories as seedCategories,
   providers as seedProviders,
   reviews as seedReviews,
   zones as seedZones,
 } from "@/data/seed";
+import { findDemoBusinessRequest, listDemoBusinessRequests } from "@/lib/business-request-store";
 import { formatDate } from "@/lib/format";
 import { defaultLocale } from "@/lib/i18n";
 import { getProviderScore } from "@/lib/ranking";
@@ -13,6 +15,8 @@ import { findDemoSupportCase, listDemoSupportCases } from "@/lib/support-store";
 import type {
   AdminDashboardData,
   Booking,
+  BusinessRequest,
+  BusinessRequestStatus,
   Category,
   Filters,
   MapCoordinates,
@@ -143,6 +147,28 @@ type SupportMessageRow = {
   message: string;
   attachment_names: string[] | null;
   created_at: string;
+};
+
+type BusinessRequestRow = {
+  id: string;
+  company_name: string;
+  contact_name: string;
+  phone: string;
+  email: string | null;
+  category_slug: string;
+  description: string;
+  wilaya_slug: string;
+  frequency: "one_time" | "recurring";
+  timeline: string;
+  budget: string | null;
+  preferred_provider_type: "service_provider" | "home_business" | "either";
+  attachment_names: string[] | null;
+  status: BusinessRequestStatus;
+  matched_provider_ids: string[] | null;
+  admin_notes: string | null;
+  consent_accepted: boolean | null;
+  created_at: string;
+  updated_at: string;
 };
 
 function stripPrefix(value: string, prefix: string) {
@@ -435,6 +461,30 @@ function mapSupportCaseRow(row: SupportCaseRow): SupportCase {
   };
 }
 
+function mapBusinessRequestRow(row: BusinessRequestRow): BusinessRequest {
+  return {
+    id: row.id,
+    companyName: row.company_name,
+    contactName: row.contact_name,
+    phone: row.phone,
+    email: row.email ?? undefined,
+    categorySlug: row.category_slug,
+    description: row.description,
+    wilayaSlug: row.wilaya_slug,
+    frequency: row.frequency,
+    timeline: row.timeline,
+    budget: row.budget ?? undefined,
+    preferredProviderType: row.preferred_provider_type,
+    attachmentNames: row.attachment_names ?? [],
+    status: row.status,
+    matchedProviderIds: row.matched_provider_ids ?? [],
+    adminNotes: row.admin_notes ?? undefined,
+    consentAccepted: row.consent_accepted ?? true,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 async function fetchSupabaseProviders() {
   if (!hasSupabaseServerEnv()) {
     return null;
@@ -684,6 +734,51 @@ async function fetchSupabaseSupportCases() {
   return (data as SupportCaseRow[]).map(mapSupportCaseRow);
 }
 
+async function fetchSupabaseBusinessRequests() {
+  if (!hasSupabaseServerEnv()) {
+    return null;
+  }
+
+  const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("business_requests")
+    .select(
+      `
+        id,
+        company_name,
+        contact_name,
+        phone,
+        email,
+        category_slug,
+        description,
+        wilaya_slug,
+        frequency,
+        timeline,
+        budget,
+        preferred_provider_type,
+        attachment_names,
+        status,
+        matched_provider_ids,
+        admin_notes,
+        consent_accepted,
+        created_at,
+        updated_at
+      `,
+    )
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    return null;
+  }
+
+  return (data as BusinessRequestRow[]).map(mapBusinessRequestRow);
+}
+
 async function fetchSupabaseMetadata<Row>(table: "categories" | "zones") {
   if (!hasSupabaseServerEnv()) {
     return null;
@@ -806,6 +901,10 @@ export async function getSupportCases() {
   return (await fetchSupabaseSupportCases()) ?? listDemoSupportCases();
 }
 
+export async function getBusinessRequests() {
+  return (await fetchSupabaseBusinessRequests()) ?? listDemoBusinessRequests();
+}
+
 export async function getSupportCaseById(id: string) {
   if (!hasSupabaseServerEnv()) {
     return findDemoSupportCase(id);
@@ -815,17 +914,27 @@ export async function getSupportCaseById(id: string) {
   return items.find((item) => item.id === id) ?? null;
 }
 
+export async function getBusinessRequestById(id: string) {
+  if (!hasSupabaseServerEnv()) {
+    return findDemoBusinessRequest(id);
+  }
+
+  const items = await getBusinessRequests();
+  return items.find((item) => item.id === id) ?? null;
+}
+
 export async function getBookingById(id: string) {
   const items = await getBookings();
   return items.find((booking) => booking.id === id) ?? null;
 }
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {
-  const [providers, bookings, reviews, supportCases, categories, zones] = await Promise.all([
+  const [providers, bookings, reviews, supportCases, businessRequests, categories, zones] = await Promise.all([
     getProviders({}, true),
     getBookings(),
     getReviews(),
     getSupportCases(),
+    getBusinessRequests(),
     getCategories(),
     getZones(),
   ]);
@@ -835,6 +944,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     bookings,
     reviews,
     supportCases,
+    businessRequests,
     categories,
     zones,
   };

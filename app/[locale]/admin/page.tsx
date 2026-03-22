@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BusinessRequestActions } from "@/components/admin/business-request-actions";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { MetadataManager } from "@/components/admin/metadata-manager";
 import { ProviderActions } from "@/components/admin/provider-actions";
@@ -39,6 +40,13 @@ export default async function AdminPage({ params }: AdminPageProps) {
     resolved: dictionary.admin.resolved,
   };
   const supportCategoryLabels = dictionary.support.categories;
+  const businessStatusLabels = {
+    new: dictionary.admin.businessNew,
+    under_review: dictionary.admin.businessUnderReview,
+    matched: dictionary.admin.businessMatched,
+    closed: dictionary.admin.businessClosed,
+    rejected: dictionary.admin.businessRejected,
+  };
   const providerStatusLabels = {
     approved: dictionary.common.approved,
     pending: dictionary.common.pending,
@@ -52,6 +60,7 @@ export default async function AdminPage({ params }: AdminPageProps) {
   const supportCasesNeedingAttention = dashboard.supportCases.filter(
     (supportCase) => supportCase.status !== "resolved" || supportCase.requestSafetyBlock || supportCase.privacySensitive,
   );
+  const activeBusinessRequests = dashboard.businessRequests.filter((request) => request.status !== "closed" && request.status !== "rejected");
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -246,6 +255,108 @@ export default async function AdminPage({ params }: AdminPageProps) {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="surface-card rounded-[1.75rem] p-6">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className="text-xl font-extrabold">{dictionary.admin.businessRequests}</h2>
+        </div>
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "طلبات نشطة" : "Demandes actives"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">{activeBusinessRequests.length}</div>
+          </div>
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "تمت مطابقتها" : "Déjà mises en relation"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">
+              {dashboard.businessRequests.filter((request) => request.status === "matched").length}
+            </div>
+          </div>
+          <div className="rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4">
+            <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "طلبات جديدة" : "Nouvelles demandes"}</div>
+            <div className="mt-2 text-3xl font-extrabold text-[var(--ink)]">
+              {dashboard.businessRequests.filter((request) => request.status === "new").length}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-5">
+          {dashboard.businessRequests.length === 0 ? (
+            <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4 text-sm text-[var(--muted)]">
+              {dictionary.admin.businessNoRequests}
+            </div>
+          ) : (
+            dashboard.businessRequests.map((businessRequest) => {
+              const categoryLabel = getLocalizedValue(
+                categoryMap.get(businessRequest.categorySlug)?.name ?? { ar: businessRequest.categorySlug, fr: businessRequest.categorySlug },
+                locale,
+              );
+              const provinceLabel = getLocalizedValue(
+                dashboard.zones.find((zone) => zone.provinceSlug === businessRequest.wilayaSlug)?.provinceName ?? { ar: businessRequest.wilayaSlug, fr: businessRequest.wilayaSlug },
+                locale,
+              );
+              const suggestedProviders = approvedProviders.filter((provider) => {
+                if (provider.categorySlug !== businessRequest.categorySlug) {
+                  return false;
+                }
+
+                if (businessRequest.preferredProviderType === "either") {
+                  return true;
+                }
+
+                return provider.profileType === businessRequest.preferredProviderType;
+              });
+
+              return (
+                <article key={businessRequest.id} className="rounded-[1.5rem] border border-[var(--line)] bg-white p-5">
+                  <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
+                          {businessStatusLabels[businessRequest.status]}
+                        </span>
+                        <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                          {categoryLabel}
+                        </span>
+                        <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                          {provinceLabel}
+                        </span>
+                        <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                          #{businessRequest.id}
+                        </span>
+                      </div>
+                      <h3 className={`mt-3 text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{businessRequest.companyName}</h3>
+                      <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{businessRequest.description}</p>
+                      <div className="mt-4 grid gap-2 text-sm text-[var(--muted)] sm:grid-cols-2">
+                        <div>{dictionary.admin.businessContact}: {businessRequest.contactName}</div>
+                        <div>{locale === "ar" ? "الهاتف" : "Téléphone"}: {businessRequest.phone}</div>
+                        <div>{dictionary.admin.businessFrequency}: {businessRequest.frequency === "recurring" ? (locale === "ar" ? "متكرر" : "Récurrent") : (locale === "ar" ? "مرة واحدة" : "Ponctuel")}</div>
+                        <div>{dictionary.admin.businessTimeline}: {businessRequest.timeline}</div>
+                        <div>{dictionary.admin.businessPreferredType}: {businessRequest.preferredProviderType === "either" ? (locale === "ar" ? "أيّهما مناسب" : "Peu importe") : businessRequest.preferredProviderType === "home_business" ? (locale === "ar" ? "نشاط منزلي" : "Activité à domicile") : (locale === "ar" ? "مزود خدمة فردي" : "Prestataire individuel")}</div>
+                        <div>{dictionary.admin.businessBudget}: {businessRequest.budget || "-"}</div>
+                      </div>
+                      {businessRequest.attachmentNames.length > 0 ? (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {businessRequest.attachmentNames.map((attachment) => (
+                            <span key={attachment} className="chip-button min-h-0 px-3 py-2 text-xs">
+                              {attachment}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <BusinessRequestActions
+                      locale={locale}
+                      businessRequest={businessRequest}
+                      suggestedProviders={suggestedProviders}
+                      labels={dictionary.admin}
+                    />
+                  </div>
+                </article>
+              );
+            })
+          )}
         </div>
       </section>
 

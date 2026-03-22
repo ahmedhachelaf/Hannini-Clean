@@ -1,4 +1,4 @@
-import type { Booking, Category, Provider, Review, SupportCase, Zone } from "@/lib/types";
+import type { Booking, BusinessRequest, Category, Provider, Review, SupportCase, Zone } from "@/lib/types";
 
 export const categories: Category[] = [
   {
@@ -1140,6 +1140,53 @@ export const supportCases: SupportCase[] = [
         createdAt: "2026-03-21T09:20:00.000Z",
       },
     ],
+  },
+];
+
+export const businessRequests: BusinessRequest[] = [
+  {
+    id: "business-request-1",
+    companyName: "Espace Atlas Events",
+    contactName: "سارة لعروسي",
+    phone: "+213 770 22 44 55",
+    email: "atlas.events@example.com",
+    categorySlug: "home-cooking",
+    description:
+      "نحتاج مزوّد طبخ منزلي موثوق لتحضير بوفيه محلي بسيط لفعالية شركة في وهران مع إمكانية تكرار الطلب شهرياً إذا كانت الجودة والتنظيم مناسبين.",
+    wilayaSlug: "oran",
+    frequency: "recurring",
+    timeline: "خلال أسبوعين",
+    budget: "ميزانية متوسطة لكل فعالية",
+    preferredProviderType: "home_business",
+    attachmentNames: ["brief-evenement.pdf"],
+    status: "under_review",
+    matchedProviderIds: ["provider-oum-yasmine-cuisine"],
+    adminNotes: "مرشحة جيدة لطلبات المناسبات الصغيرة مع متابعة على القدرة الأسبوعية.",
+    consentAccepted: true,
+    createdAt: "2026-03-20T11:10:00.000Z",
+    updatedAt: "2026-03-21T08:35:00.000Z",
+  },
+  {
+    id: "business-request-2",
+    companyName: "Maison El Wiam",
+    contactName: "Nadia B.",
+    phone: "+213 661 99 33 20",
+    email: "",
+    categorySlug: "tailoring",
+    description:
+      "Recherche un atelier ou une activité à domicile capable de préparer une petite série de retouches et broderies pour des coffrets cadeaux d'entreprise.",
+    wilayaSlug: "sidi-bel-abbes",
+    frequency: "one_time",
+    timeline: "Avant la fin du mois",
+    budget: "Selon échantillon validé",
+    preferredProviderType: "either",
+    attachmentNames: [],
+    status: "new",
+    matchedProviderIds: [],
+    adminNotes: "",
+    consentAccepted: true,
+    createdAt: "2026-03-21T09:45:00.000Z",
+    updatedAt: "2026-03-21T09:45:00.000Z",
   },
 ];
 

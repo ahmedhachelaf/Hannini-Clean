@@ -11,6 +11,7 @@ type SiteHeaderProps = {
       home: string;
       providers: string;
       businesses: string;
+      business: string;
       grow: string;
       safety: string;
       join: string;
@@ -27,6 +28,7 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
     { href: `/${locale}`, label: dictionary.nav.home },
     { href: `/${locale}/providers`, label: dictionary.nav.providers },
     { href: `/${locale}/businesses`, label: dictionary.nav.businesses },
+    { href: `/${locale}/business`, label: dictionary.nav.business },
     { href: `/${locale}/grow`, label: dictionary.nav.grow },
     { href: `/${locale}/safety`, label: dictionary.nav.safety },
     { href: `/${locale}/join`, label: dictionary.nav.join },

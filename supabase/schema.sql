@@ -7,6 +7,7 @@ create type public.verification_status as enum ('pending', 'verified', 'rejected
 create type public.contact_method as enum ('whatsapp', 'phone');
 create type public.support_actor as enum ('customer', 'provider', 'admin');
 create type public.support_status as enum ('open', 'in_review', 'waiting_for_user', 'resolved');
+create type public.business_request_status as enum ('new', 'under_review', 'matched', 'closed', 'rejected');
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -191,6 +192,28 @@ create table if not exists public.support_messages (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.business_requests (
+  id uuid primary key default gen_random_uuid(),
+  company_name text not null,
+  contact_name text not null,
+  phone text not null,
+  email text,
+  category_slug text not null references public.categories(slug) on delete restrict,
+  description text not null,
+  wilaya_slug text not null,
+  frequency text not null,
+  timeline text not null,
+  budget text,
+  preferred_provider_type text not null default 'either',
+  attachment_names text[] not null default '{}',
+  status public.business_request_status not null default 'new',
+  matched_provider_ids uuid[] not null default '{}',
+  admin_notes text,
+  consent_accepted boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists providers_status_idx on public.providers (approval_status);
 create index if not exists providers_verified_idx on public.providers (is_verified);
 create index if not exists provider_services_category_idx on public.provider_services (category_slug);
@@ -200,6 +223,8 @@ create index if not exists reviews_provider_idx on public.reviews (provider_id);
 create index if not exists support_cases_status_idx on public.support_cases (status);
 create index if not exists support_cases_provider_idx on public.support_cases (provider_id);
 create index if not exists support_messages_case_idx on public.support_messages (support_case_id);
+create index if not exists business_requests_status_idx on public.business_requests (status);
+create index if not exists business_requests_category_idx on public.business_requests (category_slug);
 
 drop trigger if exists set_categories_updated_at on public.categories;
 create trigger set_categories_updated_at before update on public.categories for each row execute function public.set_updated_at();
@@ -221,3 +246,6 @@ create trigger set_provider_verifications_updated_at before update on public.pro
 
 drop trigger if exists set_support_cases_updated_at on public.support_cases;
 create trigger set_support_cases_updated_at before update on public.support_cases for each row execute function public.set_updated_at();
+
+drop trigger if exists set_business_requests_updated_at on public.business_requests;
+create trigger set_business_requests_updated_at before update on public.business_requests for each row execute function public.set_updated_at();

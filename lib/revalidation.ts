@@ -6,6 +6,7 @@ export function revalidateMarketplacePaths(providerSlug?: string) {
 
   for (const locale of locales) {
     revalidatePath(`/${locale}`);
+    revalidatePath(`/${locale}/business`);
     revalidatePath(`/${locale}/providers`);
     revalidatePath(`/${locale}/businesses`);
     revalidatePath(`/${locale}/join`);

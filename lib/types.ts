@@ -34,6 +34,12 @@ export type SupportActor = "customer" | "provider";
 
 export type SupportStatus = "open" | "in_review" | "waiting_for_user" | "resolved";
 
+export type BusinessRequestStatus = "new" | "under_review" | "matched" | "closed" | "rejected";
+
+export type BusinessRequestFrequency = "one_time" | "recurring";
+
+export type BusinessPreferredProviderType = ProfileType | "either";
+
 export type SupportCategory =
   | "booking_issue"
   | "provider_report"
@@ -170,6 +176,28 @@ export type SupportCase = {
   messages: SupportMessage[];
 };
 
+export type BusinessRequest = {
+  id: string;
+  companyName: string;
+  contactName: string;
+  phone: string;
+  email?: string;
+  categorySlug: string;
+  description: string;
+  wilayaSlug: string;
+  frequency: BusinessRequestFrequency;
+  timeline: string;
+  budget?: string;
+  preferredProviderType: BusinessPreferredProviderType;
+  attachmentNames: string[];
+  status: BusinessRequestStatus;
+  matchedProviderIds: string[];
+  adminNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+  consentAccepted: boolean;
+};
+
 export type ProviderSignupInput = {
   profileType: ProfileType;
   fullName: string;
@@ -257,6 +285,22 @@ export type SupportReplyInput = {
   attachmentNames: string[];
 };
 
+export type BusinessRequestInput = {
+  companyName: string;
+  contactName: string;
+  phone: string;
+  email?: string;
+  categorySlug: string;
+  description: string;
+  wilayaSlug: string;
+  frequency: BusinessRequestFrequency;
+  timeline: string;
+  budget?: string;
+  preferredProviderType: BusinessPreferredProviderType;
+  attachmentNames: string[];
+  consentAccepted: boolean;
+};
+
 export type BookingSubmissionResult = {
   ok: boolean;
   message: string;
@@ -286,6 +330,13 @@ export type SupportSubmissionResult = {
   demoMode?: boolean;
 };
 
+export type BusinessRequestSubmissionResult = {
+  ok: boolean;
+  message: string;
+  requestId?: string;
+  demoMode?: boolean;
+};
+
 export type Filters = {
   profileType?: ProfileType;
   category?: string;
@@ -300,6 +351,7 @@ export type AdminDashboardData = {
   bookings: Booking[];
   reviews: Review[];
   supportCases: SupportCase[];
+  businessRequests: BusinessRequest[];
   categories: Category[];
   zones: Zone[];
 };

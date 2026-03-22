@@ -65,6 +65,30 @@ export const supportReplySchema = z.object({
   attachmentNames: z.array(z.string()).default([]),
 });
 
+export const businessRequestSchema = z.object({
+  companyName: z.string().min(2),
+  contactName: z.string().min(2),
+  phone: z.string().min(8),
+  email: z.string().email().optional().or(z.literal("")).default(""),
+  categorySlug: z.string().min(1),
+  description: z.string().min(10),
+  wilayaSlug: z.string().min(1),
+  frequency: z.enum(["one_time", "recurring"]),
+  timeline: z.string().min(2),
+  budget: z.string().optional().or(z.literal("")).default(""),
+  preferredProviderType: z.enum(["service_provider", "home_business", "either"]),
+  attachmentNames: z.array(z.string()).default([]),
+  consentAccepted: z.boolean().default(false),
+}).superRefine((value, ctx) => {
+  if (!value.consentAccepted) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["consentAccepted"],
+      message: "consent_required",
+    });
+  }
+});
+
 export const adminLoginSchema = z.object({
   password: z.string().min(1),
 });
