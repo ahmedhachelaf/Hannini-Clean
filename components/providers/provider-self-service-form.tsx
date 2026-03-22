@@ -19,11 +19,19 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
   const [whatsappNumber, setWhatsappNumber] = useState(provider.whatsappNumber);
   const [shortDescription, setShortDescription] = useState(provider.bio[locale]);
   const [zoneSlug, setZoneSlug] = useState(provider.zones[0] ?? zones[0]?.slug ?? "");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function run(action: "update" | "deactivate" | "reactivate" | "request_deletion") {
     setPending(action);
     setMessage("");
     setIsError(false);
+
+    if (action === "update" && newPassword && newPassword !== confirmPassword) {
+      setIsError(true);
+      setMessage(locale === "ar" ? "تأكيد كلمة المرور غير مطابق." : "La confirmation du mot de passe ne correspond pas.");
+      return;
+    }
 
     try {
       const response = await fetch(`/api/providers/${provider.id}/self-service`, {
@@ -39,6 +47,7 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
           whatsappNumber,
           shortDescription,
           zoneSlug,
+          newPassword,
         }),
       });
 
@@ -67,8 +76,10 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
             : action === "deactivate"
               ? "Le profil est maintenant mis en pause."
               : action === "reactivate"
-                ? "Le profil est de nouveau actif."
+              ? "Le profil est de nouveau actif."
                 : "La demande de départ a bien été enregistrée.");
+      setNewPassword("");
+      setConfirmPassword("");
       window.location.reload();
     } catch {
       setIsError(true);
@@ -133,6 +144,35 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
           className="input-base min-h-28 resize-y"
         />
       </label>
+
+      <section className="mt-4 rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] p-5">
+        <h2 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+          {locale === "ar" ? "حماية الدخول إلى لوحة مزود الخدمة" : "Protection de votre espace prestataire"}
+        </h2>
+        <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+          {provider.verification.hasPassword
+            ? locale === "ar"
+              ? "يمكنك تغيير كلمة المرور من هنا في أي وقت."
+              : "Vous pouvez changer votre mot de passe ici à tout moment."
+            : locale === "ar"
+              ? "لم يتم ضبط كلمة مرور بعد. عيّن كلمة مرور الآن حتى يبقى دخولك إلى اللوحة تحت سيطرتك."
+              : "Aucun mot de passe n’est encore défini. Choisissez-en un maintenant pour garder votre espace sous votre contrôle."}
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label>
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {locale === "ar" ? "كلمة المرور الجديدة" : "Nouveau mot de passe"}
+            </span>
+            <input value={newPassword} onChange={(event) => setNewPassword(event.target.value)} type="password" className="input-base" />
+          </label>
+          <label>
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {locale === "ar" ? "تأكيد كلمة المرور" : "Confirmer le mot de passe"}
+            </span>
+            <input value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} type="password" className="input-base" />
+          </label>
+        </div>
+      </section>
 
       {message ? (
         <div

@@ -74,6 +74,10 @@ type FormCopy = {
   profilePhoto: string;
   workPhotos: string;
   verificationDocument: string;
+  accountAccessTitle: string;
+  accountAccessHint: string;
+  password: string;
+  passwordConfirmation: string;
   ageTitle: string;
   ageConfirmation: string;
   conductTitle: string;
@@ -137,6 +141,10 @@ function getCopy(locale: Locale): FormCopy {
       profilePhoto: "الصورة الشخصية أو الشعار",
       workPhotos: "صور الأعمال",
       verificationDocument: "وثيقة التحقق",
+      accountAccessTitle: "حماية لوحة مزود الخدمة",
+      accountAccessHint: "اختر كلمة مرور من 8 أحرف أو أكثر حتى يصبح دخولك إلى لوحة مزود الخدمة وحذف الحساب أو إيقافه تحت سيطرتك.",
+      password: "كلمة المرور",
+      passwordConfirmation: "تأكيد كلمة المرور",
       ageTitle: "تأكيد العمر",
       ageConfirmation: "أؤكد أن عمري 16 سنة أو أكثر",
       conductTitle: "قواعد السلوك والأمان",
@@ -199,6 +207,10 @@ function getCopy(locale: Locale): FormCopy {
     profilePhoto: "Photo ou logo",
     workPhotos: "Photos de réalisations",
     verificationDocument: "Document de vérification",
+    accountAccessTitle: "Protection de l’espace prestataire",
+    accountAccessHint: "Choisissez un mot de passe d’au moins 8 caractères pour garder l’accès à votre tableau, à la désactivation et à la demande de suppression sous votre contrôle.",
+    password: "Mot de passe",
+    passwordConfirmation: "Confirmer le mot de passe",
     ageTitle: "Confirmation d'âge",
     ageConfirmation: "Je confirme avoir 16 ans ou plus",
     conductTitle: "Code de conduite et sécurité",
@@ -225,6 +237,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [hasAcceptedConduct, setHasAcceptedConduct] = useState(false);
   const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
   const provinceGroups = useMemo(
     () =>
@@ -243,7 +257,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const provinceZones = provinceGroups.find((group) => group.slug === provinceSlug)?.zones ?? [];
   const primaryCategorySlug = laneCategories[0]?.slug ?? "";
   const primaryZoneSlug = provinceZones[0]?.slug ?? "";
-  const canSubmit = isAgeConfirmed && hasAcceptedConduct && hasAcceptedPolicy;
+  const hasPasswordReady = password.trim().length >= 8 && password === passwordConfirmation;
+  const canSubmit = isAgeConfirmed && hasAcceptedConduct && hasAcceptedPolicy && hasPasswordReady;
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -580,6 +595,49 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
         </div>
       </section>
 
+      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
+        <div className="flex flex-col gap-1">
+          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.accountAccessTitle}</h3>
+          <p className="text-sm leading-7 text-[var(--muted)]">{copy.accountAccessHint}</p>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <label>
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {copy.password} <span className="text-[var(--navy)]">• {copy.required}</span>
+            </span>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setResult(null);
+              }}
+              className="input-base"
+            />
+          </label>
+          <label>
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {copy.passwordConfirmation} <span className="text-[var(--navy)]">• {copy.required}</span>
+            </span>
+            <input
+              name="passwordConfirmation"
+              type="password"
+              required
+              minLength={8}
+              value={passwordConfirmation}
+              onChange={(event) => {
+                setPasswordConfirmation(event.target.value);
+                setResult(null);
+              }}
+              className="input-base"
+            />
+          </label>
+        </div>
+      </section>
+
       {result ? (
         <div aria-live="polite" className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
           <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
@@ -673,8 +731,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
       {!canSubmit ? (
         <p className="text-sm font-medium text-[var(--muted)]">
           {locale === "ar"
-            ? "أكّد العمر ووافق على قواعد السلوك والشروط لإرسال الطلب."
-            : "Confirmez votre âge et acceptez les règles ainsi que les politiques pour envoyer la demande."}
+            ? "أكّد العمر ووافق على القواعد وأضف كلمة مرور صالحة لإرسال الطلب."
+            : "Confirmez votre âge, acceptez les règles et ajoutez un mot de passe valide pour envoyer la demande."}
         </p>
       ) : null}
 

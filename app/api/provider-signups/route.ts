@@ -7,6 +7,7 @@ import {
   createProviderManagementToken,
   mergeProviderLifecycleNotes,
 } from "@/lib/provider-lifecycle";
+import { createProviderPasswordSecret } from "@/lib/provider-password";
 import { createDemoProviderApplication } from "@/lib/provider-store";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { providerSignupSchema } from "@/lib/validation";
@@ -65,6 +66,8 @@ export async function POST(request: Request) {
       productionCapacity: String(formData.get("productionCapacity") ?? ""),
       leadTime: String(formData.get("leadTime") ?? ""),
       deliveryArea: String(formData.get("deliveryArea") ?? ""),
+      password: String(formData.get("password") ?? ""),
+      passwordConfirmation: String(formData.get("passwordConfirmation") ?? ""),
       ageConfirmed: String(formData.get("ageConfirmed") ?? "") === "on",
       conductAccepted: String(formData.get("conductAccepted") ?? "") === "on",
       policyAccepted: String(formData.get("policyAccepted") ?? "") === "on",
@@ -105,6 +108,7 @@ export async function POST(request: Request) {
 
     const acceptedAt = new Date().toISOString();
     const managementToken = createProviderManagementToken();
+    const passwordSecret = createProviderPasswordSecret(payload.password);
 
     const userUpsert = await supabase.from("users").upsert(
       {
@@ -262,6 +266,8 @@ export async function POST(request: Request) {
         policyVersion: CURRENT_POLICY_VERSION,
         statusOverride: "submitted",
         managementToken,
+        passwordSalt: passwordSecret.salt,
+        passwordHash: passwordSecret.hash,
       },
       [
         payload.profilePhotoName ? `Profile photo: ${payload.profilePhotoName}` : "",
@@ -344,6 +350,18 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
       return locale === "ar"
         ? "يجب الموافقة على الشروط والسياسات ذات الصلة قبل إرسال الطلب."
         : "Vous devez accepter les conditions et politiques applicables avant d'envoyer la candidature.";
+    }
+
+    if (issue.message === "password_confirmation_mismatch") {
+      return locale === "ar"
+        ? "تأكيد كلمة المرور غير مطابق."
+        : "La confirmation du mot de passe ne correspond pas.";
+    }
+
+    if (issue.path[0] === "password") {
+      return locale === "ar"
+        ? "اختر كلمة مرور من 8 أحرف أو أكثر لحماية لوحة مزود الخدمة."
+        : "Choisissez un mot de passe d’au moins 8 caractères pour protéger votre espace prestataire.";
     }
 
     if (issue.path[0] === "shortDescription") {

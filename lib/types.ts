@@ -140,6 +140,7 @@ export type Provider = {
     rejectionReason?: string | null;
     adminNote?: string | null;
     managementToken?: string | null;
+    hasPassword?: boolean;
   };
 };
 
@@ -260,6 +261,8 @@ export type ProviderSignupInput = {
   productionCapacity?: string;
   leadTime?: string;
   deliveryArea?: string;
+  password: string;
+  passwordConfirmation: string;
   ageConfirmed: boolean;
   conductAccepted: boolean;
   policyAccepted: boolean;

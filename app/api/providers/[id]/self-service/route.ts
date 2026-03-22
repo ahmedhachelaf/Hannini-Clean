@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProviderById } from "@/lib/repository";
 import { mergeProviderLifecycleNotes, parseProviderLifecycleMeta } from "@/lib/provider-lifecycle";
+import { createProviderPasswordSecret } from "@/lib/provider-password";
 import { updateDemoProviderSelfService } from "@/lib/provider-store";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
@@ -20,6 +21,7 @@ export async function POST(request: Request, context: RouteContext) {
         whatsappNumber?: string;
         shortDescription?: string;
         zoneSlug?: string;
+        newPassword?: string;
       }
     | null;
 
@@ -35,6 +37,7 @@ export async function POST(request: Request, context: RouteContext) {
       whatsappNumber: body.whatsappNumber,
       shortDescription: body.shortDescription,
       zoneSlug: body.zoneSlug,
+      newPassword: body.newPassword,
     });
 
     if (!provider) {
@@ -109,6 +112,7 @@ export async function POST(request: Request, context: RouteContext) {
     .maybeSingle();
 
   const meta = parseProviderLifecycleMeta(existingVerification?.notes);
+  const passwordSecret = body.newPassword?.trim() ? createProviderPasswordSecret(body.newPassword.trim()) : null;
   const statusOverride =
     body.action === "deactivate"
       ? "deactivated_by_provider"
@@ -146,6 +150,8 @@ export async function POST(request: Request, context: RouteContext) {
         conductVersion: meta.conductVersion,
         policyVersion: meta.policyVersion,
         managementToken: meta.managementToken,
+        passwordSalt: passwordSecret?.salt ?? meta.passwordSalt,
+        passwordHash: passwordSecret?.hash ?? meta.passwordHash,
         statusOverride,
       }),
     },

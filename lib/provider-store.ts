@@ -5,6 +5,7 @@ import {
   createProviderManagementToken,
   mergeProviderLifecycleNotes,
 } from "@/lib/provider-lifecycle";
+import { createProviderPasswordSecret } from "@/lib/provider-password";
 import type { Locale, Provider, ProviderSignupInput, ProviderStatus } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 
@@ -30,6 +31,7 @@ function cloneSeedProviders() {
           policyVersion: provider.verification.policyVersion,
           managementToken,
         }),
+        hasPassword: provider.verification.hasPassword ?? false,
       },
     };
   });
@@ -66,6 +68,7 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
   const providerId = `provider-${Date.now().toString(36)}`;
   const providerSlug = `${slugify(input.workshopName || input.fullName)}-${Date.now().toString(36).slice(-5)}`;
   const managementToken = createProviderManagementToken();
+  const passwordSecret = createProviderPasswordSecret(input.password);
   const notes = mergeProviderLifecycleNotes(
     "",
     {
@@ -77,6 +80,8 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
       policyVersion: CURRENT_POLICY_VERSION,
       statusOverride: "submitted",
       managementToken,
+      passwordSalt: passwordSecret.salt,
+      passwordHash: passwordSecret.hash,
     },
     [
       input.profilePhotoName ? `Profile photo: ${input.profilePhotoName}` : "",
@@ -182,6 +187,7 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
       conductVersion: CURRENT_CONDUCT_VERSION,
       policyVersion: CURRENT_POLICY_VERSION,
       managementToken,
+      hasPassword: true,
     },
   };
 
@@ -245,6 +251,7 @@ export function updateDemoProviderSelfService(
     whatsappNumber?: string;
     shortDescription?: string;
     zoneSlug?: string;
+    newPassword?: string;
   },
 ) {
   const provider = findDemoProvider(providerId);
@@ -267,6 +274,15 @@ export function updateDemoProviderSelfService(
     if (input.zoneSlug?.trim()) {
       provider.zones = [input.zoneSlug.trim()];
       provider.coordinates = zoneMap.get(input.zoneSlug.trim())?.coordinates ?? provider.coordinates;
+    }
+
+    if (input.newPassword?.trim()) {
+      const secret = createProviderPasswordSecret(input.newPassword.trim());
+      provider.verification.hasPassword = true;
+      provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {
+        passwordSalt: secret.salt,
+        passwordHash: secret.hash,
+      });
     }
 
     provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {}, [

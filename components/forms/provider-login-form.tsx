@@ -10,6 +10,7 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const [useAccessCode, setUseAccessCode] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -25,7 +26,8 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
         },
         body: JSON.stringify({
           phoneOrWhatsapp: String(formData.get("phoneOrWhatsapp") ?? ""),
-          token: String(formData.get("token") ?? ""),
+          password: String(formData.get("password") ?? ""),
+          accessCode: String(formData.get("accessCode") ?? ""),
         }),
       });
 
@@ -36,8 +38,8 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
         setMessage(
           data.message ??
             (locale === "ar"
-              ? "تعذر تسجيل الدخول حالياً. تحقق من الرقم ورمز الإدارة."
-              : "Connexion impossible pour le moment. Vérifiez le numéro et le code d’accès."),
+              ? "تعذر تسجيل الدخول حالياً. تحقق من الرقم وكلمة المرور أو استخدم رمز الوصول الاحتياطي."
+              : "Connexion impossible pour le moment. Vérifiez le numéro et le mot de passe, ou utilisez le code d’accès de secours."),
         );
         return;
       }
@@ -63,8 +65,8 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
         </h1>
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
           {locale === "ar"
-            ? "استخدم رقم الهاتف أو واتساب مع رمز الإدارة الذي ظهر لك بعد إرسال طلب الانضمام، حتى تتابع الطلبات وتحدّث ملفك."
-            : "Utilisez votre numéro de téléphone ou WhatsApp avec le code d’accès reçu après votre demande d’inscription pour suivre vos demandes et mettre à jour votre profil."}
+            ? "ادخل برقم الهاتف أو واتساب مع كلمة المرور التي اخترتها عند الانضمام. إذا كنت من المزودين القدامى، يمكنك استخدام رمز الوصول القديم مرة واحدة ثم تعيين كلمة مرور من داخل الملف."
+            : "Connectez-vous avec votre téléphone ou WhatsApp et le mot de passe choisi à l’inscription. Si vous avez un ancien accès, vous pouvez encore utiliser le code d’accès puis définir un mot de passe depuis votre profil."}
         </p>
       </div>
 
@@ -77,10 +79,31 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
 
       <label>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-          {locale === "ar" ? "رمز الإدارة" : "Code d’accès"}
+          {locale === "ar" ? "كلمة المرور" : "Mot de passe"}
         </span>
-        <input name="token" required className="input-base" />
+        <input name="password" type="password" required={!useAccessCode} className="input-base" />
       </label>
+
+      <label className="flex items-start gap-3 rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4">
+        <input
+          type="checkbox"
+          checked={useAccessCode}
+          onChange={(event) => setUseAccessCode(event.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+        />
+        <span className="text-sm font-semibold leading-7 text-[var(--ink)]">
+          {locale === "ar" ? "لدي رمز وصول قديم وأريد استخدامه كخيار احتياطي" : "J’ai un ancien code d’accès et je veux l’utiliser en secours"}
+        </span>
+      </label>
+
+      {useAccessCode ? (
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "رمز الوصول الاحتياطي" : "Code d’accès de secours"}
+          </span>
+          <input name="accessCode" className="input-base" />
+        </label>
+      ) : null}
 
       {message ? (
         <div

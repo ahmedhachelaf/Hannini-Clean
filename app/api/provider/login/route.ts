@@ -1,23 +1,49 @@
 import { NextResponse } from "next/server";
-import { authenticateProviderAccess, setProviderSessionCookie } from "@/lib/provider-auth";
+import { authenticateProviderWithAccessCode, authenticateProviderWithPassword, setProviderSessionCookie } from "@/lib/provider-auth";
 
 export async function POST(request: Request) {
   try {
+    const locale = request.headers.get("x-hannini-locale") === "fr" ? "fr" : "ar";
     const payload = (await request.json().catch(() => null)) as
       | {
           phoneOrWhatsapp?: string;
-          token?: string;
+          password?: string;
+          accessCode?: string;
         }
       | null;
 
-    if (!payload?.phoneOrWhatsapp?.trim() || !payload?.token?.trim()) {
-      return NextResponse.json({ ok: false, message: "Missing phone or access code." }, { status: 400 });
+    if (!payload?.phoneOrWhatsapp?.trim() || (!payload?.password?.trim() && !payload?.accessCode?.trim())) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            locale === "ar"
+              ? "أدخل رقم الهاتف مع كلمة المرور أو رمز الوصول الاحتياطي."
+              : "Saisissez votre téléphone avec le mot de passe ou le code d’accès de secours.",
+        },
+        { status: 400 },
+      );
     }
 
-    const provider = await authenticateProviderAccess(payload.phoneOrWhatsapp, payload.token);
+    const provider =
+      (payload.password?.trim()
+        ? await authenticateProviderWithPassword(payload.phoneOrWhatsapp, payload.password)
+        : null) ??
+      (payload.accessCode?.trim()
+        ? await authenticateProviderWithAccessCode(payload.phoneOrWhatsapp, payload.accessCode)
+        : null);
 
     if (!provider || !provider.verification.managementToken) {
-      return NextResponse.json({ ok: false, message: "Invalid provider access." }, { status: 401 });
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            locale === "ar"
+              ? "تعذر التحقق من بيانات الدخول. راجع الرقم وكلمة المرور، أو استخدم رمز الوصول إذا لم تعيّن كلمة مرور بعد."
+              : "Impossible de vérifier vos accès. Vérifiez le numéro et le mot de passe, ou utilisez le code d’accès si aucun mot de passe n’a encore été défini.",
+        },
+        { status: 401 },
+      );
     }
 
     await setProviderSessionCookie({
@@ -27,7 +53,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      redirectTo: `/${request.headers.get("x-hannini-locale") === "fr" ? "fr" : "ar"}/provider`,
+      redirectTo: `/${locale}/provider`,
     });
   } catch (error) {
     return NextResponse.json(

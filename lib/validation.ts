@@ -123,6 +123,8 @@ export const providerSignupSchema = z.object({
   productionCapacity: z.string().optional().or(z.literal("")).default(""),
   leadTime: z.string().optional().or(z.literal("")).default(""),
   deliveryArea: z.string().optional().or(z.literal("")).default(""),
+  password: z.string().min(8),
+  passwordConfirmation: z.string().min(8),
   ageConfirmed: z.boolean().default(false),
   conductAccepted: z.boolean().default(false),
   policyAccepted: z.boolean().default(false),
@@ -156,6 +158,14 @@ export const providerSignupSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["policyAccepted"],
       message: "policy_acceptance_required",
+    });
+  }
+
+  if (value.password !== value.passwordConfirmation) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["passwordConfirmation"],
+      message: "password_confirmation_mismatch",
     });
   }
 });

@@ -237,6 +237,8 @@ function parseVerificationNotes(notes: string | null | undefined) {
     rejectionReason: value.rejectionReason,
     adminNote: value.adminNote,
     managementToken: value.managementToken,
+    passwordSalt: value.passwordSalt,
+    passwordHash: value.passwordHash,
   };
 }
 
@@ -382,6 +384,7 @@ function mapProviderRow(row: ProviderRow): Provider {
       rejectionReason: verificationFlags.rejectionReason,
       adminNote: verificationFlags.adminNote,
       managementToken: verificationFlags.managementToken,
+      hasPassword: Boolean(verificationFlags.passwordHash && verificationFlags.passwordSalt),
     },
     availability:
       row.availability?.map((slot) => ({

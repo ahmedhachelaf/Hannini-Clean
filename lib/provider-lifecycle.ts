@@ -14,6 +14,8 @@ type ProviderLifecycleMeta = {
   rejectionReason?: string | null;
   adminNote?: string | null;
   managementToken?: string | null;
+  passwordSalt?: string | null;
+  passwordHash?: string | null;
 };
 
 const TAG_PATTERNS = {
@@ -24,6 +26,8 @@ const TAG_PATTERNS = {
   rejectionReason: /\[rejection_reason:([^\]]+)\]/,
   adminNote: /\[admin_note:([^\]]+)\]/,
   managementToken: /\[manage_token:([^\]]+)\]/,
+  passwordSalt: /\[password_salt:([^\]]+)\]/,
+  passwordHash: /\[password_hash:([^\]]+)\]/,
 } as const;
 
 function readTag(value: string, pattern: RegExp) {
@@ -44,6 +48,8 @@ export function parseProviderLifecycleMeta(notes: string | null | undefined): Pr
     rejectionReason: readTag(value, TAG_PATTERNS.rejectionReason),
     adminNote: readTag(value, TAG_PATTERNS.adminNote),
     managementToken: readTag(value, TAG_PATTERNS.managementToken),
+    passwordSalt: readTag(value, TAG_PATTERNS.passwordSalt),
+    passwordHash: readTag(value, TAG_PATTERNS.passwordHash),
   };
 }
 
@@ -110,6 +116,8 @@ export function mergeProviderLifecycleNotes(
     merged.rejectionReason ? `[rejection_reason:${merged.rejectionReason}]` : "",
     merged.adminNote ? `[admin_note:${merged.adminNote}]` : "",
     merged.managementToken ? `[manage_token:${merged.managementToken}]` : "",
+    merged.passwordSalt ? `[password_salt:${merged.passwordSalt}]` : "",
+    merged.passwordHash ? `[password_hash:${merged.passwordHash}]` : "",
   ].filter(Boolean);
 
   return [...tags, ...Array.from(new Set(raw))].join(" | ");
