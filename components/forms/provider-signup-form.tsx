@@ -216,6 +216,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const [result, setResult] = useState<SignupSubmissionResult | null>(null);
   const [profileType, setProfileType] = useState<ProfileType>("service_provider");
   const [provinceSlug, setProvinceSlug] = useState<string>(zones[0]?.provinceSlug ?? "");
+  const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
+  const [hasAcceptedConduct, setHasAcceptedConduct] = useState(false);
 
   const provinceGroups = useMemo(
     () =>
@@ -234,6 +236,7 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const provinceZones = provinceGroups.find((group) => group.slug === provinceSlug)?.zones ?? [];
   const primaryCategorySlug = laneCategories[0]?.slug ?? "";
   const primaryZoneSlug = provinceZones[0]?.slug ?? "";
+  const canSubmit = isAgeConfirmed && hasAcceptedConduct;
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -585,14 +588,36 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
 
         <div className="mt-4 space-y-3">
           <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
-            <input name="ageConfirmed" type="checkbox" required aria-required="true" className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]" />
+            <input
+              name="ageConfirmed"
+              type="checkbox"
+              required
+              aria-required="true"
+              checked={isAgeConfirmed}
+              onChange={(event) => {
+                setIsAgeConfirmed(event.target.checked);
+                setResult(null);
+              }}
+              className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+            />
             <span className="text-sm font-semibold text-[var(--ink)]">
               {copy.ageConfirmation} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
           </label>
 
           <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
-            <input name="conductAccepted" type="checkbox" required aria-required="true" className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]" />
+            <input
+              name="conductAccepted"
+              type="checkbox"
+              required
+              aria-required="true"
+              checked={hasAcceptedConduct}
+              onChange={(event) => {
+                setHasAcceptedConduct(event.target.checked);
+                setResult(null);
+              }}
+              className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+            />
             <span className="text-sm font-semibold leading-7 text-[var(--ink)]">
               {copy.conductAgreement} <span className="text-[var(--navy)]">• {copy.required}</span>
               <span className="mt-2 block text-sm font-medium text-[var(--muted)]">
@@ -605,7 +630,15 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
         </div>
       </section>
 
-      <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit">
+      {!canSubmit ? (
+        <p className="text-sm font-medium text-[var(--muted)]">
+          {locale === "ar"
+            ? "أكّد العمر ووافق على قواعد السلوك لإرسال الطلب."
+            : "Confirmez votre age et acceptez le code de conduite pour envoyer la demande."}
+        </p>
+      ) : null}
+
+      <button type="submit" disabled={pending || !canSubmit} aria-disabled={pending || !canSubmit} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit">
         {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : profileType === "home_business" ? copy.submitBusiness : copy.submitService}
       </button>
     </form>
