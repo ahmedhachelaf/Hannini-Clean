@@ -209,19 +209,19 @@ export default async function GrowPage({ params }: GrowPageProps) {
             ))}
           </div>
 
-          <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(13,28,69,0.98),rgba(20,92,255,0.9)_72%,rgba(96,165,250,0.76))] p-6 text-white shadow-[0_24px_60px_rgba(12,40,104,0.16)]">
+          <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(229,239,255,0.96)_62%,rgba(208,226,255,0.94))] p-6 text-[var(--ink)] shadow-[0_24px_60px_rgba(12,40,104,0.16)]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.grow.safetyTitle}</h2>
-                <p className="mt-3 max-w-3xl text-sm leading-8 text-white/82">{dictionary.grow.safetyDescription}</p>
+                <p className="mt-3 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.grow.safetyDescription}</p>
               </div>
-              <Link href={`/${locale}/safety`} className="button-secondary border-white/18 bg-white/10 text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]">
+              <Link href={`/${locale}/safety`} className="button-secondary">
                 {dictionary.nav.safety}
               </Link>
             </div>
             <div className="mt-5 grid gap-3 lg:grid-cols-2">
               {dictionary.grow.safetyItems.map((item) => (
-                <div key={item} className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm leading-7 text-white/84">
+                <div key={item} className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-3 text-sm leading-7 text-[var(--ink)] shadow-[0_10px_24px_rgba(15,95,255,0.06)]">
                   {item}
                 </div>
               ))}
