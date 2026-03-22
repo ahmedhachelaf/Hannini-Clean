@@ -103,8 +103,8 @@ export function HomePageContent({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
-      <section id="hero" className="surface-card hero-shell gradient-frame relative isolate overflow-visible rounded-[2rem] p-4 text-white sm:overflow-hidden sm:p-7 lg:p-10">
+    <div className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
+      <section id="hero" className="surface-card hero-shell gradient-frame relative isolate w-full max-w-full overflow-hidden rounded-[2rem] p-4 text-white sm:p-7 lg:p-10">
         <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(125,180,255,0.42)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
         <div className="hero-orb right-2 top-4 h-24 w-24 bg-[rgba(255,255,255,0.14)] sm:right-10 sm:top-16 sm:h-40 sm:w-40" />
         <div className="relative z-[1] grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:items-start lg:gap-8">
@@ -125,7 +125,7 @@ export function HomePageContent({
               {dictionary.home.description}
             </p>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-8 min-w-0 space-y-4">
               <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/82">{dictionary.home.lanesTitle}</div>
               <div className="grid gap-4 lg:grid-cols-2">
                 <Link
@@ -137,7 +137,7 @@ export function HomePageContent({
                   <p className="mt-3 text-sm leading-7 text-white/88">{dictionary.home.servicesLaneDescription}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {serviceCategories.slice(0, 4).map((category) => (
-                      <span key={category.slug} className="chip-button border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
+                      <span key={category.slug} className="chip-button max-w-full border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
                         {category.icon} {getLocalizedValue(category.name, locale)}
                       </span>
                     ))}
@@ -154,7 +154,7 @@ export function HomePageContent({
                   <p className="mt-3 text-sm leading-7 text-white/88">{dictionary.home.businessesLaneDescription}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {businessCategories.slice(0, 4).map((category) => (
-                      <span key={category.slug} className="chip-button border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
+                      <span key={category.slug} className="chip-button max-w-full border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
                         {category.icon} {getLocalizedValue(category.name, locale)}
                       </span>
                     ))}

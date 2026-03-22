@@ -34,12 +34,16 @@ html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
   background:
     radial-gradient(circle at top left, rgba(20, 92, 255, 0.24), transparent 30%),
     radial-gradient(circle at top right, rgba(27, 87, 214, 0.18), transparent 24%),
@@ -99,6 +103,8 @@ img {
   position: relative;
   min-height: 100vh;
   overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
 }
 
 .locale-shell::before {
@@ -226,6 +232,8 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  max-width: 100%;
+  min-width: 0;
   min-height: 3.5rem;
   border-radius: 999px;
   padding: 0 1.25rem;
@@ -280,6 +288,26 @@ button:disabled {
   color: var(--navy);
   white-space: nowrap;
   box-shadow: 0 12px 28px rgba(11, 63, 184, 0.12);
+}
+
+.mobile-pill-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-pill-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-pill-scroll > * {
+  flex: 0 0 auto;
 }
 
 .status-pill {
@@ -363,10 +391,21 @@ button:disabled {
     min-height: auto;
   }
 
+  .hero-shell,
+  .surface-card,
+  .gradient-frame,
+  .map-panel {
+    max-width: 100%;
+  }
+
   .hero-shell .button-primary,
   .hero-shell .button-secondary,
   .hero-shell .chip-button {
     min-height: 3.25rem;
+  }
+
+  .chip-button {
+    padding-inline: 0.95rem;
   }
 
   .hero-orb {

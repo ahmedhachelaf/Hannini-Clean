@@ -37,8 +37,12 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-[rgba(13,28,69,0.08)] bg-[rgba(225,236,255,0.72)] backdrop-blur-xl">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4 rounded-[1.75rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(231,240,255,0.84))] px-4 py-3 shadow-[0_24px_60px_rgba(13,28,69,0.14)]">
-          <Link href={`/${locale}`} aria-label={locale === "ar" ? "العودة إلى الصفحة الرئيسية" : "Retour à l'accueil"} className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 rounded-[1.75rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(231,240,255,0.84))] px-4 py-3 shadow-[0_24px_60px_rgba(13,28,69,0.14)] sm:flex-row sm:items-center sm:justify-between">
+          <Link
+            href={`/${locale}`}
+            aria-label={locale === "ar" ? "العودة إلى الصفحة الرئيسية" : "Retour à l'accueil"}
+            className="flex min-w-0 items-center gap-3"
+          >
             <Image
               src="/brand/henini-mark.svg"
               alt="هَنّيني | Henini"
@@ -46,9 +50,9 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
               height={48}
               className="h-12 w-12 rounded-2xl ring-1 ring-[rgba(15,95,255,0.12)]"
             />
-            <div>
-              <div className={`text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هَنّيني</div>
-              <div className="text-sm font-medium text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
+            <div className="min-w-0">
+              <div className={`truncate text-lg font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>هَنّيني</div>
+              <div className="truncate text-sm font-medium text-[var(--muted)]">{locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}</div>
             </div>
           </Link>
 
@@ -62,7 +66,7 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
 
           <Suspense
             fallback={
-              <span className="inline-flex min-h-11 items-center rounded-full border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--muted)]">
+              <span className="inline-flex min-h-11 max-w-full items-center self-start rounded-full border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--muted)] sm:self-auto">
                 {dictionary.localeLabel}
               </span>
             }
@@ -79,13 +83,13 @@ export function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
 
         <nav
           aria-label={locale === "ar" ? "التنقل الرئيسي على الهاتف" : "Navigation principale mobile"}
-          className="mt-4 flex flex-wrap gap-2 pb-1 md:hidden"
+          className="mobile-pill-scroll mt-4 md:hidden"
         >
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="chip-button min-h-11 max-w-full px-4 text-sm font-semibold"
+              className="chip-button min-h-11 shrink-0 px-4 text-sm font-semibold"
             >
               {item.label}
             </Link>

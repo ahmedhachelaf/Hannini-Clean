@@ -122,7 +122,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         </select>
       </label>
 
-      <div className="flex flex-wrap gap-3 sm:flex-nowrap">
+      <div className="flex flex-wrap gap-3">
         <button type="submit" className="button-primary w-full sm:w-auto">
           {locale === "ar" ? "تطبيق" : "Appliquer"}
         </button>
