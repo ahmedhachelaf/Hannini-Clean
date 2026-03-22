@@ -9,7 +9,30 @@ import type { Locale, Provider, ProviderSignupInput, ProviderStatus } from "@/li
 import { slugify } from "@/lib/utils";
 
 function cloneSeedProviders() {
-  return JSON.parse(JSON.stringify(seedProviders)) as Provider[];
+  return (JSON.parse(JSON.stringify(seedProviders)) as Provider[]).map((provider) => {
+    if (provider.verification.managementToken) {
+      return provider;
+    }
+
+    const managementToken = createProviderManagementToken();
+
+    return {
+      ...provider,
+      verification: {
+        ...provider.verification,
+        managementToken,
+        notes: mergeProviderLifecycleNotes(provider.verification.notes, {
+          ageConfirmed: provider.verification.ageConfirmed,
+          conductAccepted: provider.verification.conductAccepted,
+          policyAccepted: provider.verification.policyAccepted,
+          acceptedAt: provider.verification.acceptedAt,
+          conductVersion: provider.verification.conductVersion,
+          policyVersion: provider.verification.policyVersion,
+          managementToken,
+        }),
+      },
+    };
+  });
 }
 
 const demoProviders = cloneSeedProviders();

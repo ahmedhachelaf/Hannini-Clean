@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
+import { buildBookingDescription, createCustomerBookingAccessToken, stripBookingLifecycleTags } from "@/lib/booking-lifecycle";
+import { createDemoBooking } from "@/lib/booking-store";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { getProviderById } from "@/lib/repository";
 import { bookingSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
+  let locale: "ar" | "fr" = "ar";
+
   try {
     const contentType = request.headers.get("content-type") ?? "";
+    locale = resolveBookingLocale(request);
     const payload =
       contentType.includes("multipart/form-data")
         ? bookingSchema.parse(await readFormPayload(request))
@@ -16,18 +21,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "Provider not found." }, { status: 404 });
     }
 
-    const issueSummary = [
-      payload.issueDescription,
-      payload.notificationRequested ? "Notification requested: yes" : null,
-      payload.isBusinessBuyer ? "Business buyer inquiry: yes" : null,
-      payload.quantityNeeded ? `Quantity needed: ${payload.quantityNeeded}` : null,
-      payload.productionNeed ? `Production need: ${payload.productionNeed}` : null,
-      payload.requestedLeadTime ? `Lead time requested: ${payload.requestedLeadTime}` : null,
-      payload.deliveryAreaNeeded ? `Delivery area needed: ${payload.deliveryAreaNeeded}` : null,
-      payload.issuePhotoNames.length > 0 ? `Issue photos: ${payload.issuePhotoNames.join(", ")}` : null,
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const customerAccessToken = createCustomerBookingAccessToken();
+    const issueSummary = buildBookingDescription(payload, locale, customerAccessToken);
+    const whatsappIssueSummary = stripBookingLifecycleTags(issueSummary);
 
     const whatsappMessage = encodeURIComponent(
       `Bonjour / السلام عليكم. Booking via Hannini:\n` +
@@ -36,15 +32,24 @@ export async function POST(request: Request) {
         `Date: ${payload.date} ${payload.time}\n` +
         `Address: ${payload.address}\n` +
         `Maps: ${payload.googleMapsUrl}\n` +
-        `Issue: ${issueSummary}`,
+        `Issue: ${whatsappIssueSummary}`,
     );
 
     if (!hasSupabaseServerEnv()) {
+      const booking = createDemoBooking(payload, {
+        issueDescription: issueSummary,
+        customerAccessToken,
+      });
+
       return NextResponse.json({
         ok: true,
         demoMode: true,
-        bookingId: `demo-booking-${Date.now().toString(36)}`,
-        message: "Booking captured in demo mode. Configure Supabase to persist records.",
+        bookingId: booking.id,
+        statusUrl: `/${locale}/bookings/${booking.id}?token=${customerAccessToken}`,
+        message:
+          locale === "ar"
+            ? "تم حفظ الطلب داخلياً، ويمكن لمزوّد الخدمة والإدارة متابعته الآن."
+            : "La demande a bien été enregistrée en interne et peut maintenant être suivie par le prestataire et l’admin.",
         whatsappUrl: `https://wa.me/${provider.whatsappNumber}?text=${whatsappMessage}`,
       });
     }
@@ -92,7 +97,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       bookingId: data.id,
-      message: "Booking saved successfully.",
+      statusUrl: `/${locale}/bookings/${data.id}?token=${customerAccessToken}`,
+      message:
+        locale === "ar"
+          ? "تم حفظ الطلب داخلياً، ويمكن متابعته من صفحة الحالة مع استمرار خيار واتساب للتأكيد."
+          : "La demande est bien enregistrée en interne. Vous pouvez suivre son statut, et WhatsApp reste disponible pour confirmation.",
       whatsappUrl: `https://wa.me/${provider.whatsappNumber}?text=${whatsappMessage}`,
     });
   } catch (error) {
@@ -104,6 +113,17 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+}
+
+function resolveBookingLocale(request: Request): "ar" | "fr" {
+  const fromHeader = request.headers.get("x-hannini-locale");
+
+  if (fromHeader === "fr") {
+    return "fr";
+  }
+
+  const referer = request.headers.get("referer") ?? "";
+  return referer.includes("/fr/") ? "fr" : "ar";
 }
 
 async function readFormPayload(request: Request) {

@@ -159,8 +159,23 @@ export type Booking = {
   notificationRequested?: boolean;
   issuePhotoNames?: string[];
   preferredContactMethod: ContactMethod;
+  isBusinessBuyer?: boolean;
+  quantityNeeded?: string;
+  productionNeed?: string;
+  requestedLeadTime?: string;
+  deliveryAreaNeeded?: string;
+  providerNote?: string;
+  proposedDate?: string;
+  proposedTime?: string;
+  customerAccessToken?: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   createdAt: string;
+  updatedAt?: string;
+};
+
+export type ProviderSession = {
+  providerId: string;
+  token: string;
 };
 
 export type SupportMessage = {
@@ -324,6 +339,7 @@ export type BookingSubmissionResult = {
   message: string;
   whatsappUrl?: string;
   bookingId?: string;
+  statusUrl?: string;
   demoMode?: boolean;
 };
 

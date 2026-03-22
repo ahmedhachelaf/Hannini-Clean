@@ -1,11 +1,12 @@
 import {
-  bookings as seedBookings,
   businessRequests as seedBusinessRequests,
   categories as seedCategories,
   providers as seedProviders,
   reviews as seedReviews,
   zones as seedZones,
 } from "@/data/seed";
+import { hydrateBookingLifecycle } from "@/lib/booking-lifecycle";
+import { findDemoBooking, listDemoBookings } from "@/lib/booking-store";
 import { findDemoBusinessRequest, listDemoBusinessRequests } from "@/lib/business-request-store";
 import { formatDate } from "@/lib/format";
 import { defaultLocale } from "@/lib/i18n";
@@ -116,6 +117,7 @@ type BookingRow = {
   preferred_contact_method: Booking["preferredContactMethod"];
   status: Booking["status"];
   created_at: string;
+  updated_at?: string;
   providers?: Array<{
     slug: string;
   }> | null;
@@ -407,7 +409,7 @@ function mapReviewRow(row: ReviewRow): Review {
 }
 
 function mapBookingRow(row: BookingRow): Booking {
-  return {
+  return hydrateBookingLifecycle({
     id: row.id,
     providerId: row.provider_id,
     providerSlug: row.providers?.[0]?.slug ?? "",
@@ -423,7 +425,8 @@ function mapBookingRow(row: BookingRow): Booking {
     preferredContactMethod: row.preferred_contact_method,
     status: row.status,
     createdAt: row.created_at,
-  };
+    updatedAt: row.updated_at,
+  });
 }
 
 function mapSupportMessageRow(row: SupportMessageRow): SupportMessage {
@@ -637,6 +640,7 @@ async function fetchSupabaseBookings() {
         preferred_contact_method,
         status,
         created_at,
+        updated_at,
         providers ( slug )
       `,
     )
@@ -930,7 +934,7 @@ export async function getReviews(providerId?: string) {
 }
 
 export async function getBookings() {
-  return (await fetchSupabaseBookings()) ?? seedBookings;
+  return (await fetchSupabaseBookings()) ?? listDemoBookings();
 }
 
 export async function getSupportCases() {
@@ -960,8 +964,19 @@ export async function getBusinessRequestById(id: string) {
 }
 
 export async function getBookingById(id: string) {
+  if (!hasSupabaseServerEnv()) {
+    return findDemoBooking(id);
+  }
+
   const items = await getBookings();
   return items.find((booking) => booking.id === id) ?? null;
+}
+
+export async function getBookingsForProvider(providerId: string) {
+  const items = await getBookings();
+  return items
+    .filter((booking) => booking.providerId === providerId)
+    .sort((left, right) => `${right.date}T${right.time}`.localeCompare(`${left.date}T${left.time}`));
 }
 
 export async function getAdminDashboardData(): Promise<AdminDashboardData> {

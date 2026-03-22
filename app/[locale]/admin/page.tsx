@@ -168,13 +168,17 @@ export default async function AdminPage({ params }: AdminPageProps) {
           <div className="mt-5 space-y-4">
             {dashboard.bookings.map((booking) => (
               <article key={booking.id} className="rounded-[1.5rem] border border-[var(--line)] bg-white p-4">
-                <div className="font-semibold">{booking.customerName}</div>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="font-semibold">{booking.customerName}</div>
+                  <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">{booking.status}</span>
+                </div>
                 <div className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                  {booking.providerSlug} • {formatDate(booking.date, locale)} • {booking.time}
+                  {booking.providerSlug} • {formatDate(booking.proposedDate ?? booking.date, locale)} • {booking.proposedTime ?? booking.time}
                 </div>
                 <div className="mt-1 text-sm text-[var(--muted)]">
                   {booking.address} • {booking.preferredContactMethod}
                 </div>
+                {booking.providerNote ? <div className="mt-2 text-sm text-[var(--muted)]">{booking.providerNote}</div> : null}
               </article>
             ))}
           </div>

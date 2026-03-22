@@ -585,9 +585,14 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
           <div className="mt-1">{result.message}</div>
           {result.ok && result.manageUrl ? (
-            <a href={result.manageUrl} className="mt-3 inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
-              {locale === "ar" ? "إدارة ملفك أو إيقاف ظهوره مؤقتاً" : "Gérer votre profil ou le mettre en pause"}
-            </a>
+            <div className="mt-3 flex flex-col gap-2">
+              <a href={result.manageUrl} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+                {locale === "ar" ? "إدارة ملفك أو إيقاف ظهوره مؤقتاً" : "Gérer votre profil ou le mettre en pause"}
+              </a>
+              <a href={`/${locale}/provider/login`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+                {locale === "ar" ? "دخول مزود الخدمة لمتابعة الطلبات لاحقاً" : "Accéder à l’espace prestataire plus tard"}
+              </a>
+            </div>
           ) : null}
         </div>
       ) : null}

@@ -68,6 +68,9 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
     try {
       const response = await fetch("/api/bookings", {
         method: "POST",
+        headers: {
+          "x-hannini-locale": locale,
+        },
         body: formData,
       });
 
@@ -91,6 +94,11 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
         <p className="mt-3 max-w-xl text-sm leading-7 text-[var(--muted)]">{labels.successDescription}</p>
         <p className="mt-3 text-sm text-[var(--muted)]">{result.message}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          {result.statusUrl ? (
+            <a href={result.statusUrl} className="button-secondary">
+              {locale === "ar" ? "متابعة حالة الطلب" : "Suivre la demande"}
+            </a>
+          ) : null}
           {result.whatsappUrl ? (
             <a href={result.whatsappUrl} target="_blank" rel="noreferrer" className="button-primary">
               {labels.openWhatsapp}
