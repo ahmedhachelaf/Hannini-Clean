@@ -366,6 +366,22 @@ export function HomePageContent({
               const readiness = getProviderReadiness(provider);
               const opportunities = getOpportunityTypes(provider).slice(0, 3);
               const stage = getGrowthStage(provider);
+              const storyTitle =
+                provider.profileType === "home_business"
+                  ? locale === "ar"
+                    ? "نشاط منزلي يكسب ثقة الزبائن خطوة بخطوة"
+                    : "Une activité à domicile qui gagne la confiance pas à pas"
+                  : locale === "ar"
+                    ? "مزود خدمة يبني سمعته من أعمال واضحة وموثوقة"
+                    : "Un prestataire qui construit sa réputation avec des preuves concrètes";
+              const storyHighlight =
+                provider.profileType === "home_business"
+                  ? locale === "ar"
+                    ? "جاهز لطلبات المناسبات أو المشترين الذين يحتاجون كميات أكبر."
+                    : "Prêt pour des commandes d'occasion ou des acheteurs à plus grand volume."
+                  : locale === "ar"
+                    ? "يتقدم عبر جودة الأعمال، سرعة الرد، وثقة متزايدة من الزبائن."
+                    : "Progresse grâce à la qualité du travail, à une réponse claire et à la confiance des clients.";
               return (
                 <div key={provider.id} className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(231,240,255,0.9))] p-5 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
                   <div className="flex flex-wrap items-center gap-2">
@@ -374,9 +390,24 @@ export function HomePageContent({
                       {provider.profileType === "home_business" ? dictionary.nav.businesses : dictionary.nav.providers}
                     </span>
                     <span className="chip-button min-h-0 px-3 py-2 text-xs">{stageLabels[stage]}</span>
+                    {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
+                      <span className="chip-button min-h-0 px-3 py-2 text-xs">{locale === "ar" ? "جاهز للكميات" : "Prêt au volume"}</span>
+                    ) : null}
                   </div>
                   <h3 className={`mt-3 text-xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
                   <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{getLocalizedValue(provider.shortTagline, locale)}</p>
+                  <div className="mt-4 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm text-[var(--muted)]">
+                    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">
+                      {locale === "ar" ? "قصة نمو قصيرة" : "Courte histoire de progression"}
+                    </div>
+                    <div className="mt-2 font-semibold text-[var(--ink)]">{storyTitle}</div>
+                    <p className="mt-2 leading-7">
+                      {locale === "ar"
+                        ? `هذا الملف بنى حضوره من خلال ${provider.completedJobs} طلباً منجزاً، تقييم ${provider.rating.toFixed(1)}، وصور أو أدلة عملية تساعد الزبون على الثقة قبل التواصل.`
+                        : `Ce profil a renforcé sa présence grâce à ${provider.completedJobs} demandes accomplies, une note de ${provider.rating.toFixed(1)} et des preuves concrètes qui rassurent avant la prise de contact.`}
+                    </p>
+                    <p className="mt-2 leading-7 text-[var(--ink)]">{storyHighlight}</p>
+                  </div>
                   <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
                     {locale === "ar"
                       ? `بنى هذا الملف حضوره بثبات من خلال ${provider.completedJobs} طلباً، تقييم ${provider.rating.toFixed(1)}، وخدمة واضحة في ${primaryZone ? getLocalizedValue(primaryZone.name, locale) : "منطقته"}.`
@@ -398,6 +429,13 @@ export function HomePageContent({
                         {readiness.score}%
                       </span>
                     </div>
+                    <div className="mt-3 overflow-hidden rounded-full bg-[rgba(15,95,255,0.08)]">
+                      <div
+                        className="h-2 rounded-full bg-[linear-gradient(90deg,#0f5fff,#4f8dff)]"
+                        style={{ width: `${Math.max(readiness.score, 8)}%` }}
+                        aria-hidden="true"
+                      />
+                    </div>
                     <p className="mt-2 leading-7">
                       {locale === "ar"
                         ? `هذا الملف أكمل ${readiness.completed} من ${readiness.total} عناصر تساعده على الظهور، الثقة، والحصول على فرص أفضل.`
@@ -409,6 +447,11 @@ export function HomePageContent({
                           {opportunityLabels[key]}
                         </span>
                       ))}
+                      {provider.gallery.length > 0 ? (
+                        <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                          {locale === "ar" ? `${provider.gallery.length} صور أعمال` : `${provider.gallery.length} visuels`}
+                        </span>
+                      ) : null}
                       {isMentorReady(provider) ? (
                         <span className="chip-button min-h-0 px-3 py-2 text-xs">
                           {locale === "ar" ? "جاهز للإلهام والإرشاد" : "Prêt à inspirer d'autres profils"}

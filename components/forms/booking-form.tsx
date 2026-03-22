@@ -175,6 +175,47 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
             <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{labels.fields.businessBuyerTitle}</h3>
             <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{labels.fields.businessBuyerHint}</p>
           </div>
+          <div className="mt-4 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm text-[var(--muted)] shadow-[0_14px_28px_rgba(15,95,255,0.08)]">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="status-pill border border-[rgba(15,95,255,0.14)] bg-[var(--soft)] text-[var(--brand)]">
+                {locale === "ar" ? "جاهز للمشترين المهنيين" : "Ouvert aux acheteurs pro"}
+              </span>
+              <span className="chip-button min-h-0 px-3 py-2 text-xs">
+                {locale === "ar" ? "مسار طلبات كبيرة" : "Parcours volume"}
+              </span>
+            </div>
+            <p className="mt-3 leading-7">
+              {locale === "ar"
+                ? "إذا كنت تمثل شركة، مناسبة، أو مشترياً يبحث عن كمية أكبر، استخدم هذا القسم لتوضيح الحجم المتوقع والمهلة المطلوبة حتى يتلقى النشاط طلباً أكثر دقة."
+                : "Si vous représentez une entreprise, un événement ou un acheteur à plus grande échelle, utilisez cette section pour préciser le volume attendu et le délai souhaité."}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {provider.bulkOrders.minimumOrderQuantity ? (
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{locale === "ar" ? "الحد الأدنى" : "Minimum"}</div>
+                  <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.minimumOrderQuantity}</div>
+                </div>
+              ) : null}
+              {provider.bulkOrders.productionCapacity ? (
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{locale === "ar" ? "القدرة" : "Capacité"}</div>
+                  <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.productionCapacity}</div>
+                </div>
+              ) : null}
+              {provider.bulkOrders.leadTime ? (
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{locale === "ar" ? "المهلة" : "Délai"}</div>
+                  <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.leadTime}</div>
+                </div>
+              ) : null}
+              {provider.bulkOrders.deliveryArea ? (
+                <div className="rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{locale === "ar" ? "منطقة التسليم" : "Zone de remise"}</div>
+                  <div className="mt-1 font-semibold text-[var(--ink)]">{provider.bulkOrders.deliveryArea}</div>
+                </div>
+              ) : null}
+            </div>
+          </div>
           <label className="mt-4 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
             <input name="isBusinessBuyer" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
             <span className="text-sm font-semibold text-[var(--ink)]">{labels.fields.isBusinessBuyer}</span>

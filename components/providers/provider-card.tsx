@@ -141,6 +141,11 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
       </div>
 
       <div className="flex flex-wrap gap-2">
+        {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
+          <span className="chip-button min-h-0 px-3 py-2 text-xs">
+            {locale === "ar" ? "جاهز لطلبات كبيرة" : "Prêt pour le volume"}
+          </span>
+        ) : null}
         {provider.gallery.length > 0 ? (
           <span className="chip-button min-h-0 px-3 py-2 text-xs">
             {locale === "ar" ? `معرض ${provider.gallery.length}` : `Portfolio ${provider.gallery.length}`}

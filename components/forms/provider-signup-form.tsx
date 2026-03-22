@@ -450,6 +450,11 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <div className="flex flex-col gap-1">
               <h4 className="text-sm font-extrabold text-[var(--ink)]">{copy.buyerAccessTitle}</h4>
               <p className="text-sm leading-7 text-[var(--muted)]">{copy.buyerAccessHint}</p>
+              <p className="text-xs leading-6 text-[var(--muted)]">
+                {locale === "ar"
+                  ? "هذه المعلومات اختيارية لكنها تساعد هنيني على إظهار أنك جاهز لطلبات المناسبات، الشركات، أو المشترين الذين يحتاجون كميات أكبر."
+                  : "Ces informations restent optionnelles, mais elles aident Henini à montrer que votre activité peut répondre à des commandes d'événements, d'entreprises ou d'acheteurs en volume."}
+              </p>
             </div>
             <label className="mt-4 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
               <input name="availableForBulkOrders" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
