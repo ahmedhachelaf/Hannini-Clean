@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ProviderCard } from "@/components/providers/provider-card";
 import { ProvidersFilters } from "@/components/providers/providers-filters";
 import { getLocalizedValue } from "@/lib/i18n";
@@ -62,6 +62,12 @@ function getPaddedBounds(items: Provider[]) {
   };
 }
 
+function getMarkerLabel(zone: Zone | undefined, locale: Locale) {
+  const fallback = locale === "ar" ? "غير محدد" : "Non defini";
+  const label = getLocalizedValue(zone?.name ?? { ar: fallback, fr: fallback }, locale);
+  return label.length > 18 ? `${label.slice(0, 18)}…` : label;
+}
+
 export function ProvidersExplorer({ locale, actionPath, categories, zones, providers, values, labels }: ProvidersExplorerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(providers[0]?.id ?? null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -80,7 +86,13 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
       ? "كل الولايات"
       : "Toutes les wilayas";
 
-  function getMarkerPosition(provider: Provider) {
+  useEffect(() => {
+    if (!providers.some((provider) => provider.id === selectedId)) {
+      setSelectedId(providers[0]?.id ?? null);
+    }
+  }, [providers, selectedId]);
+
+  function getMarkerPosition(provider: Provider, index: number) {
     if (!bounds) {
       return { top: 50, left: 50 };
     }
@@ -88,9 +100,18 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
     const latSpan = Math.max(bounds.maxLat - bounds.minLat, 0.1);
     const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 0.1);
 
+    const duplicateIndex = providers
+      .slice(0, index)
+      .filter(
+        (item) =>
+          item.coordinates.latitude === provider.coordinates.latitude &&
+          item.coordinates.longitude === provider.coordinates.longitude,
+      ).length;
+    const duplicateOffset = duplicateIndex * 2.6;
+
     return {
-      top: 16 + ((bounds.maxLat - provider.coordinates.latitude) / latSpan) * 68,
-      left: 16 + ((provider.coordinates.longitude - bounds.minLng) / lngSpan) * 68,
+      top: Math.min(86, 16 + ((bounds.maxLat - provider.coordinates.latitude) / latSpan) * 68 + duplicateOffset),
+      left: Math.min(84, 16 + ((provider.coordinates.longitude - bounds.minLng) / lngSpan) * 68 + duplicateOffset),
     };
   }
 
@@ -142,20 +163,26 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
       ) : (
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
           <div className="map-panel sticky top-28 overflow-hidden rounded-[2rem] shadow-[0_30px_70px_rgba(12,40,104,0.14)]">
-            <div className="relative min-h-[520px] overflow-hidden bg-[linear-gradient(180deg,rgba(13,28,69,0.98),rgba(20,92,255,0.9)_75%,rgba(147,197,253,0.78))] p-6 text-white">
+            <div className="relative min-h-[440px] overflow-hidden bg-[linear-gradient(180deg,rgba(13,28,69,0.98),rgba(20,92,255,0.9)_75%,rgba(147,197,253,0.78))] p-4 text-white sm:min-h-[520px] sm:p-6">
               <iframe
                 title={locale === "ar" ? "خريطة النتائج" : "Carte des résultats"}
                 src={mapFrameSrc}
-                className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-92"
+                className="pointer-events-none absolute inset-0 h-full w-full border-0 opacity-100"
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,23,56,0.12),rgba(9,23,56,0.34)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,23,56,0.08),rgba(9,23,56,0.28)_100%)]" />
 
-              <div className="absolute inset-x-6 top-6 z-10 rounded-[1.5rem] border border-white/14 bg-white/10 p-4 backdrop-blur">
+              <div className="absolute inset-x-4 top-4 z-10 rounded-[1.5rem] border border-white/14 bg-[rgba(8,18,37,0.24)] p-4 backdrop-blur sm:inset-x-6 sm:top-6">
                 <div className="text-sm font-semibold text-white/76">{locale === "ar" ? "خريطة المزودين" : "Carte des prestataires"}</div>
                 <div className="mt-1 text-lg font-extrabold">{locale === "ar" ? "نتائج حسب الولاية والفئة" : "Resultats par wilaya et categorie"}</div>
                 <div className="mt-2 text-xs text-white/72">
                   {locale === "ar" ? "الولاية الحالية:" : "Wilaya active :"} {activeProvinceName}
+                </div>
+                <div className="mt-2 text-xs leading-6 text-white/74">
+                  {locale === "ar"
+                    ? "المؤشرات مبنية على مراكز المناطق التقريبية للمساعدة على فهم الانتشار، وليس على عناوين منزلية دقيقة."
+                    : "Les repères s'appuient sur des centres de zones approximatifs pour montrer la couverture, pas des adresses personnelles précises."}
                 </div>
                 {selectedProvider ? (
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-white/86">
@@ -169,34 +196,58 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                 ) : null}
               </div>
 
-              <div className="absolute inset-0 z-10 mt-24">
-                <div className="absolute inset-[10%] rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.02))]">
-                  {providers.map((provider) => {
-                    const position = getMarkerPosition(provider);
+              <div className="absolute inset-0 z-10 mt-28 sm:mt-24">
+                <div className="absolute inset-[10%] rounded-[2rem] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]">
+                  {providers.map((provider, index) => {
+                    const position = getMarkerPosition(provider, index);
                     const selected = provider.id === selectedId;
+                    const zone = zoneMap.get(provider.zones[0]);
                     return (
                       <button
                         key={provider.id}
                         type="button"
                         onClick={() => selectProvider(provider.id)}
-                        className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border px-3 py-2 text-xs font-bold shadow-[0_12px_28px_rgba(8,18,37,0.22)] transition ${
+                        aria-pressed={selected}
+                        aria-label={
+                          locale === "ar"
+                            ? `تحديد ${provider.displayName} في ${getLocalizedValue(zone?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}`
+                            : `Selectionner ${provider.displayName} a ${getLocalizedValue(zone?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}`
+                        }
+                        className={`absolute -translate-x-1/2 -translate-y-1/2 transition ${
                           selected
-                            ? "z-20 border-white bg-white text-[var(--navy)] ring-4 ring-white/20"
-                            : "z-10 border-white/18 bg-[rgba(13,28,69,0.78)] text-white backdrop-blur hover:bg-[rgba(13,28,69,0.88)]"
+                            ? "z-20"
+                            : "z-10"
                         }`}
                         style={{ top: `${position.top}%`, left: `${position.left}%` }}
                       >
-                        {getLocalizedValue(zoneMap.get(provider.zones[0])?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}
+                        <span
+                          className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm font-extrabold shadow-[0_12px_28px_rgba(8,18,37,0.22)] ${
+                            selected
+                              ? "border-white bg-white text-[var(--navy)] ring-4 ring-white/20"
+                              : "border-white/18 bg-[rgba(13,28,69,0.82)] text-white backdrop-blur hover:bg-[rgba(13,28,69,0.92)]"
+                          }`}
+                        >
+                          {index + 1}
+                        </span>
+                        <span
+                          className={`mt-2 block rounded-full border px-3 py-1 text-[11px] font-bold whitespace-nowrap ${
+                            selected
+                              ? "border-white/18 bg-[rgba(8,18,37,0.88)] text-white"
+                              : "border-white/12 bg-[rgba(8,18,37,0.68)] text-white/92"
+                          }`}
+                        >
+                          {getMarkerLabel(zone, locale)}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="absolute inset-x-6 bottom-6 z-10 rounded-[1.35rem] border border-white/14 bg-[rgba(8,18,37,0.26)] p-4 backdrop-blur">
+              <div className="absolute inset-x-4 bottom-4 z-10 rounded-[1.35rem] border border-white/14 bg-[rgba(8,18,37,0.34)] p-4 backdrop-blur sm:inset-x-6 sm:bottom-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-white/84">
-                    {locale === "ar" ? "اضغط على البطاقة أو الدبوس لمزامنة الخريطة" : "Cliquez sur la carte ou un repère pour synchroniser la sélection"}
+                    {locale === "ar" ? "اضغط على البطاقة أو المؤشر لمزامنة الخريطة" : "Cliquez sur une carte ou un repere pour synchroniser la selection"}
                   </div>
                   {selectedProvider ? (
                     <a
@@ -213,7 +264,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
             </div>
 
             <div className="grid gap-3 border-t border-[rgba(20,92,255,0.12)] bg-white/92 p-5">
-              {providers.slice(0, 4).map((provider) => (
+              {providers.slice(0, 5).map((provider, index) => (
                 <button
                   key={provider.id}
                   type="button"
@@ -224,7 +275,16 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                       : "border-[rgba(20,92,255,0.12)] bg-white hover:border-[rgba(20,92,255,0.2)]"
                   }`}
                 >
-                  <div className="text-sm font-bold text-[var(--ink)]">{provider.displayName}</div>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ${
+                        provider.id === selectedId ? "bg-[var(--accent)] text-white" : "bg-[var(--soft)] text-[var(--navy)]"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    <div className="text-sm font-bold text-[var(--ink)]">{provider.displayName}</div>
+                  </div>
                   <div className="mt-1 text-xs text-[var(--muted)]">
                     {categoryMap.get(provider.categorySlug)?.name[locale]} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.provinceName ?? { ar: "غير محدد", fr: "Non defini" }, locale)} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}
                   </div>
