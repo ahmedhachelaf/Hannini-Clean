@@ -270,12 +270,43 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
         body: formData,
       });
 
-      const data = (await response.json()) as SignupSubmissionResult;
-      setResult(data);
-    } catch {
+      const raw = await response.text();
+      let data: SignupSubmissionResult | null = null;
+
+      try {
+        data = raw ? (JSON.parse(raw) as SignupSubmissionResult) : null;
+      } catch (error) {
+        console.error("provider-signup:invalid_json_response", {
+          status: response.status,
+          rawSnippet: raw.slice(0, 240),
+          error,
+        });
+      }
+
+      if (data) {
+        setResult(data);
+        return;
+      }
+
+      console.error("provider-signup:unexpected_response", {
+        status: response.status,
+        rawSnippet: raw.slice(0, 240),
+      });
       setResult({
         ok: false,
-        message: copy.submissionError,
+        message:
+          locale === "ar"
+            ? "تعذر قراءة رد الخادم. حدّث التطبيق أو أعد فتحه ثم حاول مرة أخرى."
+            : "Impossible de lire la réponse du serveur. Mettez l'application à jour ou relancez-la puis réessayez.",
+      });
+    } catch (error) {
+      console.error("provider-signup:request_failed", error);
+      setResult({
+        ok: false,
+        message:
+          locale === "ar"
+            ? "تعذر الوصول إلى خادم الإرسال حالياً. حدّث التطبيق أو أعد فتحه ثم حاول مرة أخرى."
+            : "Impossible de joindre le service d'envoi pour le moment. Mettez l'application à jour ou relancez-la puis réessayez.",
       });
     } finally {
       setPending(false);

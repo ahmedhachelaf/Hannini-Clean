@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SupportForm } from "@/components/forms/support-form";
 import { getDictionary, isLocale } from "@/lib/i18n";
 import { notFound } from "next/navigation";
@@ -43,13 +44,13 @@ export default async function SupportPage({ params, searchParams }: SupportPageP
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {quickCategories.map((category) => (
-              <a
+              <Link
                 key={category}
                 href={`/${locale}/support?category=${category}`}
                 className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4 text-sm font-semibold leading-7 text-[var(--ink)] backdrop-blur transition hover:-translate-y-0.5"
               >
                 {dictionary.support.categories[category]}
-              </a>
+              </Link>
             ))}
           </div>
         </section>
@@ -80,12 +81,12 @@ export default async function SupportPage({ params, searchParams }: SupportPageP
           ))}
         </div>
 
-        <a
+        <Link
           href={`/${locale}/safety`}
           className="button-secondary mt-6"
         >
           {locale === "ar" ? "العودة إلى مركز الأمان" : "Retour au centre sécurité"}
-        </a>
+        </Link>
       </aside>
     </div>
   );

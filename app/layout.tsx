@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { APP_BUILD_ID, APP_VERSION } from "@/lib/build-info";
 import "./globals.css";
 
 const appUrl =
@@ -41,7 +42,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" suppressHydrationWarning>
-      <body className="bg-[var(--bg)] text-[var(--ink)] antialiased">{children}</body>
+      <body
+        data-app-version={APP_VERSION}
+        data-build-id={APP_BUILD_ID}
+        className="bg-[var(--bg)] text-[var(--ink)] antialiased"
+      >
+        {children}
+      </body>
     </html>
   );
 }

@@ -1,5 +1,16 @@
-const CACHE_NAME = "hannini-shell-v2";
-const OFFLINE_ASSETS = ["/", "/ar", "/fr", "/manifest.webmanifest"];
+const CACHE_NAME = "hannini-shell-v3-20260323";
+const OFFLINE_ASSETS = [
+  "/",
+  "/ar",
+  "/fr",
+  "/ar/join",
+  "/fr/join",
+  "/ar/support",
+  "/fr/support",
+  "/ar/safety",
+  "/fr/safety",
+  "/manifest.webmanifest",
+];
 
 function getLocaleFallback(pathname) {
   return pathname.startsWith("/fr") ? "/fr" : "/ar";
@@ -15,7 +26,14 @@ async function networkFirst(request) {
     }
     return response;
   } catch {
-    return caches.match(request).then((cached) => cached ?? caches.match(getLocaleFallback(new URL(request.url).pathname)));
+    const requestUrl = new URL(request.url);
+    return caches.match(request).then(
+      (cached) =>
+        cached ??
+        caches.match(requestUrl.pathname).then(
+          (pathnameMatch) => pathnameMatch ?? caches.match(getLocaleFallback(requestUrl.pathname)),
+        ),
+    );
   }
 }
 
@@ -45,6 +63,12 @@ self.addEventListener("activate", (event) => {
       Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
     ).then(() => self.clients.claim()),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("fetch", (event) => {

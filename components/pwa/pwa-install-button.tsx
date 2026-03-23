@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { APP_BUILD_LABEL } from "@/lib/build-info";
 import type { Locale } from "@/lib/types";
 
 type BeforeInstallPromptEvent = Event & {
@@ -41,6 +42,8 @@ let installSnapshot: InstallSnapshot = {
 };
 
 let listenersBound = false;
+let buildLogged = false;
+let controllerChangeBound = false;
 const snapshotListeners = new Set<(snapshot: InstallSnapshot) => void>();
 
 function emitSnapshot() {
@@ -75,8 +78,44 @@ function bindInstallListeners() {
 
   listenersBound = true;
 
+  if (!buildLogged) {
+    console.info(`[Hannini] build ${APP_BUILD_LABEL}`);
+    buildLogged = true;
+  }
+
   if ("serviceWorker" in navigator) {
-    void navigator.serviceWorker.register("/sw.js");
+    void navigator.serviceWorker.register("/sw.js").then((registration) => {
+      void registration.update();
+
+      if (registration.waiting && navigator.serviceWorker.controller) {
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const nextWorker = registration.installing;
+        if (!nextWorker) {
+          return;
+        }
+
+        nextWorker.addEventListener("statechange", () => {
+          if (nextWorker.state === "installed" && navigator.serviceWorker.controller) {
+            nextWorker.postMessage({ type: "SKIP_WAITING" });
+          }
+        });
+      });
+    });
+
+    if (!controllerChangeBound) {
+      controllerChangeBound = true;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (window.sessionStorage.getItem("hannini-sw-reloaded") === "1") {
+          return;
+        }
+
+        window.sessionStorage.setItem("hannini-sw-reloaded", "1");
+        window.location.reload();
+      });
+    }
   }
 
   detectInstallState();

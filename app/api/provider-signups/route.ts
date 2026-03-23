@@ -381,6 +381,7 @@ export async function POST(request: Request) {
           : "Votre demande a bien été reçue et reste maintenant en attente de revue.",
     });
   } catch (error) {
+    console.error("provider-signups:request_failed", formatSignupErrorForLog(error));
     return NextResponse.json(
       {
         ok: false,
@@ -530,4 +531,26 @@ async function cleanupFailedProviderSignup(
   providerId: string,
 ) {
   await supabase.from("providers").delete().eq("id", providerId);
+}
+
+function formatSignupErrorForLog(error: unknown) {
+  if (error instanceof ZodError) {
+    return {
+      type: "zod",
+      issues: error.issues,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      type: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return {
+    type: typeof error,
+    value: error,
+  };
 }

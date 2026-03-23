@@ -5,6 +5,7 @@ import { MetadataManager } from "@/components/admin/metadata-manager";
 import { ProviderActions } from "@/components/admin/provider-actions";
 import { SupportCaseActions } from "@/components/admin/support-case-actions";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { APP_BUILD_LABEL } from "@/lib/build-info";
 import { formatDate } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
 import { getGrowthStage, getOpportunityTypes, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
@@ -91,6 +92,9 @@ export default async function AdminPage({ params }: AdminPageProps) {
         <div>
           <h1 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.admin.title}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">{dictionary.admin.description}</p>
+          <p className="mt-2 text-xs font-medium text-[var(--muted)]">
+            {locale === "ar" ? "إصدار الواجهة الحالي" : "Version active"}: {APP_BUILD_LABEL}
+          </p>
         </div>
         <LogoutButton locale={locale} label={dictionary.admin.logout} />
       </section>
