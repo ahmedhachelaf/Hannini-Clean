@@ -207,18 +207,69 @@ export async function POST(request: Request) {
     });
 
     if (serviceInsert.error) {
+      console.error("provider-signups:provider_services_insert_failed", {
+        locale,
+        providerId,
+        categorySlug: payload.categorySlug,
+        error: serviceInsert.error,
+      });
+      await cleanupFailedProviderSignup(supabase, providerId);
       throw new Error(localizeServerWriteError("service", locale));
     }
 
     if (payload.zones.length > 0) {
+      const normalizedZoneSlugs = Array.from(new Set(payload.zones.map((zone) => zone.trim()).filter(Boolean)));
+      const selectedZones = normalizedZoneSlugs
+        .map((zoneSlug) => seedZones.find((zone) => zone.slug === zoneSlug))
+        .filter((zone): zone is (typeof seedZones)[number] => Boolean(zone));
+
+      if (selectedZones.length !== normalizedZoneSlugs.length) {
+        console.error("provider-signups:invalid_zone_payload", {
+          locale,
+          providerId,
+          zones: payload.zones,
+        });
+        await cleanupFailedProviderSignup(supabase, providerId);
+        throw new Error(localizeServerWriteError("zone_invalid", locale));
+      }
+
+      const zonesUpsert = await upsertSelectedZones(
+        supabase,
+        selectedZones.map((zone) => ({
+          slug: zone.slug,
+          province_slug: zone.provinceSlug,
+          wilaya: zone.wilaya,
+          name_ar: zone.name.ar,
+          name_fr: zone.name.fr,
+        })),
+      );
+
+      if (zonesUpsert.error) {
+        console.error("provider-signups:zones_upsert_failed", {
+          locale,
+          providerId,
+          zones: normalizedZoneSlugs,
+          error: zonesUpsert.error,
+        });
+        await cleanupFailedProviderSignup(supabase, providerId);
+        throw new Error(localizeServerWriteError("zone_seed", locale));
+      }
+
       const areaInsert = await supabase.from("service_areas").insert(
-        payload.zones.map((zoneSlug) => ({
+        normalizedZoneSlugs.map((zoneSlug) => ({
           provider_id: providerId,
           zone_slug: zoneSlug,
         })),
       );
 
       if (areaInsert.error) {
+        console.error("provider-signups:service_areas_insert_failed", {
+          locale,
+          providerId,
+          zones: normalizedZoneSlugs,
+          error: areaInsert.error,
+        });
+        await cleanupFailedProviderSignup(supabase, providerId);
         throw new Error(localizeServerWriteError("zone", locale));
       }
     }
@@ -236,6 +287,13 @@ export async function POST(request: Request) {
       );
 
       if (availabilityInsert.error) {
+        console.error("provider-signups:availability_insert_failed", {
+          locale,
+          providerId,
+          weekdays: payload.weekdays,
+          error: availabilityInsert.error,
+        });
+        await cleanupFailedProviderSignup(supabase, providerId);
         throw new Error(localizeServerWriteError("availability", locale));
       }
     }
@@ -251,6 +309,13 @@ export async function POST(request: Request) {
       );
 
       if (photoInsert.error) {
+        console.error("provider-signups:gallery_insert_failed", {
+          locale,
+          providerId,
+          workPhotoNames: payload.workPhotoNames,
+          error: photoInsert.error,
+        });
+        await cleanupFailedProviderSignup(supabase, providerId);
         throw new Error(localizeServerWriteError("gallery", locale));
       }
     }
@@ -294,6 +359,12 @@ export async function POST(request: Request) {
     });
 
     if (verificationInsert.error) {
+      console.error("provider-signups:verification_insert_failed", {
+        locale,
+        providerId,
+        error: verificationInsert.error,
+      });
+      await cleanupFailedProviderSignup(supabase, providerId);
       throw new Error(localizeServerWriteError("verification", locale));
     }
 
@@ -393,7 +464,7 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
 }
 
 function localizeServerWriteError(
-  step: "user" | "category" | "service" | "zone" | "availability" | "gallery" | "verification",
+  step: "user" | "category" | "service" | "zone" | "zone_invalid" | "zone_seed" | "availability" | "gallery" | "verification",
   locale: "ar" | "fr",
 ) {
   if (locale === "ar") {
@@ -402,6 +473,8 @@ function localizeServerWriteError(
       category: "تعذر حفظ فئة النشاط المختارة.",
       service: "تعذر ربط النشاط بالفئة المختارة.",
       zone: "تعذر حفظ مناطق الخدمة.",
+      zone_invalid: "قيمة الولاية أو المنطقة المختارة غير صالحة. اختر منطقة الخدمة مرة أخرى.",
+      zone_seed: "تعذر تجهيز مناطق الخدمة المختارة قبل حفظها. حاول مرة أخرى.",
       availability: "تعذر حفظ أوقات التوفر.",
       gallery: "تعذر حفظ صور الأعمال.",
       verification: "تعذر حفظ وثيقة التحقق وبيانات المراجعة.",
@@ -413,8 +486,48 @@ function localizeServerWriteError(
     category: "Impossible d'enregistrer la catégorie sélectionnée.",
     service: "Impossible de relier le profil à la catégorie choisie.",
     zone: "Impossible d'enregistrer les zones de service.",
+    zone_invalid: "La wilaya ou la zone choisie n'est pas valide. Merci de la sélectionner de nouveau.",
+    zone_seed: "Impossible de préparer les zones choisies avant l'enregistrement. Merci de réessayer.",
     availability: "Impossible d'enregistrer les disponibilités.",
     gallery: "Impossible d'enregistrer les photos de réalisations.",
     verification: "Impossible d'enregistrer le document de vérification et les données de revue.",
   }[step];
+}
+
+async function upsertSelectedZones(
+  supabase: NonNullable<ReturnType<typeof createServerSupabaseClient>>,
+  rows: Array<{
+    slug: string;
+    province_slug: string;
+    wilaya: string;
+    name_ar: string;
+    name_fr: string;
+  }>,
+) {
+  const primaryAttempt = await supabase.from("zones").upsert(rows, { onConflict: "slug" });
+
+  if (!primaryAttempt.error) {
+    return primaryAttempt;
+  }
+
+  if (!("message" in primaryAttempt.error) || !String(primaryAttempt.error.message).includes("province_slug")) {
+    return primaryAttempt;
+  }
+
+  return supabase.from("zones").upsert(
+    rows.map(({ slug, wilaya, name_ar, name_fr }) => ({
+      slug,
+      wilaya,
+      name_ar,
+      name_fr,
+    })),
+    { onConflict: "slug" },
+  );
+}
+
+async function cleanupFailedProviderSignup(
+  supabase: NonNullable<ReturnType<typeof createServerSupabaseClient>>,
+  providerId: string,
+) {
+  await supabase.from("providers").delete().eq("id", providerId);
 }
