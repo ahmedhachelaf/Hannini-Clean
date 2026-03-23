@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProviderSignupForm } from "@/components/forms/provider-signup-form";
 import { getDictionary, isLocale } from "@/lib/i18n";
 import { getCategories, getZones } from "@/lib/repository";
@@ -40,12 +41,12 @@ export default async function JoinPage({ params }: JoinPageProps) {
             {dictionary.grow.academySoon}
           </div>
 
-          <a
+          <Link
             href={`/${locale}/grow`}
             className="button-secondary mt-5 w-full border-white/20 bg-white/12 text-center text-white shadow-[0_18px_36px_rgba(8,18,37,0.18)]"
           >
             {dictionary.nav.grow}
-          </a>
+          </Link>
         </aside>
       </div>
     </div>

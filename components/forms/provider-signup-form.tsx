@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Category, Locale, ProfileType, SignupSubmissionResult, Zone } from "@/lib/types";
 
@@ -675,12 +676,12 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           <div className="mt-1">{result.message}</div>
           {result.ok && result.manageUrl ? (
             <div className="mt-3 flex flex-col gap-2">
-              <a href={result.manageUrl} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+              <Link href={result.manageUrl} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
                 {locale === "ar" ? "إدارة ملفك أو إيقاف ظهوره مؤقتاً" : "Gérer votre profil ou le mettre en pause"}
-              </a>
-              <a href={`/${locale}/provider/login`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+              </Link>
+              <Link href={`/${locale}/provider/login`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
                 {locale === "ar" ? "دخول مزود الخدمة لمتابعة الطلبات لاحقاً" : "Accéder à l’espace prestataire plus tard"}
-              </a>
+              </Link>
             </div>
           ) : null}
         </div>

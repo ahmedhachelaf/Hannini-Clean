@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { Locale, SupportSubmissionResult } from "@/lib/types";
 
@@ -221,9 +222,9 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
           <div className="font-semibold">{labels.successTitle}</div>
           <div className="mt-1">{labels.successDescription}</div>
           {result.caseId ? (
-            <a href={`/${locale}/support/${result.caseId}`} className="button-primary mt-4 inline-flex">
+            <Link href={`/${locale}/support/${result.caseId}`} className="button-primary mt-4 inline-flex">
               {labels.openThread}
-            </a>
+            </Link>
           ) : null}
         </div>
       ) : null}

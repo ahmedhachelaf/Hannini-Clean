@@ -1,21 +1,15 @@
 import type { Metadata, Viewport } from "next";
+import { getAppBaseUrl } from "@/lib/app-origin";
 import { APP_BUILD_ID, APP_VERSION } from "@/lib/build-info";
 import "./globals.css";
 
-const appUrl =
-  process.env.NEXT_PUBLIC_APP_URL ??
-  process.env.VERCEL_PROJECT_PRODUCTION_URL ??
-  "https://hannini-clean.vercel.app";
-
-function normalizeBaseUrl(value: string) {
-  return value.startsWith("http") ? value : `https://${value}`;
-}
+const appUrl = getAppBaseUrl();
 
 export const metadata: Metadata = {
   title: "Hannini | هَنّيني",
   description: "Hannini is a clean bilingual marketplace MVP for booking trusted home-service providers in Algeria.",
   applicationName: "Hannini",
-  metadataBase: appUrl ? new URL(normalizeBaseUrl(appUrl)) : undefined,
+  metadataBase: appUrl ? new URL(appUrl) : undefined,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

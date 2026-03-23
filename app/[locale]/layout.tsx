@@ -30,7 +30,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       <SiteHeader locale={locale} dictionary={dictionary} />
       <main id="main-content" tabIndex={-1}>{children}</main>
       <SiteFooter locale={locale} nav={dictionary.nav} />
-      <div className="pointer-events-none fixed bottom-4 left-0 right-0 z-30 flex justify-center px-4 md:hidden">
+      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-end px-4 pb-[max(env(safe-area-inset-bottom),0px)] md:hidden">
         <div className="pointer-events-auto">
           <PwaInstallButton locale={locale} copy={dictionary.install} />
         </div>

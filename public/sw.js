@@ -1,4 +1,5 @@
-const CACHE_NAME = "hannini-shell-v3-20260323";
+const buildId = new URL(self.location.href).searchParams.get("build") ?? "v3-20260323";
+const CACHE_NAME = `hannini-shell-${buildId}`;
 const OFFLINE_ASSETS = [
   "/",
   "/ar",

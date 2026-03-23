@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { BookingSubmissionResult, Category, Locale, Provider, Zone } from "@/lib/types";
 
@@ -95,18 +96,18 @@ export function BookingForm({ locale, provider, categories, zones, labels }: Boo
         <p className="mt-3 text-sm text-[var(--muted)]">{result.message}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           {result.statusUrl ? (
-            <a href={result.statusUrl} className="button-secondary">
+            <Link href={result.statusUrl} className="button-secondary">
               {locale === "ar" ? "متابعة حالة الطلب" : "Suivre la demande"}
-            </a>
+            </Link>
           ) : null}
           {result.whatsappUrl ? (
             <a href={result.whatsappUrl} target="_blank" rel="noreferrer" className="button-primary">
               {labels.openWhatsapp}
             </a>
           ) : null}
-          <a href={`/${locale}/providers/${provider.slug}`} className="button-secondary">
+          <Link href={`/${locale}/providers/${provider.slug}`} className="button-secondary">
             {locale === "ar" ? "العودة إلى الملف" : "Retour au profil"}
-          </a>
+          </Link>
         </div>
       </div>
     );
