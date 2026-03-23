@@ -1,13 +1,35 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { parseProviderLifecycleMeta } from "@/lib/provider-lifecycle";
 import { verifyProviderPassword } from "@/lib/provider-password";
 import { cookies } from "next/headers";
 import { getProviderById, getProviders } from "@/lib/repository";
-import type { Provider, ProviderSession } from "@/lib/types";
+import type { Provider } from "@/lib/types";
 
 const PROVIDER_COOKIE = "hannini_provider_session";
+const PROVIDER_SESSION_SECRET =
+  process.env.PROVIDER_SESSION_SECRET || process.env.ADMIN_ACCESS_PASSWORD || "hannini-provider-session-secret";
 
-function serializeProviderSession(value: ProviderSession) {
-  return `${value.providerId}::${value.token}`;
+type ParsedProviderSession = {
+  providerId: string;
+  sessionProof: string;
+};
+
+function createProviderSessionProof(providerId: string) {
+  return createHmac("sha256", PROVIDER_SESSION_SECRET).update(providerId).digest("hex");
+}
+
+function validateProviderSessionProof(providerId: string, sessionProof: string) {
+  const expected = createProviderSessionProof(providerId);
+
+  if (expected.length !== sessionProof.length) {
+    return false;
+  }
+
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(sessionProof));
+}
+
+function serializeProviderSession(providerId: string) {
+  return `${providerId}::${createProviderSessionProof(providerId)}`;
 }
 
 function parseProviderSession(value: string | undefined) {
@@ -15,18 +37,18 @@ function parseProviderSession(value: string | undefined) {
     return null;
   }
 
-  const [providerId, token] = value.split("::");
+  const [providerId, sessionProof] = value.split("::");
 
-  if (!providerId || !token) {
+  if (!providerId || !sessionProof) {
     return null;
   }
 
-  return { providerId, token };
+  return { providerId, sessionProof } satisfies ParsedProviderSession;
 }
 
-export async function setProviderSessionCookie(session: ProviderSession) {
+export async function setProviderSessionCookie(providerId: string) {
   const store = await cookies();
-  store.set(PROVIDER_COOKIE, serializeProviderSession(session), {
+  store.set(PROVIDER_COOKIE, serializeProviderSession(providerId), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -54,7 +76,14 @@ export async function getAuthenticatedProvider() {
 
   const provider = await getProviderById(session.providerId, true);
 
-  if (!provider || provider.verification.managementToken !== session.token) {
+  if (!provider) {
+    return null;
+  }
+
+  if (
+    !validateProviderSessionProof(session.providerId, session.sessionProof) &&
+    provider.verification.managementToken !== session.sessionProof
+  ) {
     return null;
   }
 
@@ -65,15 +94,21 @@ export async function isProviderAuthenticated() {
   return Boolean(await getAuthenticatedProvider());
 }
 
-export async function authenticateProviderWithPassword(phoneOrWhatsapp: string, password: string): Promise<Provider | null> {
+export async function authenticateProviderWithPassword(identifier: string, password: string): Promise<Provider | null> {
   const providers = await getProviders({}, true);
-  const normalizedIdentifier = phoneOrWhatsapp.trim();
+  const normalizedIdentifier = identifier.trim();
+  const normalizedIdentifierLower = normalizedIdentifier.toLowerCase();
 
   return (
     providers.find(
       (provider) => {
+        const accountEmail = parseProviderLifecycleMeta(provider.verification.notes).accountEmail?.trim().toLowerCase();
         if (
-          (provider.phoneNumber.trim() !== normalizedIdentifier && provider.whatsappNumber.trim() !== normalizedIdentifier) ||
+          (
+            provider.phoneNumber.trim() !== normalizedIdentifier &&
+            provider.whatsappNumber.trim() !== normalizedIdentifier &&
+            accountEmail !== normalizedIdentifierLower
+          ) ||
           provider.status === "deleted"
         ) {
           return false;
@@ -89,14 +124,24 @@ export async function authenticateProviderWithPassword(phoneOrWhatsapp: string, 
 export async function authenticateProviderWithAccessCode(phoneOrWhatsapp: string, accessCode: string): Promise<Provider | null> {
   const providers = await getProviders({}, true);
   const normalizedIdentifier = phoneOrWhatsapp.trim();
+  const normalizedIdentifierLower = normalizedIdentifier.toLowerCase();
   const normalizedAccessCode = accessCode.trim();
 
   return (
     providers.find(
-      (provider) =>
-        (provider.phoneNumber.trim() === normalizedIdentifier || provider.whatsappNumber.trim() === normalizedIdentifier) &&
-        provider.verification.managementToken === normalizedAccessCode &&
-        provider.status !== "deleted",
+      (provider) => {
+        const accountEmail = parseProviderLifecycleMeta(provider.verification.notes).accountEmail?.trim().toLowerCase();
+
+        return (
+          (
+            provider.phoneNumber.trim() === normalizedIdentifier ||
+            provider.whatsappNumber.trim() === normalizedIdentifier ||
+            accountEmail === normalizedIdentifierLower
+          ) &&
+          provider.verification.managementToken === normalizedAccessCode &&
+          provider.status !== "deleted"
+        );
+      },
     ) ?? null
   );
 }

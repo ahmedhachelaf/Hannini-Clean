@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAuthenticatedProvider } from "@/lib/provider-auth";
 import { getProviderById } from "@/lib/repository";
 import { mergeProviderLifecycleNotes, parseProviderLifecycleMeta } from "@/lib/provider-lifecycle";
 import { createProviderPasswordSecret } from "@/lib/provider-password";
@@ -13,10 +14,11 @@ type RouteContext = {
 export async function POST(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const body = (await request.json().catch(() => null)) as
-    | {
+      | {
         token?: string;
         action?: "update" | "deactivate" | "reactivate" | "request_deletion";
         workshopName?: string;
+        email?: string;
         phoneNumber?: string;
         whatsappNumber?: string;
         shortDescription?: string;
@@ -25,20 +27,31 @@ export async function POST(request: Request, context: RouteContext) {
       }
     | null;
 
-  if (!body?.token || !body.action) {
-    return NextResponse.json({ ok: false, message: "Missing management token or action." }, { status: 400 });
+  if (!body?.action) {
+    return NextResponse.json({ ok: false, message: "Missing action." }, { status: 400 });
   }
 
+  const authenticatedProvider = await getAuthenticatedProvider();
+  const hasSessionAccess = authenticatedProvider?.id === id;
+
   if (!hasSupabaseServerEnv()) {
-    const provider = updateDemoProviderSelfService(id, body.token, {
-      action: body.action,
-      workshopName: body.workshopName,
-      phoneNumber: body.phoneNumber,
-      whatsappNumber: body.whatsappNumber,
-      shortDescription: body.shortDescription,
-      zoneSlug: body.zoneSlug,
-      newPassword: body.newPassword,
-    });
+    const provider = updateDemoProviderSelfService(
+      id,
+      {
+        authenticated: hasSessionAccess,
+        managementToken: body.token ?? null,
+      },
+      {
+        action: body.action,
+        workshopName: body.workshopName,
+        email: body.email,
+        phoneNumber: body.phoneNumber,
+        whatsappNumber: body.whatsappNumber,
+        shortDescription: body.shortDescription,
+        zoneSlug: body.zoneSlug,
+        newPassword: body.newPassword,
+      },
+    );
 
     if (!provider) {
       return NextResponse.json({ ok: false, message: "Invalid access or provider not found." }, { status: 404 });
@@ -61,7 +74,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   const provider = await getProviderById(id, true);
 
-  if (!provider || provider.verification.managementToken !== body.token) {
+  if (!provider || (!hasSessionAccess && provider.verification.managementToken !== body.token)) {
     return NextResponse.json({ ok: false, message: "Invalid access or provider not found." }, { status: 404 });
   }
 
@@ -159,6 +172,7 @@ export async function POST(request: Request, context: RouteContext) {
         ageConfirmed: meta.ageConfirmed,
         conductAccepted: meta.conductAccepted,
         policyAccepted: meta.policyAccepted,
+        accountEmail: body.email?.trim().toLowerCase() || meta.accountEmail,
         acceptedAt: meta.acceptedAt,
         conductVersion: meta.conductVersion,
         policyVersion: meta.policyVersion,

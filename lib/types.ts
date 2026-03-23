@@ -104,6 +104,7 @@ export type Provider = {
   profileType: ProfileType;
   displayName: string;
   workshopName?: string | null;
+  email?: string;
   categorySlug: string;
   rating: number;
   reviewCount: number;
@@ -178,7 +179,7 @@ export type Booking = {
 
 export type ProviderSession = {
   providerId: string;
-  token: string;
+  sessionProof?: string;
 };
 
 export type SupportMessage = {
@@ -237,6 +238,7 @@ export type ProviderSignupInput = {
   profileType: ProfileType;
   fullName: string;
   workshopName: string;
+  email: string;
   phoneNumber: string;
   whatsappNumber: string;
   categorySlug: string;
@@ -355,6 +357,8 @@ export type SignupSubmissionResult = {
   providerId?: string;
   providerSlug?: string;
   manageUrl?: string;
+  loginUrl?: string;
+  dashboardUrl?: string;
   demoMode?: boolean;
 };
 

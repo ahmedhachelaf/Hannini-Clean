@@ -230,6 +230,7 @@ function parseVerificationNotes(notes: string | null | undefined) {
   const value = parseProviderLifecycleMeta(notes);
 
   return {
+    accountEmail: value.accountEmail,
     ageConfirmed: value.ageConfirmed,
     conductAccepted: value.conductAccepted,
     policyAccepted: value.policyAccepted,
@@ -327,6 +328,7 @@ function mapProviderRow(row: ProviderRow): Provider {
     profileType,
     displayName: row.display_name,
     workshopName: row.workshop_name,
+    email: verificationFlags.accountEmail ?? undefined,
     categorySlug,
     rating: row.rating_average ?? 0,
     reviewCount: row.review_count ?? 0,

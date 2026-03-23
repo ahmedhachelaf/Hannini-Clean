@@ -6,20 +6,23 @@ export async function POST(request: Request) {
     const locale = request.headers.get("x-hannini-locale") === "fr" ? "fr" : "ar";
     const payload = (await request.json().catch(() => null)) as
       | {
+          identifier?: string;
           phoneOrWhatsapp?: string;
           password?: string;
           accessCode?: string;
         }
       | null;
 
-    if (!payload?.phoneOrWhatsapp?.trim() || (!payload?.password?.trim() && !payload?.accessCode?.trim())) {
+    const identifier = payload?.identifier?.trim() || payload?.phoneOrWhatsapp?.trim() || "";
+
+    if (!identifier || (!payload?.password?.trim() && !payload?.accessCode?.trim())) {
       return NextResponse.json(
         {
           ok: false,
           message:
             locale === "ar"
-              ? "أدخل رقم الهاتف مع كلمة المرور أو رمز الوصول الاحتياطي."
-              : "Saisissez votre téléphone avec le mot de passe ou le code d’accès de secours.",
+              ? "أدخل البريد الإلكتروني أو رقم الهاتف مع كلمة المرور أو رمز الوصول الاحتياطي."
+              : "Saisissez votre e-mail ou téléphone avec le mot de passe, ou le code d’accès de secours.",
         },
         { status: 400 },
       );
@@ -27,29 +30,26 @@ export async function POST(request: Request) {
 
     const provider =
       (payload.password?.trim()
-        ? await authenticateProviderWithPassword(payload.phoneOrWhatsapp, payload.password)
+        ? await authenticateProviderWithPassword(identifier, payload.password)
         : null) ??
       (payload.accessCode?.trim()
-        ? await authenticateProviderWithAccessCode(payload.phoneOrWhatsapp, payload.accessCode)
+        ? await authenticateProviderWithAccessCode(identifier, payload.accessCode)
         : null);
 
-    if (!provider || !provider.verification.managementToken) {
+    if (!provider) {
       return NextResponse.json(
         {
           ok: false,
           message:
             locale === "ar"
-              ? "تعذر التحقق من بيانات الدخول. راجع الرقم وكلمة المرور، أو استخدم رمز الوصول إذا لم تعيّن كلمة مرور بعد."
-              : "Impossible de vérifier vos accès. Vérifiez le numéro et le mot de passe, ou utilisez le code d’accès si aucun mot de passe n’a encore été défini.",
+              ? "تعذر التحقق من بيانات الدخول. راجع البريد الإلكتروني أو الرقم وكلمة المرور."
+              : "Impossible de vérifier vos accès. Vérifiez l’e-mail ou le numéro ainsi que le mot de passe.",
         },
         { status: 401 },
       );
     }
 
-    await setProviderSessionCookie({
-      providerId: provider.id,
-      token: provider.verification.managementToken,
-    });
+    await setProviderSessionCookie(provider.id);
 
     return NextResponse.json({
       ok: true,

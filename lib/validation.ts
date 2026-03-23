@@ -98,6 +98,7 @@ export const providerSignupSchema = z.object({
   profileType: z.enum(["service_provider", "home_business"]),
   fullName: z.string().min(2),
   workshopName: z.string().optional().default(""),
+  email: z.string().email(),
   phoneNumber: z.string().optional().default(""),
   whatsappNumber: z.string().optional().default(""),
   categorySlug: z.string().min(1),

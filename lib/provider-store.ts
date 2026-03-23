@@ -52,6 +52,7 @@ function buildGallery(workPhotoNames: string[]) {
 
 function syncVerificationMeta(provider: Provider) {
   const meta = parseProviderLifecycleMeta(provider.verification.notes);
+  provider.email = meta.accountEmail ?? provider.email ?? undefined;
   provider.verification.managementToken = meta.managementToken ?? provider.verification.managementToken ?? null;
   provider.verification.ageConfirmed = meta.ageConfirmed;
   provider.verification.conductAccepted = meta.conductAccepted;
@@ -109,6 +110,7 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
   const notes = mergeProviderLifecycleNotes(
     "",
     {
+      accountEmail: input.email,
       ageConfirmed: input.ageConfirmed,
       conductAccepted: input.conductAccepted,
       policyAccepted: input.policyAccepted,
@@ -142,6 +144,7 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
     profileType: input.profileType,
     displayName: input.fullName,
     workshopName: input.workshopName || null,
+    email: input.email,
     categorySlug: input.categorySlug,
     rating: 0,
     reviewCount: 0,
@@ -281,10 +284,14 @@ export function updateDemoProviderModeration(
 
 export function updateDemoProviderSelfService(
   providerId: string,
-  managementToken: string,
+  access: {
+    authenticated?: boolean;
+    managementToken?: string | null;
+  },
   input: {
     action: "update" | "deactivate" | "reactivate" | "request_deletion";
     workshopName?: string;
+    email?: string;
     phoneNumber?: string;
     whatsappNumber?: string;
     shortDescription?: string;
@@ -294,13 +301,22 @@ export function updateDemoProviderSelfService(
 ) {
   const provider = findDemoProvider(providerId);
 
-  if (!provider || provider.verification.managementToken !== managementToken) {
+  if (!provider) {
+    return null;
+  }
+
+  const hasSessionAccess = Boolean(access.authenticated);
+  const hasTokenAccess =
+    Boolean(access.managementToken) && provider.verification.managementToken === access.managementToken;
+
+  if (!hasSessionAccess && !hasTokenAccess) {
     return null;
   }
 
   if (input.action === "update") {
     provider.workshopName = input.workshopName?.trim() || provider.workshopName;
     provider.displayName = provider.displayName;
+    provider.email = input.email?.trim().toLowerCase() || provider.email;
     provider.phoneNumber = input.phoneNumber?.trim() || provider.phoneNumber;
     provider.whatsappNumber = input.whatsappNumber?.trim() || provider.whatsappNumber;
 
@@ -318,8 +334,13 @@ export function updateDemoProviderSelfService(
       const secret = createProviderPasswordSecret(input.newPassword.trim());
       provider.verification.hasPassword = true;
       provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {
+        accountEmail: input.email?.trim().toLowerCase() || provider.email,
         passwordSalt: secret.salt,
         passwordHash: secret.hash,
+      });
+    } else if (input.email?.trim()) {
+      provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {
+        accountEmail: input.email.trim().toLowerCase(),
       });
     }
 

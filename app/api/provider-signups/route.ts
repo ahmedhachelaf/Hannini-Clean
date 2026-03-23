@@ -37,6 +37,7 @@ export async function POST(request: Request) {
       profileType: String(formData.get("profileType") ?? "service_provider"),
       fullName: String(formData.get("fullName") ?? ""),
       workshopName: String(formData.get("workshopName") ?? ""),
+      email: String(formData.get("email") ?? "").trim().toLowerCase(),
       phoneNumber: String(formData.get("phoneNumber") ?? ""),
       whatsappNumber: String(formData.get("whatsappNumber") ?? ""),
       categorySlug: String(formData.get("categorySlug") ?? ""),
@@ -93,10 +94,12 @@ export async function POST(request: Request) {
         providerId: provider.id,
         providerSlug: provider.slug,
         manageUrl: `/${locale}/join/manage?provider=${provider.id}&token=${managementToken}`,
+        loginUrl: `/${locale}/provider/login`,
+        dashboardUrl: `/${locale}/dashboard`,
         message:
           locale === "ar"
-            ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
-            : "Votre demande a bien été reçue et reste maintenant en attente de revue.",
+            ? "تم استلام طلبك بنجاح. يمكنك تسجيل الدخول لاحقاً ببريدك الإلكتروني أو رقمك وكلمة المرور لمتابعة حالة المراجعة."
+            : "Votre demande a bien été reçue. Vous pourrez vous reconnecter plus tard avec votre e-mail ou votre numéro et votre mot de passe pour suivre l’état de la revue.",
       });
     }
 
@@ -323,6 +326,7 @@ export async function POST(request: Request) {
     const verificationNotes = mergeProviderLifecycleNotes(
       "",
       {
+        accountEmail: payload.email,
         ageConfirmed: payload.ageConfirmed,
         conductAccepted: payload.conductAccepted,
         policyAccepted: payload.policyAccepted,
@@ -375,10 +379,12 @@ export async function POST(request: Request) {
       providerId,
       providerSlug: generatedSlug,
       manageUrl: `/${locale}/join/manage?provider=${providerId}&token=${managementToken}`,
+      loginUrl: `/${locale}/provider/login`,
+      dashboardUrl: `/${locale}/dashboard`,
       message:
         locale === "ar"
-          ? "تم استلام طلبك بنجاح وهو الآن قيد المراجعة."
-          : "Votre demande a bien été reçue et reste maintenant en attente de revue.",
+          ? "تم استلام طلبك بنجاح. يمكنك تسجيل الدخول لاحقاً ببريدك الإلكتروني أو رقمك وكلمة المرور لمتابعة حالة المراجعة."
+          : "Votre demande a bien été reçue. Vous pourrez vous reconnecter plus tard avec votre e-mail ou votre numéro et votre mot de passe pour suivre l’état de la revue.",
     });
   } catch (error) {
     console.error("provider-signups:request_failed", formatSignupErrorForLog(error));

@@ -41,6 +41,7 @@ type FormCopy = {
   businessTypeDescription: string;
   fullName: string;
   workshopName: string;
+  email: string;
   category: string;
   province: string;
   zone: string;
@@ -108,6 +109,7 @@ function getCopy(locale: Locale): FormCopy {
       businessTypeDescription: "طبخ منزلي، خياطة، حلويات، ومنتجات يدوية محلية.",
       fullName: "الاسم الكامل أو اسم المشروع",
       workshopName: "اسم الورشة أو النشاط (اختياري)",
+      email: "البريد الإلكتروني",
       category: "الفئة",
       province: "الولاية",
       zone: "المدينة أو المنطقة",
@@ -174,6 +176,7 @@ function getCopy(locale: Locale): FormCopy {
     businessTypeDescription: "Cuisine maison, couture, pâtisserie et créations locales.",
     fullName: "Nom complet ou nom du projet",
     workshopName: "Nom de l'atelier ou de l'activité (optionnel)",
+    email: "E-mail",
     category: "Catégorie",
     province: "Wilaya",
     zone: "Ville ou zone",
@@ -427,6 +430,13 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
           </label>
 
           <label>
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {copy.email} <span className="text-[var(--navy)]">• {copy.required}</span>
+            </span>
+            <input name="email" type="email" required aria-required="true" className="input-base" />
+          </label>
+
+          <label>
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.phone}</span>
             <input name="phoneNumber" type="tel" className="input-base" />
           </label>
@@ -674,13 +684,13 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
         <div aria-live="polite" className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
           <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
           <div className="mt-1">{result.message}</div>
-          {result.ok && result.manageUrl ? (
+          {result.ok ? (
             <div className="mt-3 flex flex-col gap-2">
-              <Link href={result.manageUrl} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
-                {locale === "ar" ? "إدارة ملفك أو إيقاف ظهوره مؤقتاً" : "Gérer votre profil ou le mettre en pause"}
+              <Link href={result.loginUrl ?? `/${locale}/provider/login`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+                {locale === "ar" ? "تسجيل الدخول إلى لوحة مزود الخدمة" : "Se connecter à l’espace prestataire"}
               </Link>
-              <Link href={`/${locale}/provider/login`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
-                {locale === "ar" ? "دخول مزود الخدمة لمتابعة الطلبات لاحقاً" : "Accéder à l’espace prestataire plus tard"}
+              <Link href={result.dashboardUrl ?? `/${locale}/dashboard`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
+                {locale === "ar" ? "فتح اللوحة لاحقاً بعد الموافقة" : "Ouvrir le tableau de bord après approbation"}
               </Link>
             </div>
           ) : null}

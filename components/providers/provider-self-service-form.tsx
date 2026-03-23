@@ -6,7 +6,7 @@ import type { Locale, Provider, Zone } from "@/lib/types";
 type ProviderSelfServiceFormProps = {
   locale: Locale;
   provider: Provider;
-  token: string;
+  token?: string;
   zones: Zone[];
 };
 
@@ -15,6 +15,7 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
   const [isError, setIsError] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
   const [workshopName, setWorkshopName] = useState(provider.workshopName ?? "");
+  const [email, setEmail] = useState(provider.email ?? "");
   const [phoneNumber, setPhoneNumber] = useState(provider.phoneNumber);
   const [whatsappNumber, setWhatsappNumber] = useState(provider.whatsappNumber);
   const [shortDescription, setShortDescription] = useState(provider.bio[locale]);
@@ -42,9 +43,10 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          token,
+          token: token || undefined,
           action,
           workshopName,
+          email,
           phoneNumber,
           whatsappNumber,
           shortDescription,
@@ -108,6 +110,12 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
             {locale === "ar" ? "اسم النشاط" : "Nom de l'activité"}
           </span>
           <input value={workshopName} onChange={(event) => setWorkshopName(event.target.value)} className="input-base" />
+        </label>
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "البريد الإلكتروني" : "E-mail"}
+          </span>
+          <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="input-base" />
         </label>
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">

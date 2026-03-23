@@ -4,6 +4,7 @@ export const CURRENT_CONDUCT_VERSION = "2026-03";
 export const CURRENT_POLICY_VERSION = "2026-03";
 
 type ProviderLifecycleMeta = {
+  accountEmail?: string | null;
   ageConfirmed: boolean;
   conductAccepted: boolean;
   policyAccepted: boolean;
@@ -19,6 +20,7 @@ type ProviderLifecycleMeta = {
 };
 
 const TAG_PATTERNS = {
+  accountEmail: /\[account_email:([^\]]+)\]/,
   acceptedAt: /\[accepted_at:([^\]]+)\]/,
   conductVersion: /\[conduct_version:([^\]]+)\]/,
   policyVersion: /\[policy_version:([^\]]+)\]/,
@@ -38,6 +40,7 @@ export function parseProviderLifecycleMeta(notes: string | null | undefined): Pr
   const value = notes ?? "";
 
   return {
+    accountEmail: readTag(value, TAG_PATTERNS.accountEmail),
     ageConfirmed: value.includes("[age_confirmed]"),
     conductAccepted: value.includes("[conduct_accepted]"),
     policyAccepted: value.includes("[policy_accepted]"),
@@ -109,6 +112,7 @@ export function mergeProviderLifecycleNotes(
     merged.ageConfirmed ? "[age_confirmed]" : "",
     merged.conductAccepted ? "[conduct_accepted]" : "",
     merged.policyAccepted ? "[policy_accepted]" : "",
+    merged.accountEmail ? `[account_email:${merged.accountEmail}]` : "",
     merged.acceptedAt ? `[accepted_at:${merged.acceptedAt}]` : "",
     merged.conductVersion ? `[conduct_version:${merged.conductVersion}]` : "",
     merged.policyVersion ? `[policy_version:${merged.policyVersion}]` : "",

@@ -25,7 +25,7 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
           "x-hannini-locale": locale,
         },
         body: JSON.stringify({
-          phoneOrWhatsapp: String(formData.get("phoneOrWhatsapp") ?? ""),
+          identifier: String(formData.get("identifier") ?? ""),
           password: String(formData.get("password") ?? ""),
           accessCode: String(formData.get("accessCode") ?? ""),
         }),
@@ -65,16 +65,16 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
         </h1>
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
           {locale === "ar"
-            ? "ادخل برقم الهاتف أو واتساب مع كلمة المرور التي اخترتها عند الانضمام. إذا كنت من المزودين القدامى، يمكنك استخدام رمز الوصول القديم مرة واحدة ثم تعيين كلمة مرور من داخل الملف."
-            : "Connectez-vous avec votre téléphone ou WhatsApp et le mot de passe choisi à l’inscription. Si vous avez un ancien accès, vous pouvez encore utiliser le code d’accès puis définir un mot de passe depuis votre profil."}
+            ? "ادخل ببريدك الإلكتروني وكلمة المرور التي اخترتها عند الانضمام. ما زال الهاتف أو واتساب يعملان كخيار احتياطي للحسابات الأقدم."
+            : "Connectez-vous avec l’e-mail et le mot de passe choisis à l’inscription. Le téléphone ou WhatsApp restent disponibles en secours pour les comptes plus anciens."}
         </p>
       </div>
 
       <label>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-          {locale === "ar" ? "الهاتف أو واتساب" : "Téléphone ou WhatsApp"}
+          {locale === "ar" ? "البريد الإلكتروني أو الهاتف" : "E-mail ou téléphone"}
         </span>
-        <input name="phoneOrWhatsapp" required className="input-base" />
+        <input name="identifier" required className="input-base" />
       </label>
 
       <label>
