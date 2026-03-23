@@ -2,7 +2,6 @@ import {
   businessRequests as seedBusinessRequests,
   categories as seedCategories,
   providers as seedProviders,
-  reviews as seedReviews,
   zones as seedZones,
 } from "@/data/seed";
 import { hydrateBookingLifecycle } from "@/lib/booking-lifecycle";
@@ -12,6 +11,7 @@ import { formatDate } from "@/lib/format";
 import { defaultLocale } from "@/lib/i18n";
 import { deriveLifecycleStatus, parseProviderLifecycleMeta, stripProviderLifecycleTags } from "@/lib/provider-lifecycle";
 import { findDemoProvider, findDemoProviderBySlug, listDemoProviders } from "@/lib/provider-store";
+import { listDemoReviews } from "@/lib/review-store";
 import { getProviderScore } from "@/lib/ranking";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { findDemoSupportCase, listDemoSupportCases } from "@/lib/support-store";
@@ -99,6 +99,8 @@ type ReviewRow = {
   customer_name: string;
   rating: number;
   review_text: string;
+  status?: Review["status"] | null;
+  admin_note?: string | null;
   created_at: string;
 };
 
@@ -407,6 +409,8 @@ function mapReviewRow(row: ReviewRow): Review {
     customerName: row.customer_name,
     rating: row.rating,
     comment: row.review_text,
+    status: row.status ?? "approved",
+    adminNote: row.admin_note ?? null,
     createdAt: row.created_at,
   };
 }
@@ -604,11 +608,20 @@ async function fetchSupabaseReviews() {
 
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, provider_id, booking_id, customer_name, rating, review_text, created_at")
+    .select("id, provider_id, booking_id, customer_name, rating, review_text, status, admin_note, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
-    return null;
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from("reviews")
+      .select("id, provider_id, booking_id, customer_name, rating, review_text, created_at")
+      .order("created_at", { ascending: false });
+
+    if (fallbackError) {
+      return null;
+    }
+
+    return (fallbackData as ReviewRow[]).map(mapReviewRow);
   }
 
   return (data as ReviewRow[]).map(mapReviewRow);
@@ -926,14 +939,15 @@ export async function getProviderById(id: string, includePending = false) {
   return providers.find((provider) => provider.id === id) ?? null;
 }
 
-export async function getReviews(providerId?: string) {
-  const reviews = (await fetchSupabaseReviews()) ?? seedReviews;
+export async function getReviews(providerId?: string, options?: { includeAllStatuses?: boolean }) {
+  const reviews = (await fetchSupabaseReviews()) ?? listDemoReviews(true);
+  const visibleReviews = options?.includeAllStatuses ? reviews : reviews.filter((review) => review.status === "approved");
 
   if (!providerId) {
-    return reviews;
+    return visibleReviews;
   }
 
-  return reviews.filter((review) => review.providerId === providerId);
+  return visibleReviews.filter((review) => review.providerId === providerId);
 }
 
 export async function getBookings() {
@@ -986,7 +1000,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   const [providers, bookings, reviews, supportCases, businessRequests, categories, zones] = await Promise.all([
     getProviders({}, true),
     getBookings(),
-    getReviews(),
+    getReviews(undefined, { includeAllStatuses: true }),
     getSupportCases(),
     getBusinessRequests(),
     getCategories(),

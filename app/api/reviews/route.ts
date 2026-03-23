@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createDemoReview } from "@/lib/review-store";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { getBookingById } from "@/lib/repository";
 import { reviewSchema } from "@/lib/validation";
@@ -16,11 +17,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "Customer access token is required for this review." }, { status: 403 });
     }
 
+    if (booking.status !== "completed") {
+      return NextResponse.json({ ok: false, message: "Only completed bookings can receive a review." }, { status: 400 });
+    }
+
     if (!hasSupabaseServerEnv()) {
+      const { review, reason } = createDemoReview(payload);
+
+      if (!review || reason === "duplicate") {
+        return NextResponse.json({ ok: false, message: "A review already exists for this booking." }, { status: 400 });
+      }
+
       return NextResponse.json({
         ok: true,
         demoMode: true,
-        message: "Review captured in demo mode. Configure Supabase to persist records.",
+        message: "Review received and queued for moderation in demo mode.",
       });
     }
 
@@ -40,13 +51,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "A review already exists for this booking." }, { status: 400 });
     }
 
-    const { error } = await supabase.from("reviews").insert({
+    const reviewInsertPayload = {
       booking_id: payload.bookingId,
       provider_id: payload.providerId,
       customer_name: payload.customerName,
       rating: payload.rating,
       review_text: payload.comment,
-    });
+      status: "pending_review",
+      admin_note: null,
+    };
+
+    let { error } = await supabase.from("reviews").insert(reviewInsertPayload);
+
+    if (error && /status|admin_note/i.test(error.message)) {
+      const fallbackInsert = await supabase.from("reviews").insert({
+        booking_id: payload.bookingId,
+        provider_id: payload.providerId,
+        customer_name: payload.customerName,
+        rating: payload.rating,
+        review_text: payload.comment,
+      });
+
+      error = fallbackInsert.error;
+    }
 
     if (error) {
       throw error;
@@ -55,14 +82,40 @@ export async function POST(request: Request) {
     const { data: ratings, error: ratingsError } = await supabase
       .from("reviews")
       .select("rating")
-      .eq("provider_id", payload.providerId);
+      .eq("provider_id", payload.providerId)
+      .eq("status", "approved");
 
     if (ratingsError) {
-      throw ratingsError;
+      const fallbackRatings = await supabase
+        .from("reviews")
+        .select("rating")
+        .eq("provider_id", payload.providerId);
+
+      if (fallbackRatings.error) {
+        throw ratingsError;
+      }
+
+      const reviewCount = fallbackRatings.data.length;
+      const ratingAverage = reviewCount > 0
+        ? fallbackRatings.data.reduce((sum, row) => sum + row.rating, 0) / reviewCount
+        : 0;
+
+      await supabase
+        .from("providers")
+        .update({
+          rating_average: Number(ratingAverage.toFixed(2)),
+          review_count: reviewCount,
+        })
+        .eq("id", payload.providerId);
+
+      return NextResponse.json({
+        ok: true,
+        message: "Review received successfully.",
+      });
     }
 
     const reviewCount = ratings.length;
-    const ratingAverage = ratings.reduce((sum, row) => sum + row.rating, 0) / reviewCount;
+    const ratingAverage = reviewCount > 0 ? ratings.reduce((sum, row) => sum + row.rating, 0) / reviewCount : 0;
 
     await supabase
       .from("providers")
@@ -74,7 +127,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "Review saved successfully.",
+      message: "Review received and queued for moderation.",
     });
   } catch (error) {
     return NextResponse.json(

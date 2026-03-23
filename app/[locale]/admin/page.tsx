@@ -3,6 +3,7 @@ import { BusinessRequestActions } from "@/components/admin/business-request-acti
 import { LogoutButton } from "@/components/admin/logout-button";
 import { MetadataManager } from "@/components/admin/metadata-manager";
 import { ProviderActions } from "@/components/admin/provider-actions";
+import { ReviewActions } from "@/components/admin/review-actions";
 import { SupportCaseActions } from "@/components/admin/support-case-actions";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { APP_BUILD_LABEL } from "@/lib/build-info";
@@ -47,6 +48,11 @@ export default async function AdminPage({ params }: AdminPageProps) {
     matched: dictionary.admin.businessMatched,
     closed: dictionary.admin.businessClosed,
     rejected: dictionary.admin.businessRejected,
+  };
+  const reviewStatusLabels = {
+    pending_review: dictionary.admin.reviewPending,
+    approved: dictionary.admin.reviewApproved,
+    rejected: dictionary.admin.reviewRejected,
   };
   const providerStatusLabels = {
     approved: dictionary.common.approved,
@@ -193,11 +199,26 @@ export default async function AdminPage({ params }: AdminPageProps) {
           <div className="mt-5 space-y-4">
             {dashboard.reviews.map((review) => (
               <article key={review.id} className="rounded-[1.5rem] border border-[var(--line)] bg-white p-4">
-                <div className="font-semibold">{review.customerName}</div>
-                <div className="mt-2 text-sm text-[var(--muted)]">
-                  {review.rating}/5 • {formatDate(review.createdAt, locale)}
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
+                        {reviewStatusLabels[review.status]}
+                      </span>
+                      <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                        {dashboard.providers.find((provider) => provider.id === review.providerId)?.displayName ?? review.providerId}
+                      </span>
+                    </div>
+                    <div className="mt-3 font-semibold">{review.customerName}</div>
+                    <div className="mt-2 text-sm text-[var(--muted)]">
+                      {review.rating}/5 • {formatDate(review.createdAt, locale)}
+                    </div>
+                    <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{review.comment}</p>
+                    {review.adminNote ? <p className="mt-2 text-xs leading-6 text-[var(--muted)]">{review.adminNote}</p> : null}
+                  </div>
+
+                  <ReviewActions locale={locale} review={review} labels={dictionary.admin} />
                 </div>
-                <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{review.comment}</p>
               </article>
             ))}
           </div>

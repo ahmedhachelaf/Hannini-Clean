@@ -76,6 +76,28 @@ export function findDemoProviderBySlug(slug: string) {
   return demoProviders.find((provider) => provider.slug === slug) ?? null;
 }
 
+export function syncDemoProviderReviewMetrics(
+  providerId: string,
+  reviews: Array<{ rating: number; status: "pending_review" | "approved" | "rejected" }>,
+) {
+  const provider = findDemoProvider(providerId);
+
+  if (!provider) {
+    return null;
+  }
+
+  const approvedReviews = reviews.filter((review) => review.status === "approved");
+  const reviewCount = approvedReviews.length;
+  const ratingAverage = reviewCount > 0
+    ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
+    : 0;
+
+  provider.reviewCount = reviewCount;
+  provider.rating = Number(ratingAverage.toFixed(1));
+
+  return provider;
+}
+
 export function createDemoProviderApplication(input: ProviderSignupInput, locale: Locale) {
   const timestamp = new Date().toISOString();
   const zone = zoneMap.get(input.zones[0]);

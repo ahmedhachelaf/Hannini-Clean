@@ -1301,6 +1301,8 @@ export const reviews: Review[] = [
     customerName: "أمين",
     rating: 5,
     comment: "وصل في الوقت، شرح المشكلة، وأصلح التسرب بسرعة.",
+    status: "approved",
+    adminNote: null,
     createdAt: "2026-03-08T09:30:00.000Z",
   },
   {
@@ -1310,6 +1312,8 @@ export const reviews: Review[] = [
     customerName: "Nora",
     rating: 5,
     comment: "Très clair sur le devis et intervention propre.",
+    status: "approved",
+    adminNote: null,
     createdAt: "2026-03-10T15:00:00.000Z",
   },
   {
@@ -1319,6 +1323,8 @@ export const reviews: Review[] = [
     customerName: "ريم",
     rating: 4,
     comment: "تنظيف ممتاز للمكيّف والشرح كان واضح.",
+    status: "approved",
+    adminNote: null,
     createdAt: "2026-03-12T13:45:00.000Z",
   },
 ];

@@ -93,6 +93,8 @@ export type Review = {
   customerName: string;
   rating: number;
   comment: string;
+  status: "pending_review" | "approved" | "rejected";
+  adminNote?: string | null;
   createdAt: string;
 };
 

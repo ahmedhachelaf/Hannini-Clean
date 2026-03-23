@@ -8,6 +8,7 @@ create type public.contact_method as enum ('whatsapp', 'phone');
 create type public.support_actor as enum ('customer', 'provider', 'admin');
 create type public.support_status as enum ('open', 'in_review', 'waiting_for_user', 'resolved');
 create type public.business_request_status as enum ('new', 'under_review', 'matched', 'closed', 'rejected');
+create type public.review_status as enum ('pending_review', 'approved', 'rejected');
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -141,6 +142,8 @@ create table if not exists public.reviews (
   customer_name text not null,
   rating integer not null check (rating between 1 and 5),
   review_text text not null,
+  status public.review_status not null default 'pending_review',
+  admin_note text,
   created_at timestamptz not null default now()
 );
 
@@ -220,6 +223,7 @@ create index if not exists provider_services_category_idx on public.provider_ser
 create index if not exists service_areas_zone_idx on public.service_areas (zone_slug);
 create index if not exists bookings_provider_idx on public.bookings (provider_id);
 create index if not exists reviews_provider_idx on public.reviews (provider_id);
+create index if not exists reviews_status_idx on public.reviews (status);
 create index if not exists support_cases_status_idx on public.support_cases (status);
 create index if not exists support_cases_provider_idx on public.support_cases (provider_id);
 create index if not exists support_messages_case_idx on public.support_messages (support_case_id);
