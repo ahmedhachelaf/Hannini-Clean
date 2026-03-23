@@ -293,6 +293,7 @@ export type BookingInput = {
 export type ReviewInput = {
   bookingId: string;
   providerId: string;
+  customerAccessToken: string;
   customerName: string;
   rating: number;
   comment: string;

@@ -59,9 +59,16 @@ export default async function CustomerBookingStatusPage({ params, searchParams }
         </div>
 
         <div className="mt-5">
-          <Link href={`/${locale}/support?actor=customer&category=booking_issue&bookingId=${booking.id}&providerId=${booking.providerId}&providerSlug=${booking.providerSlug}`} className="button-secondary">
-            {locale === "ar" ? "طلب مساعدة بشأن هذا الطلب" : "Demander de l’aide sur cette demande"}
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href={`/${locale}/support?actor=customer&category=booking_issue&bookingId=${booking.id}&providerId=${booking.providerId}&providerSlug=${booking.providerSlug}`} className="button-secondary">
+              {locale === "ar" ? "طلب مساعدة بشأن هذا الطلب" : "Demander de l’aide sur cette demande"}
+            </Link>
+            {booking.status === "completed" ? (
+              <Link href={`/${locale}/reviews/new/${booking.id}?token=${booking.customerAccessToken}`} className="button-primary">
+                {locale === "ar" ? "إضافة تقييم بعد الإنجاز" : "Laisser un avis après le service"}
+              </Link>
+            ) : null}
+          </div>
         </div>
       </section>
     </div>

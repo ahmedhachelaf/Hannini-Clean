@@ -7,6 +7,7 @@ type ReviewFormProps = {
   locale: Locale;
   provider: Provider;
   bookingId: string;
+  customerAccessToken: string;
   labels: {
     title: string;
     description: string;
@@ -20,7 +21,7 @@ type ReviewFormProps = {
   };
 };
 
-export function ReviewForm({ locale, provider, bookingId, labels }: ReviewFormProps) {
+export function ReviewForm({ locale, provider, bookingId, customerAccessToken, labels }: ReviewFormProps) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<ReviewSubmissionResult | null>(null);
 
@@ -31,6 +32,7 @@ export function ReviewForm({ locale, provider, bookingId, labels }: ReviewFormPr
     const payload = {
       bookingId,
       providerId: provider.id,
+      customerAccessToken,
       customerName: String(formData.get("customerName") ?? ""),
       rating: Number(formData.get("rating") ?? 0),
       comment: String(formData.get("comment") ?? ""),

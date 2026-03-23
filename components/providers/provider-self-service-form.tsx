@@ -21,6 +21,8 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
   const [zoneSlug, setZoneSlug] = useState(provider.zones[0] ?? zones[0]?.slug ?? "");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const canReactivate = provider.status === "deactivated_by_provider";
+  const canRequestDeletion = provider.status !== "pending_deletion" && provider.status !== "deleted";
 
   async function run(action: "update" | "deactivate" | "reactivate" | "request_deletion") {
     setPending(action);
@@ -190,13 +192,28 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
         <button type="button" disabled={pending !== null} onClick={() => run("deactivate")} className="button-secondary disabled:opacity-60">
           {pending === "deactivate" ? (locale === "ar" ? "..." : "...") : locale === "ar" ? "إيقاف الظهور مؤقتاً" : "Mettre en pause"}
         </button>
-        <button type="button" disabled={pending !== null} onClick={() => run("reactivate")} className="button-secondary disabled:opacity-60">
+        <button type="button" disabled={pending !== null || !canReactivate} onClick={() => run("reactivate")} className="button-secondary disabled:opacity-60">
           {pending === "reactivate" ? (locale === "ar" ? "..." : "...") : locale === "ar" ? "إعادة التفعيل" : "Réactiver"}
         </button>
-        <button type="button" disabled={pending !== null} onClick={() => run("request_deletion")} className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 disabled:opacity-60">
+        <button type="button" disabled={pending !== null || !canRequestDeletion} onClick={() => run("request_deletion")} className="rounded-full border border-rose-200 bg-rose-50 px-5 py-3 text-sm font-semibold text-rose-700 disabled:opacity-60">
           {pending === "request_deletion" ? (locale === "ar" ? "..." : "...") : locale === "ar" ? "طلب مغادرة المنصة" : "Demander la suppression"}
         </button>
       </div>
+
+      {!canReactivate || !canRequestDeletion ? (
+        <div className="mt-4 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+          {!canReactivate
+            ? locale === "ar"
+              ? "زر إعادة التفعيل يظهر فقط عندما يكون الملف موقوفاً من جهتك."
+              : "La réactivation n'est proposée que lorsque le profil a été mis en pause par vous."
+            : null}
+          {!canRequestDeletion
+            ? locale === "ar"
+              ? "طلب المغادرة مسجل بالفعل ويظهر الآن ضمن متابعة الإدارة."
+              : "La demande de départ est déjà enregistrée et suivie côté admin."
+            : null}
+        </div>
+      ) : null}
     </div>
   );
 }

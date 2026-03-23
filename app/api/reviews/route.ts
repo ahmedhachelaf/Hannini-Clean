@@ -12,6 +12,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "Booking not found for this provider." }, { status: 404 });
     }
 
+    if (booking.customerAccessToken !== payload.customerAccessToken) {
+      return NextResponse.json({ ok: false, message: "Customer access token is required for this review." }, { status: 403 });
+    }
+
     if (!hasSupabaseServerEnv()) {
       return NextResponse.json({
         ok: true,

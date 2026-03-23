@@ -25,6 +25,7 @@ export const bookingSchema = z.object({
 export const reviewSchema = z.object({
   bookingId: z.string().min(1),
   providerId: z.string().min(1),
+  customerAccessToken: z.string().min(1),
   customerName: z.string().min(2),
   rating: z.number().min(1).max(5),
   comment: z.string().min(8),

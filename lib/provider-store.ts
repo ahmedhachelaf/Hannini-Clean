@@ -4,6 +4,7 @@ import {
   CURRENT_POLICY_VERSION,
   createProviderManagementToken,
   mergeProviderLifecycleNotes,
+  parseProviderLifecycleMeta,
 } from "@/lib/provider-lifecycle";
 import { createProviderPasswordSecret } from "@/lib/provider-password";
 import type { Locale, Provider, ProviderSignupInput, ProviderStatus } from "@/lib/types";
@@ -47,6 +48,20 @@ function findProviderIndex(id: string) {
 
 function buildGallery(workPhotoNames: string[]) {
   return workPhotoNames.slice(0, 3).map((_, index) => `/gallery/work-${(index % 3) + 1}.svg`);
+}
+
+function syncVerificationMeta(provider: Provider) {
+  const meta = parseProviderLifecycleMeta(provider.verification.notes);
+  provider.verification.managementToken = meta.managementToken ?? provider.verification.managementToken ?? null;
+  provider.verification.ageConfirmed = meta.ageConfirmed;
+  provider.verification.conductAccepted = meta.conductAccepted;
+  provider.verification.policyAccepted = meta.policyAccepted;
+  provider.verification.acceptedAt = meta.acceptedAt;
+  provider.verification.conductVersion = meta.conductVersion;
+  provider.verification.policyVersion = meta.policyVersion;
+  provider.verification.rejectionReason = meta.rejectionReason;
+  provider.verification.adminNote = meta.adminNote;
+  provider.verification.hasPassword = Boolean(meta.passwordHash && meta.passwordSalt);
 }
 
 export function listDemoProviders() {
@@ -237,6 +252,7 @@ export function updateDemoProviderModeration(
       rejectionReason: input.rejectionReason ?? provider.verification.rejectionReason ?? undefined,
     },
   );
+  syncVerificationMeta(provider);
 
   return provider;
 }
@@ -288,6 +304,7 @@ export function updateDemoProviderSelfService(
     provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {}, [
       "Provider updated profile details.",
     ]);
+    syncVerificationMeta(provider);
     return provider;
   }
 
@@ -296,14 +313,20 @@ export function updateDemoProviderSelfService(
     provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {
       statusOverride: "deactivated_by_provider",
     });
+    syncVerificationMeta(provider);
     return provider;
   }
 
   if (input.action === "reactivate") {
+    if (provider.status !== "deactivated_by_provider") {
+      return null;
+    }
+
     provider.status = "approved";
     provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {
       statusOverride: null,
     });
+    syncVerificationMeta(provider);
     return provider;
   }
 
@@ -311,5 +334,6 @@ export function updateDemoProviderSelfService(
   provider.verification.notes = mergeProviderLifecycleNotes(provider.verification.notes, {
     statusOverride: "pending_deletion",
   });
+  syncVerificationMeta(provider);
   return provider;
 }

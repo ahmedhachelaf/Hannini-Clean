@@ -5,10 +5,11 @@ import { notFound } from "next/navigation";
 
 type ReviewPageProps = {
   params: Promise<{ locale: string; bookingId: string }>;
+  searchParams: Promise<{ token?: string }>;
 };
 
-export default async function ReviewPage({ params }: ReviewPageProps) {
-  const { locale, bookingId } = await params;
+export default async function ReviewPage({ params, searchParams }: ReviewPageProps) {
+  const [{ locale, bookingId }, query] = await Promise.all([params, searchParams]);
 
   if (!isLocale(locale)) {
     notFound();
@@ -17,7 +18,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
   const dictionary = getDictionary(locale);
   const booking = await getBookingById(bookingId);
 
-  if (!booking) {
+  if (!booking || !query.token || booking.customerAccessToken !== query.token) {
     notFound();
   }
 
@@ -29,7 +30,13 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
 
   return (
     <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:px-8 lg:py-10">
-      <ReviewForm locale={locale} provider={provider} bookingId={bookingId} labels={dictionary.review} />
+      <ReviewForm
+        locale={locale}
+        provider={provider}
+        bookingId={bookingId}
+        customerAccessToken={query.token}
+        labels={dictionary.review}
+      />
 
       <aside className="surface-card rounded-[1.75rem] p-6">
         <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h2>

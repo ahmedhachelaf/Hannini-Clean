@@ -69,9 +69,17 @@ export default async function ProviderBookingDetailPage({ params }: ProviderBook
           </div>
 
           <div className="mt-4">
-            <a href={booking.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary">
-              {locale === "ar" ? "فتح الموقع" : "Ouvrir la localisation"}
-            </a>
+            <div className="flex flex-wrap gap-3">
+              <a href={booking.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary">
+                {locale === "ar" ? "فتح الموقع" : "Ouvrir la localisation"}
+              </a>
+              <Link
+                href={`/${locale}/support?actor=provider&category=unsafe_behavior&bookingId=${booking.id}&providerId=${provider.id}&providerSlug=${provider.slug}`}
+                className="button-secondary"
+              >
+                {locale === "ar" ? "الإبلاغ عن زبون أو طلب غير آمن" : "Signaler un client ou une demande à risque"}
+              </Link>
+            </div>
           </div>
         </article>
 

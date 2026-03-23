@@ -65,6 +65,19 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, message: "Invalid access or provider not found." }, { status: 404 });
   }
 
+  if (body.action === "reactivate" && provider.status !== "deactivated_by_provider") {
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          provider.status === "pending_deletion"
+            ? "Deletion request is already in review."
+            : "Only a provider-paused profile can be reactivated from this screen.",
+      },
+      { status: 400 },
+    );
+  }
+
   const supabase = createServerSupabaseClient();
 
   if (!supabase) {
@@ -125,7 +138,7 @@ export async function POST(request: Request, context: RouteContext) {
   const providerPatch =
     body.action === "deactivate" || body.action === "request_deletion"
       ? { approval_status: "pending" }
-      : body.action === "reactivate"
+      : body.action === "reactivate" && provider.status === "deactivated_by_provider"
         ? { approval_status: "approved" }
         : null;
 
