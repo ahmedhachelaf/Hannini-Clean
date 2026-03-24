@@ -11,6 +11,11 @@ export const fr = {
     join: "Rejoindre Hannini",
     support: "Support",
     admin: "Admin",
+    login: "Se connecter",
+    loginCompact: "Connexion",
+    myAccount: "Mon compte",
+    menu: "Menu",
+    closeMenu: "Fermer le menu",
   },
   install: {
     title: "Installer l’application",

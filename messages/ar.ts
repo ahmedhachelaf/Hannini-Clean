@@ -11,6 +11,11 @@ export const ar = {
     join: "انضم كمزوّد خدمة",
     support: "الدعم",
     admin: "الإدارة",
+    login: "تسجيل الدخول",
+    loginCompact: "دخول",
+    myAccount: "حسابي",
+    menu: "القائمة",
+    closeMenu: "إغلاق القائمة",
   },
   install: {
     title: "تثبيت التطبيق",

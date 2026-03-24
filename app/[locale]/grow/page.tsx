@@ -90,9 +90,9 @@ export default async function GrowPage({ params }: GrowPageProps) {
           </div>
 
           <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white p-5 backdrop-blur">
-            <div className="text-sm font-semibold text-[var(--ink)]">{dictionary.nav.providers}</div>
+            <div className="text-sm font-bold text-[var(--navy)]">{dictionary.nav.providers}</div>
             <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneService}</div>
-            <div className="mt-4 text-sm font-semibold text-[var(--ink)]">{dictionary.nav.businesses}</div>
+            <div className="mt-4 text-sm font-bold text-[var(--navy)]">{dictionary.nav.businesses}</div>
             <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneBusiness}</div>
             <div className="mt-5 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-4 text-sm leading-7 text-[var(--ink)]">
               {dictionary.grow.academySoon}
@@ -144,7 +144,7 @@ export default async function GrowPage({ params }: GrowPageProps) {
                     </div>
                     <div className="h-px flex-1 bg-[linear-gradient(90deg,rgba(20,92,255,0.28),rgba(20,92,255,0.03))]" aria-hidden="true" />
                   </div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent)]">
                     {locale === "ar" ? `مرحلة ${index + 1}` : `Étape ${index + 1}`}
                   </div>
                   <div className="mt-2 font-semibold text-[var(--ink)]">{step}</div>
