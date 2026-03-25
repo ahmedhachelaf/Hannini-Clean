@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { FooterV2 } from "@/components/FooterV2";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
 import { getDictionary, getDirection, isLocale, locales } from "@/lib/i18n";
@@ -29,7 +29,13 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       </a>
       <SiteHeader locale={locale} dictionary={dictionary} />
       <main id="main-content" tabIndex={-1}>{children}</main>
-      <SiteFooter locale={locale} nav={dictionary.nav} />
+      <FooterV2
+          locale={locale}
+          nav={dictionary.nav}
+          footer={dictionary.footer}
+          localeLabel={dictionary.localeLabel}
+          alternateLocaleLabel={dictionary.alternateLocaleLabel}
+        />
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-20 flex justify-end px-4 pb-[max(env(safe-area-inset-bottom),0px)] md:hidden">
         <div className="pointer-events-auto">
           <PwaInstallButton locale={locale} copy={dictionary.install} />
