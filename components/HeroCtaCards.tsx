@@ -12,7 +12,7 @@ export function HeroCtaCards({ locale, t, providerHref, seekerHref }: HeroCtaCar
   const isRtl = locale === "ar";
   return (
     <div className="mt-8 grid gap-4 sm:grid-cols-2">
-      <Link href={providerHref} className="group relative overflow-hidden rounded-[1.75rem] bg-terracotta p-6 shadow-[0_18px_40px_rgba(196,97,42,0.28)] transition hover:-translate-y-0.5 hover:bg-terracotta-light hover:shadow-[0_24px_48px_rgba(196,97,42,0.36)]">
+      <Link href={providerHref} className="group relative overflow-hidden rounded-[1.75rem] bg-terracotta p-6 shadow-[0_18px_40px_rgba(22,72,192,0.28)] transition hover:-translate-y-0.5 hover:bg-terracotta-light hover:shadow-[0_24px_48px_rgba(22,72,192,0.36)]">
         <div className="mb-4 inline-flex rounded-xl bg-white/20 p-2.5 text-2xl">🛠️</div>
         <div className="text-sm font-semibold text-white/75">{t.providerMicro}</div>
         <div className={`mt-1.5 text-2xl font-extrabold text-white ${isRtl ? "arabic-display" : ""}`}>{t.providerTitle}</div>

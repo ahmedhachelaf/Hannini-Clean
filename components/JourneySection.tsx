@@ -16,7 +16,7 @@ type JourneySectionProps = {
 export function JourneySection({ locale, t, providerHref, seekerHref, termsHref = "#", privacyHref = "#", conductHref = "#" }: JourneySectionProps) {
   const isRtl = locale === "ar";
   return (
-    <section id="join-henini" className="relative isolate overflow-hidden rounded-[2rem] p-8 sm:p-10" style={{ background: "linear-gradient(135deg, #C4612A 0%, #A84E22 100%)" }}>
+    <section id="join-henini" className="relative isolate overflow-hidden rounded-[2rem] p-8 sm:p-10" style={{ background: "linear-gradient(135deg, #0d1c45 0%, #1648c0 100%)" }}>
       <div className={`pointer-events-none absolute inset-0 flex items-center justify-center select-none font-extrabold text-white/5 ${isRtl ? "arabic-display" : ""}`} style={{ fontSize: "clamp(100px, 18vw, 200px)", lineHeight: 1 }} aria-hidden="true">هَنّيني</div>
       <div className="relative z-[1] flex flex-col items-center gap-8 text-center">
         <div className="inline-flex rounded-full border border-white/30 bg-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur">{t.eyebrow}</div>
