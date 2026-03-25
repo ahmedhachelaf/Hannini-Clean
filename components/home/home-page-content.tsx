@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { HeroCtaCards } from "@/components/HeroCtaCards";
+import { JourneySection } from "@/components/JourneySection";
+import { RoleBanner } from "@/components/RoleBanner";
 import { HomeSearchForm } from "@/components/home/home-search-form";
 import { ProviderCard } from "@/components/providers/provider-card";
 import { getLocalizedValue } from "@/lib/i18n";
@@ -66,6 +69,9 @@ type HomePageContentProps = {
       statsZones: string;
       statsCategories: string;
     };
+    roleBanner: { providerLabel: string; providerTitle: string; providerSub: string; seekerLabel: string; seekerTitle: string; seekerSub: string; divider: string; };
+    heroCtaCards: { providerMicro: string; providerTitle: string; seekerMicro: string; seekerTitle: string; };
+    journey: { eyebrow: string; headline: string; sub: string; providerRole: string; providerTitle: string; providerDesc: string; providerCta: string; seekerRole: string; seekerTitle: string; seekerDesc: string; seekerCta: string; legalPrefix: string; termsLink: string; privacyLink: string; conductLink: string; };
   };
   categories: Category[];
   zones: Zone[];
@@ -114,6 +120,8 @@ export function HomePageContent({
   };
 
   return (
+    <>
+      <RoleBanner locale={locale} t={dictionary.roleBanner} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} />
     <div className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
       <section id="hero" className="surface-card hero-shell gradient-frame relative isolate w-full max-w-full overflow-hidden rounded-[2rem] p-4 text-white sm:p-7 lg:p-10">
         <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(125,180,255,0.42)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
@@ -136,44 +144,7 @@ export function HomePageContent({
               {dictionary.home.description}
             </p>
 
-            <div className="mt-8 min-w-0 space-y-4">
-              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-white/82">{dictionary.home.lanesTitle}</div>
-              <div className="grid gap-4 lg:grid-cols-2">
-                <Link
-                  href={`/${locale}/providers`}
-                  className="rounded-[1.75rem] border border-white/12 bg-[linear-gradient(180deg,rgba(8,23,69,0.34),rgba(15,47,126,0.24))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.2)] backdrop-blur"
-                >
-                  <div className="text-sm font-semibold text-white/82">{locale === "ar" ? "المسار الأول" : "Volet 1"}</div>
-                  <div className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.servicesLaneTitle}</div>
-                  <p className="mt-3 text-sm leading-7 text-white/88">{dictionary.home.servicesLaneDescription}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {serviceCategories.slice(0, 4).map((category) => (
-                      <span key={category.slug} className="chip-button max-w-full border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
-                        {category.icon} {getLocalizedValue(category.name, locale)}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-5 text-sm font-bold text-white">{dictionary.home.servicesLaneCta}</div>
-                </Link>
-
-                <Link
-                  href={`/${locale}/businesses`}
-                  className="rounded-[1.75rem] border border-white/12 bg-[linear-gradient(180deg,rgba(16,44,112,0.34),rgba(33,83,182,0.24))] p-5 shadow-[0_24px_48px_rgba(8,18,37,0.2)] backdrop-blur"
-                >
-                  <div className="text-sm font-semibold text-white/82">{locale === "ar" ? "المسار الثاني" : "Volet 2"}</div>
-                  <div className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.home.businessesLaneTitle}</div>
-                  <p className="mt-3 text-sm leading-7 text-white/88">{dictionary.home.businessesLaneDescription}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {businessCategories.slice(0, 4).map((category) => (
-                      <span key={category.slug} className="chip-button max-w-full border-white/10 bg-[rgba(255,255,255,0.12)] text-white text-xs">
-                        {category.icon} {getLocalizedValue(category.name, locale)}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-5 text-sm font-bold text-white">{dictionary.home.businessesLaneCta}</div>
-                </Link>
-              </div>
-            </div>
+            <HeroCtaCards locale={locale} t={dictionary.heroCtaCards} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} />
 
             <HomeSearchForm
               locale={locale}
@@ -589,41 +560,8 @@ export function HomePageContent({
         </div>
       </section>
 
-      <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] sm:p-8">
-        <div className="mb-6 rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white p-5 backdrop-blur">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--ink)]">{dictionary.nav.grow}</div>
-              <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
-                {dictionary.home.growTitle}
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.home.growDescription}</p>
-            </div>
-            <div className="flex flex-col gap-3 lg:max-w-sm">
-              <span className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-3 text-sm font-semibold text-[var(--ink)]">
-                {dictionary.home.growSoon}
-              </span>
-              <Link href={`/${locale}/grow`} className="button-secondary">
-                {dictionary.home.growCta}
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div>
-            <h2 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
-              {dictionary.home.joinTitle}
-            </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-8 text-[var(--ink)]">
-              {dictionary.home.joinDescription}
-            </p>
-          </div>
-          <Link href={`/${locale}/join`} className="button-secondary">
-            {dictionary.home.joinCta}
-          </Link>
-        </div>
-      </section>
+      <JourneySection locale={locale} t={dictionary.journey} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} conductHref={`/${locale}/conduct`} privacyHref={`/${locale}/safety`} termsHref={`/${locale}/conduct`} />
     </div>
+    </>
   );
 }
