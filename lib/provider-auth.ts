@@ -1,5 +1,4 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { parseProviderLifecycleMeta } from "@/lib/provider-lifecycle";
 import { verifyProviderPassword } from "@/lib/provider-password";
 import { cookies } from "next/headers";
 import { getProviderById, getProviders } from "@/lib/repository";
@@ -99,30 +98,38 @@ export async function isProviderAuthenticated() {
   return Boolean(await getAuthenticatedProvider());
 }
 
+function matchesIdentifier(provider: Provider, normalizedIdentifier: string, normalizedIdentifierLower: string) {
+  const accountEmail = provider.email?.trim().toLowerCase();
+  return (
+    provider.phoneNumber.trim() === normalizedIdentifier ||
+    provider.whatsappNumber.trim() === normalizedIdentifier ||
+    accountEmail === normalizedIdentifierLower
+  );
+}
+
+export async function findProviderByIdentifier(identifier: string): Promise<Provider | null> {
+  const providers = await getProviders({}, true);
+  const normalizedIdentifier = identifier.trim();
+  const normalizedIdentifierLower = normalizedIdentifier.toLowerCase();
+  return providers.find((p) => matchesIdentifier(p, normalizedIdentifier, normalizedIdentifierLower)) ?? null;
+}
+
 export async function authenticateProviderWithPassword(identifier: string, password: string): Promise<Provider | null> {
   const providers = await getProviders({}, true);
   const normalizedIdentifier = identifier.trim();
   const normalizedIdentifierLower = normalizedIdentifier.toLowerCase();
 
   return (
-    providers.find(
-      (provider) => {
-        const accountEmail = parseProviderLifecycleMeta(provider.verification.notes).accountEmail?.trim().toLowerCase();
-        if (
-          (
-            provider.phoneNumber.trim() !== normalizedIdentifier &&
-            provider.whatsappNumber.trim() !== normalizedIdentifier &&
-            accountEmail !== normalizedIdentifierLower
-          ) ||
-          provider.status === "deleted"
-        ) {
-          return false;
-        }
-
-        const meta = parseProviderLifecycleMeta(provider.verification.notes);
-        return verifyProviderPassword(password.trim(), meta.passwordSalt, meta.passwordHash);
-      },
-    ) ?? null
+    providers.find((provider) => {
+      if (!matchesIdentifier(provider, normalizedIdentifier, normalizedIdentifierLower) || provider.status === "deleted") {
+        return false;
+      }
+      return verifyProviderPassword(
+        password.trim(),
+        provider.verification.passwordSalt,
+        provider.verification.passwordHash,
+      );
+    }) ?? null
   );
 }
 
@@ -133,20 +140,12 @@ export async function authenticateProviderWithAccessCode(phoneOrWhatsapp: string
   const normalizedAccessCode = accessCode.trim();
 
   return (
-    providers.find(
-      (provider) => {
-        const accountEmail = parseProviderLifecycleMeta(provider.verification.notes).accountEmail?.trim().toLowerCase();
-
-        return (
-          (
-            provider.phoneNumber.trim() === normalizedIdentifier ||
-            provider.whatsappNumber.trim() === normalizedIdentifier ||
-            accountEmail === normalizedIdentifierLower
-          ) &&
-          provider.verification.managementToken === normalizedAccessCode &&
-          provider.status !== "deleted"
-        );
-      },
-    ) ?? null
+    providers.find((provider) => {
+      return (
+        matchesIdentifier(provider, normalizedIdentifier, normalizedIdentifierLower) &&
+        provider.verification.managementToken === normalizedAccessCode &&
+        provider.status !== "deleted"
+      );
+    }) ?? null
   );
 }
