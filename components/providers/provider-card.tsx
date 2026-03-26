@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency, formatNumber, formatResponseTime } from "@/lib/format";
 import { getLocalizedValue } from "@/lib/i18n";
-import { getGrowthStage, getOpportunityTypes, getProviderReadiness } from "@/lib/provider-growth";
+import { getGrowthStage, getOpportunityTypes } from "@/lib/provider-growth";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
 
 type ProviderCardProps = {
@@ -13,34 +13,29 @@ type ProviderCardProps = {
   highlighted?: boolean;
 };
 
+// Minimal SVG placeholder for category when no gallery photos exist
+function CategoryPlaceholder({ icon, label }: { icon: string; label: string }) {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-[rgba(20,92,255,0.08)] to-[rgba(13,28,69,0.12)]">
+      <span className="text-4xl opacity-60" aria-hidden="true">{icon}</span>
+      <span className="text-xs font-semibold text-[var(--muted)] opacity-70">{label}</span>
+    </div>
+  );
+}
+
 export function ProviderCard({ locale, provider, category, zones, highlighted = false }: ProviderCardProps) {
-  const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(locale === "ar" ? " • " : " • ");
+  const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(" • ");
   const provinceName = zones[0] ? getLocalizedValue(zones[0].provinceName, locale) : locale === "ar" ? "غير محدد" : "Non defini";
   const priceLabel =
     provider.profileType === "home_business"
-      ? locale === "ar"
-        ? "السعر الابتدائي"
-        : "Prix de depart"
-      : locale === "ar"
-        ? "الساعة"
-        : "Tarif";
+      ? locale === "ar" ? "السعر الابتدائي" : "Prix de depart"
+      : locale === "ar" ? "الساعة" : "Tarif";
   const primaryActionLabel =
     provider.profileType === "home_business"
-      ? locale === "ar"
-        ? "اطلب الآن"
-        : "Commander"
-      : locale === "ar"
-        ? "احجز الآن"
-        : "Réserver";
-  const readiness = getProviderReadiness(provider);
+      ? locale === "ar" ? "اطلب الآن" : "Commander"
+      : locale === "ar" ? "احجز الآن" : "Réserver";
   const growthStage = getGrowthStage(provider);
   const opportunities = getOpportunityTypes(provider).slice(0, 3);
-  const readinessTierLabels = {
-    starter: locale === "ar" ? "بداية قوية" : "Bon début",
-    building: locale === "ar" ? "يتحسن" : "En progrès",
-    good: locale === "ar" ? "جاهز بشكل جيد" : "Bien préparé",
-    strong: locale === "ar" ? "جاهز بقوة" : "Très solide",
-  };
   const stageLabels = {
     starting: locale === "ar" ? "بداية المسار" : "Début",
     building: locale === "ar" ? "يبني الثقة" : "En progression",
@@ -55,105 +50,161 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
     bulk_ready: locale === "ar" ? "جملة" : "Volume",
   };
 
+  // Photo sources: prefer gallery photos, fall back to profile photo
+  const coverPhoto = provider.gallery[0] ?? null;
+  const thumbPhotos = provider.gallery.slice(1, 4);
+  const hasGallery = provider.gallery.length > 0;
+  const categoryIcon = category?.icon ?? "🔧";
+  const categoryLabel = category ? getLocalizedValue(category.name, locale) : provider.categorySlug;
+  const portfolioLabel = locale === "ar" ? "معرض الأعمال" : "Portfolio";
+  const viewPortfolioLabel = locale === "ar" ? "عرض المعرض" : "Voir le portfolio";
+
   return (
     <article
-      className={`surface-card gradient-frame flex h-full flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(227,238,255,0.94))] p-5 shadow-[0_26px_60px_rgba(12,40,104,0.14)] transition-all ${
+      className={`surface-card gradient-frame flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all ${
         highlighted ? "ring-2 ring-[rgba(20,92,255,0.45)] shadow-[0_30px_70px_rgba(12,40,104,0.2)]" : ""
       }`}
     >
-      <div className="flex items-start gap-4">
-        <div className="h-20 w-20 overflow-hidden rounded-3xl bg-[var(--soft)] ring-1 ring-[rgba(15,95,255,0.1)]">
-          <Image src={provider.profilePhotoUrl} alt={provider.displayName} width={160} height={120} className="h-full w-full object-cover" />
+      {/* ── Cover photo (200 px tall) ── */}
+      <div className="relative h-[200px] w-full overflow-hidden bg-[var(--soft)]">
+        {hasGallery && coverPhoto ? (
+          <>
+            <Image
+              src={coverPhoto}
+              alt={`${provider.displayName} — ${portfolioLabel}`}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Hover overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-[rgba(13,28,69,0.52)] opacity-0 transition-opacity duration-200 hover:opacity-100">
+              <span className="rounded-full bg-white/90 px-4 py-2 text-sm font-bold text-[var(--navy)]">
+                {viewPortfolioLabel}
+              </span>
+            </div>
+          </>
+        ) : (
+          <CategoryPlaceholder icon={categoryIcon} label={categoryLabel} />
+        )}
+
+        {/* Verification badge overlay */}
+        <div className="absolute bottom-3 start-3 flex flex-wrap gap-1.5">
+          {provider.isVerified ? (
+            <span className="status-pill status-pill--verified text-[0.78rem]">
+              {locale === "ar" ? "موثّق" : "Vérifié"}
+            </span>
+          ) : (
+            <span className="rounded-full border border-white/50 bg-white/80 px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--muted)] backdrop-blur-sm">
+              {locale === "ar" ? "جديد" : "Nouveau"}
+            </span>
+          )}
+          {provider.featured ? (
+            <span className="rounded-full border border-white/50 bg-white/80 px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--ink)] backdrop-blur-sm">
+              {locale === "ar" ? "مقترح" : "Recommandé"}
+            </span>
+          ) : null}
         </div>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            {provider.isVerified ? (
-              <span className="status-pill status-pill--verified">{locale === "ar" ? "موثّق" : "Vérifié"}</span>
-            ) : (
-              <span className="status-pill border border-[var(--line)] bg-white text-[var(--muted)]">
-                {locale === "ar" ? "جديد" : "Nouveau"}
-              </span>
-            )}
+      {/* ── Thumbnail strip (up to 3 additional photos) ── */}
+      {thumbPhotos.length > 0 ? (
+        <div className="flex gap-1 border-b border-[var(--line)] bg-[var(--soft)]">
+          {thumbPhotos.map((src, i) => (
+            <div key={i} className="relative h-[60px] flex-1 overflow-hidden">
+              <Image
+                src={src}
+                alt={`${provider.displayName} photo ${i + 2}`}
+                fill
+                sizes="80px"
+                className="object-cover"
+              />
+            </div>
+          ))}
+          {/* Remaining count badge */}
+          {provider.gallery.length > 4 ? (
+            <div className="flex h-[60px] min-w-[60px] flex-col items-center justify-center bg-[rgba(13,28,69,0.08)] text-xs font-bold text-[var(--muted)]">
+              +{provider.gallery.length - 4}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
-            {provider.featured ? (
-              <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
-                {locale === "ar" ? "مقترح" : "Recommandé"}
-              </span>
-            ) : null}
-            <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">{stageLabels[growthStage]}</span>
+      {/* ── Card body ── */}
+      <div className="flex flex-1 flex-col gap-4 p-5">
+        {/* Provider identity */}
+        <div className="flex items-start gap-3">
+          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[var(--soft)] ring-1 ring-[rgba(15,95,255,0.1)]">
+            <Image
+              src={provider.profilePhotoUrl}
+              alt={provider.displayName}
+              width={112}
+              height={112}
+              className="h-full w-full object-cover"
+            />
           </div>
+          <div className="min-w-0 flex-1">
+            <h3 className={`text-lg font-extrabold leading-tight tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>
+              {provider.displayName}
+            </h3>
+            <p className="mt-0.5 text-sm font-medium text-[var(--muted)]">
+              {category ? `${category.icon} ${getLocalizedValue(category.name, locale)}` : provider.categorySlug}
+            </p>
+            <p className="mt-1 line-clamp-2 text-[0.875rem] leading-6 text-[var(--muted)]">
+              {getLocalizedValue(provider.shortTagline, locale)}
+            </p>
+          </div>
+        </div>
 
-          <h3 className={`text-xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
-          <p className="mt-1 text-[0.98rem] font-medium text-[var(--muted)]">
-            {category ? `${category.icon} ${getLocalizedValue(category.name, locale)}` : provider.categorySlug}
-          </p>
-          <p className="mt-3 text-[0.98rem] leading-8 text-[var(--muted)]">{getLocalizedValue(provider.shortTagline, locale)}</p>
-        </div>
-      </div>
+        {/* Stats grid */}
+        <dl className="grid grid-cols-2 gap-2 text-[0.875rem]">
+          <div className="stat-card rounded-xl p-2.5">
+            <dt className="text-[var(--muted)]">{locale === "ar" ? "التقييم" : "Note"}</dt>
+            <dd className="mt-0.5 font-bold">{provider.rating.toFixed(1)} / 5</dd>
+          </div>
+          <div className="stat-card rounded-xl p-2.5">
+            <dt className="text-[var(--muted)]">{locale === "ar" ? "الأعمال" : "Missions"}</dt>
+            <dd className="mt-0.5 font-bold">{formatNumber(provider.completedJobs, locale)}</dd>
+          </div>
+          <div className="stat-card rounded-xl p-2.5">
+            <dt className="text-[var(--muted)]">{locale === "ar" ? "الرد" : "Réponse"}</dt>
+            <dd className="mt-0.5 font-bold">{formatResponseTime(provider.responseTimeMinutes, locale)}</dd>
+          </div>
+          <div className="stat-card rounded-xl p-2.5">
+            <dt className="text-[var(--muted)]">{priceLabel}</dt>
+            <dd className="mt-0.5 font-bold">{formatCurrency(provider.hourlyRate, locale)}</dd>
+          </div>
+        </dl>
 
-      <dl className="grid grid-cols-2 gap-3 text-[0.98rem]">
-        <div className="stat-card rounded-2xl p-3">
-          <dt className="text-[var(--muted)]">{locale === "ar" ? "التقييم" : "Note"}</dt>
-          <dd className="mt-1 font-bold">{provider.rating.toFixed(1)} / 5</dd>
+        {/* Location row */}
+        <div className="rounded-xl border border-[rgba(15,95,255,0.1)] bg-white/70 px-3.5 py-3 text-[0.875rem] leading-6 text-[var(--muted)]">
+          <span className="font-semibold text-[var(--ink)]">{provinceName}</span>
+          {zoneNames ? <span className="before:mx-1.5 before:content-['•']">{zoneNames}</span> : null}
         </div>
-        <div className="stat-card rounded-2xl p-3">
-          <dt className="text-[var(--muted)]">{locale === "ar" ? "الأعمال" : "Missions"}</dt>
-          <dd className="mt-1 font-bold">{formatNumber(provider.completedJobs, locale)}</dd>
-        </div>
-        <div className="stat-card rounded-2xl p-3">
-          <dt className="text-[var(--muted)]">{locale === "ar" ? "الرد" : "Réponse"}</dt>
-          <dd className="mt-1 font-bold">{formatResponseTime(provider.responseTimeMinutes, locale)}</dd>
-        </div>
-        <div className="stat-card rounded-2xl p-3">
-          <dt className="text-[var(--muted)]">{priceLabel}</dt>
-          <dd className="mt-1 font-bold">{formatCurrency(provider.hourlyRate, locale)}</dd>
-        </div>
-      </dl>
 
-      <div className="space-y-2 rounded-2xl border border-[rgba(15,95,255,0.12)] bg-white/88 p-4 text-[0.98rem] leading-7 text-[var(--muted)]">
-        <div>
-          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الولاية:" : "Wilaya :"}</span> {provinceName}
+        {/* Chips */}
+        <div className="flex flex-wrap gap-1.5">
+          <span className="chip-button min-h-0 px-2.5 py-1 text-xs">{stageLabels[growthStage]}</span>
+          {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
+            <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+              {locale === "ar" ? "جاهز لطلبات كبيرة" : "Prêt pour le volume"}
+            </span>
+          ) : null}
+          {opportunities.map((opportunity) => (
+            <span key={opportunity} className="chip-button min-h-0 px-2.5 py-1 text-xs">
+              {opportunityLabels[opportunity]}
+            </span>
+          ))}
         </div>
-        <div>
-          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "المدن والمناطق:" : "Villes et zones :"}</span> {zoneNames}
-        </div>
-        <div>
-          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "رسوم التنقل:" : "Déplacement :"}</span>{" "}
-          {formatCurrency(provider.travelFee, locale)}
-        </div>
-      </div>
 
-      <div className="flex flex-wrap gap-2">
-        {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
-          <span className="chip-button min-h-0 px-3 py-2 text-xs">
-            {locale === "ar" ? "جاهز لطلبات كبيرة" : "Prêt pour le volume"}
-          </span>
-        ) : null}
-        {provider.gallery.length > 0 ? (
-          <span className="chip-button min-h-0 px-3 py-2 text-xs">
-            {locale === "ar" ? `معرض ${provider.gallery.length}` : `Portfolio ${provider.gallery.length}`}
-          </span>
-        ) : null}
-        {provider.socialLinks && Object.values(provider.socialLinks).some(Boolean) ? (
-          <span className="chip-button min-h-0 px-3 py-2 text-xs">
-            {locale === "ar" ? "حضور رقمي" : "Présence digitale"}
-          </span>
-        ) : null}
-        {opportunities.map((opportunity) => (
-          <span key={opportunity} className="chip-button min-h-0 px-3 py-2 text-xs">
-            {opportunityLabels[opportunity]}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-auto flex flex-col gap-3 sm:flex-row">
-        <Link href={`/${locale}/providers/${provider.slug}`} className="button-secondary flex-1">
-          {locale === "ar" ? "عرض الملف" : "Voir le profil"}
-        </Link>
-        <Link href={`/${locale}/book/${provider.slug}`} className="button-primary flex-1">
-          {primaryActionLabel}
-        </Link>
+        {/* CTAs */}
+        <div className="mt-auto flex flex-col gap-2.5 sm:flex-row">
+          <Link href={`/${locale}/providers/${provider.slug}`} className="button-secondary flex-1 text-sm">
+            {locale === "ar" ? "عرض الملف" : "Voir le profil"}
+          </Link>
+          <Link href={`/${locale}/book/${provider.slug}`} className="button-primary flex-1 text-sm">
+            {primaryActionLabel}
+          </Link>
+        </div>
       </div>
     </article>
   );

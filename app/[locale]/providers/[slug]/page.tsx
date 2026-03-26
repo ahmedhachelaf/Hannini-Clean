@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PhotoGallery } from "@/components/providers/photo-gallery";
 import { formatCurrency, formatDate, formatNumber, formatResponseTime } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
 import { getGrowthStage, getOpportunityTypes, getProviderJourney, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
@@ -371,56 +372,28 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-8">
           <div className="surface-card rounded-[1.75rem] p-6">
-            <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.provider.galleryTitle}</h2>
-            {galleryImages.length > 0 ? (
-              <>
-                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                  {locale === "ar"
-                    ? "نماذج واقعية من الأعمال أو المنتجات لمساعدة الزبائن على تقييم الجودة والأسلوب قبل التواصل."
-                    : "Des exemples concrets de travaux ou de produits pour aider les clients à juger la qualité avant de vous contacter."}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.provider.galleryTitle}</h2>
+              {galleryImages.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
                   {galleryThemes.map((theme) => (
-                    <span key={theme} className="chip-button min-h-0 px-3 py-2 text-xs">
-                      {theme}
-                    </span>
+                    <span key={theme} className="chip-button min-h-0 px-3 py-2 text-xs">{theme}</span>
                   ))}
                   <span className="chip-button min-h-0 px-3 py-2 text-xs">
-                    {locale === "ar" ? `${galleryImages.length} عيّنة عمل` : `${galleryImages.length} échantillons`}
+                    {locale === "ar" ? `${galleryImages.length} عيّنة` : `${galleryImages.length} photos`}
                   </span>
                 </div>
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {galleryImages.map((imageUrl, index) => (
-                    <div
-                      key={`${imageUrl}-${index}`}
-                      className={`overflow-hidden rounded-[1.5rem] border border-[var(--line)] bg-white shadow-[0_18px_38px_rgba(12,40,104,0.08)] ${
-                        index === 0 ? "sm:col-span-2 lg:row-span-2" : ""
-                      }`}
-                    >
-                      <div className={index === 0 ? "relative h-72 sm:min-h-[19rem]" : "relative h-48"}>
-                        <Image
-                          src={imageUrl}
-                          alt={provider.galleryCaptions?.[index] ?? provider.displayName}
-                          width={640}
-                          height={480}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="border-t border-[var(--line)] bg-white px-4 py-4">
-                        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">
-                          {locale === "ar" ? `عينة ${index + 1}` : `Sample ${index + 1}`}
-                        </div>
-                        <div className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                          {provider.galleryCaptions?.[index] ??
-                            (locale === "ar"
-                              ? "صورة مرفوعة ضمن معرض الأعمال للمساعدة على بناء الثقة."
-                              : "Image ajoutée au portfolio pour renforcer la confiance.")}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
+              ) : null}
+            </div>
+            {galleryImages.length > 0 ? (
+              <div className="mt-5">
+                <PhotoGallery
+                  images={galleryImages}
+                  captions={provider.galleryCaptions}
+                  providerName={provider.displayName}
+                  locale={locale}
+                />
+              </div>
             ) : (
               <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-[var(--soft)] px-5 py-6 text-sm leading-7 text-[var(--muted)]">
                 {locale === "ar"
