@@ -1,17 +1,32 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 const ADMIN_COOKIE = "henini_admin_session";
+
+/**
+ * Derives a session token from the admin password using HMAC-SHA256.
+ * The raw password is never stored in the cookie — only its digest.
+ */
+function createAdminSessionToken(password: string): string {
+  return createHmac("sha256", password).update("hannini-admin-session-v1").digest("hex");
+}
 
 export async function isAdminAuthenticated() {
   const store = await cookies();
   const cookieValue = store.get(ADMIN_COOKIE)?.value;
   const expected = process.env.ADMIN_ACCESS_PASSWORD;
 
-  if (!expected) {
+  if (!expected || !cookieValue) {
     return false;
   }
 
-  return cookieValue === expected;
+  const expectedToken = createAdminSessionToken(expected);
+
+  if (expectedToken.length !== cookieValue.length) {
+    return false;
+  }
+
+  return timingSafeEqual(Buffer.from(expectedToken), Buffer.from(cookieValue));
 }
 
 export async function setAdminSessionCookie() {
@@ -22,7 +37,7 @@ export async function setAdminSessionCookie() {
   }
 
   const store = await cookies();
-  store.set(ADMIN_COOKIE, expected, {
+  store.set(ADMIN_COOKIE, createAdminSessionToken(expected), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

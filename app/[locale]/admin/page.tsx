@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { BusinessRequestActions } from "@/components/admin/business-request-actions";
 import { LogoutButton } from "@/components/admin/logout-button";
@@ -670,8 +671,7 @@ function ProviderAdminCard({
               <div className="grid gap-3 sm:grid-cols-3">
                 {provider.gallery.slice(0, 3).map((imageUrl, index) => (
                   <div key={`${provider.id}-${imageUrl}-${index}`} className="overflow-hidden rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] shadow-[0_14px_28px_rgba(12,40,104,0.08)]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={imageUrl} alt={provider.galleryCaptions?.[index] ?? provider.displayName} className="h-32 w-full object-cover" />
+                    <Image src={imageUrl} alt={provider.galleryCaptions?.[index] ?? provider.displayName} width={384} height={128} className="h-32 w-full object-cover" />
                     <div className="border-t border-[var(--line)] bg-white px-3 py-3 text-xs leading-6 text-[var(--muted)]">
                       {provider.galleryCaptions?.[index] ?? (locale === "ar" ? `عينة ${index + 1}` : `Sample ${index + 1}`)}
                     </div>

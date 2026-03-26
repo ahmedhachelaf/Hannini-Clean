@@ -6,8 +6,13 @@ import { getProviderById, getProviders } from "@/lib/repository";
 import type { Provider } from "@/lib/types";
 
 const PROVIDER_COOKIE = "hannini_provider_session";
-const PROVIDER_SESSION_SECRET =
-  process.env.PROVIDER_SESSION_SECRET || process.env.ADMIN_ACCESS_PASSWORD || "hannini-provider-session-secret";
+function getProviderSessionSecret(): string {
+  const secret = process.env.PROVIDER_SESSION_SECRET ?? process.env.ADMIN_ACCESS_PASSWORD;
+  if (!secret) {
+    throw new Error("PROVIDER_SESSION_SECRET (or ADMIN_ACCESS_PASSWORD) is not configured.");
+  }
+  return secret;
+}
 
 type ParsedProviderSession = {
   providerId: string;
@@ -15,7 +20,7 @@ type ParsedProviderSession = {
 };
 
 function createProviderSessionProof(providerId: string) {
-  return createHmac("sha256", PROVIDER_SESSION_SECRET).update(providerId).digest("hex");
+  return createHmac("sha256", getProviderSessionSecret()).update(providerId).digest("hex");
 }
 
 function validateProviderSessionProof(providerId: string, sessionProof: string) {

@@ -71,7 +71,7 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
           {/* Logo */}
           <Link
             href={`/${locale}`}
-            aria-label={locale === "ar" ? "العودة إلى الصفحة الرئيسية" : "Retour à l’accueil"}
+            aria-label={locale === "ar" ? "العودة إلى الصفحة الرئيسية" : "Retour à l'accueil"}
             className="flex min-w-0 items-center gap-3"
           >
             <Image
@@ -91,7 +91,7 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
             </div>
           </Link>
 
-          {/* Desktop navigation */}
+          {/* Desktop navigation — hidden on mobile */}
           <nav
             aria-label={locale === "ar" ? "التنقل الرئيسي" : "Navigation principale"}
             className="hidden items-center gap-1.5 text-[0.98rem] font-medium text-[var(--muted)] lg:flex"
@@ -103,9 +103,12 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
             ))}
           </nav>
 
-          {/* Desktop right side */}
+          {/* Desktop right side: login + install + lang — hidden on mobile */}
           <div className="hidden items-center gap-2 lg:flex">
-            <Link href={loginHref} className="button-primary min-h-11 px-5 text-sm font-bold">
+            <Link
+              href={loginHref}
+              className="button-primary min-h-11 px-5 text-sm font-bold"
+            >
               {loginLabel}
             </Link>
             <PwaInstallButton locale={locale} copy={dictionary.install} variant="inline" />
@@ -116,11 +119,17 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
                 </span>
               }
             >
-              <LanguageSwitcher locale={locale} labels={{ current: dictionary.localeLabel, alternate: dictionary.alternateLocaleLabel }} />
+              <LanguageSwitcher
+                locale={locale}
+                labels={{
+                  current: dictionary.localeLabel,
+                  alternate: dictionary.alternateLocaleLabel,
+                }}
+              />
             </Suspense>
           </div>
 
-          {/* Mobile right side */}
+          {/* Mobile right side: lang + login + hamburger — hidden on desktop */}
           <div className="flex shrink-0 items-center gap-2 lg:hidden">
             <Suspense
               fallback={
@@ -129,9 +138,16 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
                 </span>
               }
             >
-              <LanguageSwitcher locale={locale} labels={{ current: dictionary.localeLabel, alternate: dictionary.alternateLocaleLabel }} />
+              <LanguageSwitcher
+                locale={locale}
+                labels={{
+                  current: dictionary.localeLabel,
+                  alternate: dictionary.alternateLocaleLabel,
+                }}
+              />
             </Suspense>
 
+            {/* Login / Account compact button */}
             <Link
               href={loginHref}
               className="inline-flex h-11 shrink-0 items-center rounded-full border border-[rgba(20,92,255,0.22)] bg-[linear-gradient(135deg,var(--navy)_0%,var(--accent)_52%,#4d9bff_100%)] px-4 text-sm font-bold text-white shadow-[0_10px_24px_rgba(14,50,132,0.22)]"
@@ -139,6 +155,7 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
               {loginLabelCompact}
             </Link>
 
+            {/* Hamburger / drawer trigger */}
             <MobileMenu
               locale={locale}
               navItems={navItems}
