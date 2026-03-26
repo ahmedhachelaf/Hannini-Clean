@@ -389,6 +389,8 @@ function mapProviderRow(row: ProviderRow): Provider {
       adminNote: verificationFlags.adminNote,
       managementToken: verificationFlags.managementToken,
       hasPassword: Boolean(verificationFlags.passwordHash && verificationFlags.passwordSalt),
+      passwordSalt: verificationFlags.passwordSalt ?? null,
+      passwordHash: verificationFlags.passwordHash ?? null,
     },
     availability:
       row.availability?.map((slot) => ({

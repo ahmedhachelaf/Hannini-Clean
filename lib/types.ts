@@ -144,6 +144,8 @@ export type Provider = {
     adminNote?: string | null;
     managementToken?: string | null;
     hasPassword?: boolean;
+    passwordSalt?: string | null;
+    passwordHash?: string | null;
   };
 };
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authenticateProviderWithAccessCode, authenticateProviderWithPassword, setProviderSessionCookie } from "@/lib/provider-auth";
+import { authenticateProviderWithAccessCode, authenticateProviderWithPassword, findProviderByIdentifier, setProviderSessionCookie } from "@/lib/provider-auth";
 
 export async function POST(request: Request) {
   try {
@@ -37,16 +37,32 @@ export async function POST(request: Request) {
         : null);
 
     if (!provider) {
-      return NextResponse.json(
-        {
-          ok: false,
-          message:
-            locale === "ar"
-              ? "تعذر التحقق من بيانات الدخول. راجع البريد الإلكتروني أو الرقم وكلمة المرور."
-              : "Impossible de vérifier vos accès. Vérifiez l’e-mail ou le numéro ainsi que le mot de passe.",
-        },
-        { status: 401 },
-      );
+      const matched = await findProviderByIdentifier(identifier);
+      let failMessage: string;
+
+      if (!matched) {
+        failMessage =
+          locale === "ar"
+            ? "لا يوجد حساب بهذا البريد الإلكتروني أو الرقم. هل تريد التسجيل كمزوّد خدمة؟"
+            : "Aucun compte trouvé avec cet e-mail ou ce numéro. Souhaitez-vous vous inscrire ?";
+      } else if (["submitted", "under_review", "pending", "needs_more_info"].includes(matched.status)) {
+        failMessage =
+          locale === "ar"
+            ? "طلبك قيد المراجعة. سنتواصل معك قريباً بعد الموافقة على ملفك."
+            : "Votre dossier est en cours d’examen. Nous vous contacterons après validation de votre profil.";
+      } else if (matched.status === "rejected") {
+        failMessage =
+          locale === "ar"
+            ? "لم تتم الموافقة على طلبك. تواصل معنا لمزيد من المعلومات."
+            : "Votre candidature n’a pas été retenue. Contactez-nous pour plus d’informations.";
+      } else {
+        failMessage =
+          locale === "ar"
+            ? "البريد الإلكتروني أو كلمة المرور غير صحيحة. تأكد من البيانات وحاول مجدداً."
+            : "E-mail ou mot de passe incorrect. Vérifiez vos identifiants et réessayez.";
+      }
+
+      return NextResponse.json({ ok: false, message: failMessage }, { status: 401 });
     }
 
     await setProviderSessionCookie(provider.id);
