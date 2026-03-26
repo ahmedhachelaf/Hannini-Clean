@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { HomeSearchForm } from "@/components/home/home-search-form";
 import { ProviderCard } from "@/components/providers/provider-card";
@@ -329,6 +330,61 @@ export function HomePageContent({
           </div>
         </article>
       </section>
+
+      {/* ── Work Showcase Strip ── */}
+      {(() => {
+        const showcasePhotos = [...featuredProviders, ...featuredBusinesses]
+          .flatMap((p) =>
+            p.gallery.slice(0, 2).map((url) => ({
+              url,
+              providerName: p.displayName,
+              providerSlug: p.slug,
+              categorySlug: p.categorySlug,
+            })),
+          )
+          .slice(0, 12);
+
+        if (showcasePhotos.length === 0) return null;
+
+        return (
+          <section aria-label={locale === "ar" ? "معرض أعمال حديثة" : "Réalisations récentes"}>
+            <div className="mb-4 flex items-end justify-between gap-4">
+              <h2 className={`text-xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>
+                {locale === "ar" ? "أعمال حديثة" : "Réalisations récentes"}
+              </h2>
+              <Link href={`/${locale}/providers`} className="text-sm font-semibold text-[var(--accent)] hover:underline">
+                {dictionary.common.viewAll}
+              </Link>
+            </div>
+            <div className="mobile-pill-scroll gap-3 pb-1">
+              {showcasePhotos.map((item, idx) => (
+                <Link
+                  key={`${item.providerSlug}-${idx}`}
+                  href={`/${locale}/providers/${item.providerSlug}`}
+                  className="group relative h-[180px] w-[240px] shrink-0 overflow-hidden rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] shadow-[0_12px_28px_rgba(12,40,104,0.1)]"
+                  aria-label={item.providerName}
+                >
+                  <Image
+                    src={item.url}
+                    alt={item.providerName}
+                    fill
+                    sizes="240px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgba(5,12,35,0.78)] to-transparent px-3 pb-3 pt-8">
+                    <p className="truncate text-xs font-bold text-white">{item.providerName}</p>
+                    <p className="mt-0.5 text-[0.7rem] text-white/70">
+                      {categoryMap.get(item.categorySlug)
+                        ? `${categoryMap.get(item.categorySlug)!.icon} ${getLocalizedValue(categoryMap.get(item.categorySlug)!.name, locale)}`
+                        : item.categorySlug}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       <section id="featured-providers" className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
