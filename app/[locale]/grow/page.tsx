@@ -82,19 +82,19 @@ export default async function GrowPage({ params }: GrowPageProps) {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
           <div>
             <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">{dictionary.nav.grow}</div>
-            <h1 className={`mt-3 text-4xl font-extrabold tracking-[-0.05em] sm:text-5xl ${locale === "ar" ? "arabic-display" : ""}`}>
+            <h1 className={`mt-3 text-4xl font-extrabold tracking-[-0.05em] text-[var(--ink)] sm:text-5xl ${locale === "ar" ? "arabic-display" : ""}`}>
               {dictionary.grow.title}
             </h1>
             <p className="mt-4 text-lg font-semibold text-[var(--ink)]">{dictionary.grow.subtitle}</p>
             <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.grow.description}</p>
           </div>
 
-          <div className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white p-5 backdrop-blur">
+          <div className="rounded-[1.5rem] border border-[rgba(20,92,255,0.18)] bg-white p-5 shadow-[0_8px_24px_rgba(11,63,184,0.08)]">
             <div className="text-sm font-bold text-[var(--navy)]">{dictionary.nav.providers}</div>
             <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneService}</div>
             <div className="mt-4 text-sm font-bold text-[var(--navy)]">{dictionary.nav.businesses}</div>
             <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneBusiness}</div>
-            <div className="mt-5 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-4 text-sm leading-7 text-[var(--ink)]">
+            <div className="mt-5 rounded-[1.25rem] border border-[rgba(20,92,255,0.16)] bg-[var(--soft)] px-4 py-4 text-sm font-semibold leading-7 text-[var(--navy)]">
               {dictionary.grow.academySoon}
             </div>
           </div>

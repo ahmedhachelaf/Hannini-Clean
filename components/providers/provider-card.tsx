@@ -71,7 +71,9 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
             {provider.isVerified ? (
               <span className="status-pill status-pill--verified">{locale === "ar" ? "موثّق" : "Vérifié"}</span>
             ) : (
-              <span className="status-pill status-pill--pending">{locale === "ar" ? "قيد المراجعة" : "En attente"}</span>
+              <span className="status-pill border border-[var(--line)] bg-white text-[var(--muted)]">
+                {locale === "ar" ? "جديد" : "Nouveau"}
+              </span>
             )}
 
             {provider.featured ? (
@@ -119,24 +121,6 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
         <div>
           <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "رسوم التنقل:" : "Déplacement :"}</span>{" "}
           {formatCurrency(provider.travelFee, locale)}
-        </div>
-        <div>
-          <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "جاهزية الملف:" : "Préparation :"}</span> {readiness.score}%
-        </div>
-        <div className="overflow-hidden rounded-full bg-[rgba(15,95,255,0.08)]">
-          <div
-            className="h-2 rounded-full bg-[linear-gradient(90deg,#0f5fff,#4f8dff)]"
-            style={{ width: `${Math.max(readiness.score, 8)}%` }}
-            aria-hidden="true"
-          />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="font-semibold text-[var(--brand)]">{readinessTierLabels[readiness.scoreTier]}</span>
-          <span>
-            {locale === "ar"
-              ? `${readiness.completed} من ${readiness.total} عناصر مكتملة`
-              : `${readiness.completed}/${readiness.total} éléments complétés`}
-          </span>
         </div>
       </div>
 

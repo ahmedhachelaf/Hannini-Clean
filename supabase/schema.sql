@@ -253,3 +253,109 @@ create trigger set_support_cases_updated_at before update on public.support_case
 
 drop trigger if exists set_business_requests_updated_at on public.business_requests;
 create trigger set_business_requests_updated_at before update on public.business_requests for each row execute function public.set_updated_at();
+
+-- ─────────────────────────────────────────────────────────────
+-- Row Level Security
+-- Every table must be explicitly secured before going live.
+-- The service_role key (server-only) bypasses RLS automatically.
+-- The anon key (browser) is subject to these policies.
+-- ─────────────────────────────────────────────────────────────
+
+alter table public.categories enable row level security;
+alter table public.zones enable row level security;
+alter table public.users enable row level security;
+alter table public.providers enable row level security;
+alter table public.provider_services enable row level security;
+alter table public.service_areas enable row level security;
+alter table public.availability enable row level security;
+alter table public.bookings enable row level security;
+alter table public.reviews enable row level security;
+alter table public.provider_verifications enable row level security;
+alter table public.provider_photos enable row level security;
+alter table public.support_cases enable row level security;
+alter table public.support_messages enable row level security;
+alter table public.business_requests enable row level security;
+
+-- Categories: publicly readable (no sensitive data)
+create policy "categories_public_read"
+  on public.categories for select to anon, authenticated using (true);
+
+-- Zones: publicly readable (no sensitive data)
+create policy "zones_public_read"
+  on public.zones for select to anon, authenticated using (true);
+
+-- Users: anon may insert (booking creates a user record); no public read
+create policy "users_anon_insert"
+  on public.users for insert to anon with check (true);
+
+-- Providers: anon may only read approved providers (hides pending/rejected)
+create policy "providers_public_read_approved"
+  on public.providers for select to anon
+  using (approval_status = 'approved');
+
+-- Provider services: readable only for approved providers
+create policy "provider_services_public_read"
+  on public.provider_services for select to anon
+  using (
+    exists (
+      select 1 from public.providers p
+      where p.id = provider_id and p.approval_status = 'approved'
+    )
+  );
+
+-- Service areas: readable only for approved providers
+create policy "service_areas_public_read"
+  on public.service_areas for select to anon
+  using (
+    exists (
+      select 1 from public.providers p
+      where p.id = provider_id and p.approval_status = 'approved'
+    )
+  );
+
+-- Availability: readable only for approved providers
+create policy "availability_public_read"
+  on public.availability for select to anon
+  using (
+    exists (
+      select 1 from public.providers p
+      where p.id = provider_id and p.approval_status = 'approved'
+    )
+  );
+
+-- Provider photos: readable only for approved providers
+create policy "provider_photos_public_read"
+  on public.provider_photos for select to anon
+  using (
+    exists (
+      select 1 from public.providers p
+      where p.id = provider_id and p.approval_status = 'approved'
+    )
+  );
+
+-- Provider verifications: no public access (admin / service_role only)
+-- (service_role bypasses RLS automatically — no explicit policy needed)
+
+-- Bookings: anon may insert only; no public read (PII protected)
+create policy "bookings_anon_insert"
+  on public.bookings for insert to anon with check (true);
+
+-- Reviews: anon may read approved reviews and insert new ones
+create policy "reviews_public_read_approved"
+  on public.reviews for select to anon
+  using (status = 'approved');
+
+create policy "reviews_anon_insert"
+  on public.reviews for insert to anon with check (true);
+
+-- Support cases: anon may insert only; no public read
+create policy "support_cases_anon_insert"
+  on public.support_cases for insert to anon with check (true);
+
+-- Support messages: anon may insert only; no public read
+create policy "support_messages_anon_insert"
+  on public.support_messages for insert to anon with check (true);
+
+-- Business requests: anon may insert only; no public read
+create policy "business_requests_anon_insert"
+  on public.business_requests for insert to anon with check (true);

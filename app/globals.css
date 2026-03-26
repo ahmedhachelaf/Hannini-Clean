@@ -54,6 +54,21 @@ body {
   line-height: 1.65;
 }
 
+/* Arabic text needs more generous line-height than Latin to prevent crowding */
+:lang(ar),
+[dir="rtl"] {
+  line-height: 1.9;
+}
+
+:lang(ar) h1,
+:lang(ar) h2,
+:lang(ar) h3,
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3 {
+  line-height: 1.5;
+}
+
 a {
   color: inherit;
   text-decoration: none;
