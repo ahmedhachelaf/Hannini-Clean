@@ -25,6 +25,7 @@ import type {
   MapCoordinates,
   ProfileType,
   Provider,
+  ProviderNotification,
   ProviderStatus,
   Review,
   SortOption,
@@ -45,6 +46,9 @@ type ProviderRow = {
   response_time_minutes: number | null;
   is_verified: boolean | null;
   approval_status: "pending" | "approved" | "rejected" | "needs_more_info";
+  verification_status?: "pending" | "verified" | "rejected" | null;
+  verified_at?: string | null;
+  verified_by_admin_id?: string | null;
   featured: boolean | null;
   years_experience: number | null;
   hourly_rate: number | null;
@@ -135,9 +139,13 @@ type SupportCaseRow = {
   subject: string;
   message: string;
   phone_number: string | null;
+  reporter_name?: string | null;
+  reporter_phone?: string | null;
   email: string | null;
   booking_id: string | null;
   provider_id: string | null;
+  reported_provider_id?: string | null;
+  interaction_verified?: boolean | null;
   provider_slug: string | null;
   attachment_names: string[] | null;
   created_at: string;
@@ -155,19 +163,33 @@ type SupportMessageRow = {
   created_at: string;
 };
 
+type NotificationRow = {
+  id: string;
+  provider_id: string;
+  type: string;
+  title_ar: string;
+  body_ar: string;
+  title_fr: string | null;
+  body_fr: string | null;
+  is_read: boolean | null;
+  created_at: string;
+};
+
 type BusinessRequestRow = {
   id: string;
   company_name: string;
-  contact_name: string;
+  contact_name?: string | null;
   phone: string;
   email: string | null;
   category_slug: string;
-  description: string;
-  wilaya_slug: string;
-  frequency: "one_time" | "recurring";
-  timeline: string;
+  description: string | null;
+  wilaya_code?: string | null;
+  commune?: string | null;
+  wilaya_slug: string | null;
+  frequency: "one_time" | "recurring" | null;
+  timeline: string | null;
   budget: string | null;
-  preferred_provider_type: "service_provider" | "home_business" | "either";
+  preferred_provider_type: "service_provider" | "home_business" | "either" | null;
   attachment_names: string[] | null;
   status: BusinessRequestStatus;
   matched_provider_ids: string[] | null;
@@ -321,6 +343,7 @@ function mapProviderRow(row: ProviderRow): Provider {
   const verificationFlags = parseVerificationNotes(verification?.notes);
   const categorySlug = row.provider_services?.[0]?.category_slug ?? "handyman";
   const profileType = categoryDetailsBySlug.get(categorySlug)?.lane ?? "service_provider";
+  const verificationStatus = row.verification_status ?? verification?.status ?? "pending";
 
   return {
     id: row.id,
@@ -334,7 +357,7 @@ function mapProviderRow(row: ProviderRow): Provider {
     reviewCount: row.review_count ?? 0,
     completedJobs: row.completed_jobs_count ?? 0,
     responseTimeMinutes: row.response_time_minutes ?? 60,
-    isVerified: Boolean(row.is_verified),
+    isVerified: verificationStatus === "verified" || Boolean(row.is_verified),
     status: derivedStatus,
     featured: Boolean(row.featured),
     yearsExperience: row.years_experience ?? 0,
@@ -376,7 +399,7 @@ function mapProviderRow(row: ProviderRow): Provider {
         ?.map((photo) => photo.alt_text)
         .filter((value): value is string => Boolean(value)) ?? [],
     verification: {
-      status: verification?.status ?? "pending",
+      status: verificationStatus,
       documentName: verification?.document_name ?? null,
       notes: stripProviderLifecycleTags(verification?.notes),
       ageConfirmed: verificationFlags.ageConfirmed,
@@ -452,6 +475,24 @@ function mapSupportMessageRow(row: SupportMessageRow): SupportMessage {
   };
 }
 
+function mapNotificationRow(row: NotificationRow): ProviderNotification {
+  return {
+    id: row.id,
+    providerId: row.provider_id,
+    type: row.type,
+    title: {
+      ar: row.title_ar,
+      fr: row.title_fr ?? row.title_ar,
+    },
+    body: {
+      ar: row.body_ar,
+      fr: row.body_fr ?? row.body_ar,
+    },
+    isRead: Boolean(row.is_read),
+    createdAt: row.created_at,
+  };
+}
+
 function mapSupportCaseRow(row: SupportCaseRow): SupportCase {
   const fallbackSafetyMeta = parseSupportMessageMetadata(row.message);
 
@@ -465,9 +506,13 @@ function mapSupportCaseRow(row: SupportCaseRow): SupportCase {
     subject: row.subject,
     message: fallbackSafetyMeta.message,
     phoneNumber: row.phone_number ?? undefined,
+    reporterName: row.reporter_name ?? undefined,
+    reporterPhone: row.reporter_phone ?? undefined,
     email: row.email ?? undefined,
     bookingId: row.booking_id ?? undefined,
     providerId: row.provider_id ?? undefined,
+    reportedProviderId: row.reported_provider_id ?? undefined,
+    interactionVerified: row.interaction_verified ?? false,
     providerSlug: row.provider_slug ?? undefined,
     attachmentNames: row.attachment_names ?? [],
     createdAt: row.created_at,
@@ -480,16 +525,18 @@ function mapBusinessRequestRow(row: BusinessRequestRow): BusinessRequest {
   return {
     id: row.id,
     companyName: row.company_name,
-    contactName: row.contact_name,
+    contactName: row.contact_name ?? undefined,
     phone: row.phone,
     email: row.email ?? undefined,
     categorySlug: row.category_slug,
-    description: row.description,
-    wilayaSlug: row.wilaya_slug,
-    frequency: row.frequency,
-    timeline: row.timeline,
+    description: row.description ?? undefined,
+    wilayaCode: row.wilaya_code ?? undefined,
+    commune: row.commune ?? undefined,
+    wilayaSlug: row.wilaya_slug ?? undefined,
+    frequency: row.frequency ?? undefined,
+    timeline: row.timeline ?? undefined,
     budget: row.budget ?? undefined,
-    preferredProviderType: row.preferred_provider_type,
+    preferredProviderType: row.preferred_provider_type ?? undefined,
     attachmentNames: row.attachment_names ?? [],
     status: row.status,
     matchedProviderIds: row.matched_provider_ids ?? [],
@@ -522,6 +569,9 @@ async function fetchSupabaseProviders() {
         response_time_minutes,
         is_verified,
         approval_status,
+        verification_status,
+        verified_at,
+        verified_by_admin_id,
         featured,
         years_experience,
         hourly_rate,
@@ -555,6 +605,9 @@ async function fetchSupabaseProviders() {
         response_time_minutes,
         is_verified,
         approval_status,
+        verification_status,
+        verified_at,
+        verified_by_admin_id,
         featured,
         years_experience,
         hourly_rate,
@@ -692,9 +745,13 @@ async function fetchSupabaseSupportCases() {
         subject,
         message,
         phone_number,
+        reporter_name,
+        reporter_phone,
         email,
         booking_id,
         provider_id,
+        reported_provider_id,
+        interaction_verified,
         provider_slug,
         attachment_names,
         created_at,
@@ -723,9 +780,13 @@ async function fetchSupabaseSupportCases() {
         subject,
         message,
         phone_number,
+        reporter_name,
+        reporter_phone,
         email,
         booking_id,
         provider_id,
+        reported_provider_id,
+        interaction_verified,
         provider_slug,
         attachment_names,
         created_at,
@@ -759,6 +820,26 @@ async function fetchSupabaseSupportCases() {
   return (data as SupportCaseRow[]).map(mapSupportCaseRow);
 }
 
+async function fetchSupabaseNotifications(providerId: string) {
+  if (!hasSupabaseServerEnv()) {
+    return null;
+  }
+
+  const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("notifications")
+    .select("id, provider_id, type, title_ar, body_ar, title_fr, body_fr, is_read, created_at")
+    .eq("provider_id", providerId)
+    .order("created_at", { ascending: false });
+
+  return (data as NotificationRow[] | null)?.map(mapNotificationRow) ?? null;
+}
+
 async function fetchSupabaseBusinessRequests() {
   if (!hasSupabaseServerEnv()) {
     return null;
@@ -781,6 +862,8 @@ async function fetchSupabaseBusinessRequests() {
         email,
         category_slug,
         description,
+        wilaya_code,
+        commune,
         wilaya_slug,
         frequency,
         timeline,
@@ -896,7 +979,7 @@ export async function getProviders(filters: Filters = {}, includeAllStatuses = f
     : resolvedProviders;
   const visibleProviders = includeAllStatuses
     ? mergedProviders
-    : mergedProviders.filter((provider) => provider.status === "approved");
+    : mergedProviders.filter((provider) => ["approved", "submitted", "under_review", "needs_more_info"].includes(provider.status));
   return applyProviderFilters(visibleProviders, filters);
 }
 
@@ -960,6 +1043,15 @@ export async function getBookings() {
 
 export async function getSupportCases() {
   return (await fetchSupabaseSupportCases()) ?? listDemoSupportCases();
+}
+
+export async function getProviderNotifications(providerId: string) {
+  if (!hasSupabaseServerEnv()) {
+    return [] satisfies ProviderNotification[];
+  }
+
+  const notifications = await fetchSupabaseNotifications(providerId);
+  return notifications ?? [];
 }
 
 export async function getBusinessRequests() {

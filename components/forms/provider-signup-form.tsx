@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { getLocalizedValue } from "@/lib/i18n";
+import { useMemo, useRef, useState } from "react";
+import { WilayaSelect } from "@/components/WilayaSelect";
+import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 import type { Category, Locale, ProfileType, SignupSubmissionResult, Zone } from "@/lib/types";
 
 type ProviderSignupFormProps = {
@@ -17,812 +18,513 @@ type ProviderSignupFormProps = {
   };
 };
 
-const weekdays = [
-  { value: "sat", ar: "السبت", fr: "Samedi" },
-  { value: "sun", ar: "الأحد", fr: "Dimanche" },
-  { value: "mon", ar: "الاثنين", fr: "Lundi" },
-  { value: "tue", ar: "الثلاثاء", fr: "Mardi" },
-  { value: "wed", ar: "الأربعاء", fr: "Mercredi" },
-  { value: "thu", ar: "الخميس", fr: "Jeudi" },
-];
-
-const languageChoices = [
-  { value: "العربية", ar: "العربية", fr: "Arabe" },
-  { value: "Français", ar: "الفرنسية", fr: "Français" },
-];
+type FormErrors = Partial<Record<string, string>>;
 
 type FormCopy = {
   required: string;
-  essentialsTitle: string;
-  essentialsHint: string;
-  typeTitle: string;
-  serviceTypeTitle: string;
-  serviceTypeDescription: string;
-  businessTypeTitle: string;
-  businessTypeDescription: string;
-  fullName: string;
-  workshopName: string;
-  email: string;
-  category: string;
-  province: string;
-  zone: string;
-  phone: string;
-  whatsapp: string;
-  description: string;
+  contactTitle: string;
+  activityTitle: string;
+  identityTitle: string;
   optionalTitle: string;
   optionalHint: string;
-  yearsExperience: string;
-  startingPrice: string;
-  extraFee: string;
-  maps: string;
-  socialTitle: string;
-  socialHint: string;
-  facebook: string;
-  instagram: string;
-  tiktok: string;
-  whatsappBusiness: string;
-  website: string;
-  buyerAccessTitle: string;
-  buyerAccessHint: string;
-  bulkAvailable: string;
-  minimumOrderQuantity: string;
-  productionCapacity: string;
-  leadTime: string;
-  deliveryArea: string;
-  languages: string;
-  weekdays: string;
-  startTime: string;
-  endTime: string;
-  uploadsTitle: string;
-  profilePhoto: string;
-  workPhotos: string;
-  verificationDocument: string;
-  accountAccessTitle: string;
-  accountAccessHint: string;
+  fullName: string;
+  phone: string;
+  category: string;
+  wilaya: string;
+  commune: string;
   password: string;
   passwordConfirmation: string;
-  ageTitle: string;
-  ageConfirmation: string;
-  conductTitle: string;
-  conductAgreement: string;
-  policyAgreement: string;
-  policyLink: string;
-  conductLink: string;
-  conductHint: string;
+  termsTitle: string;
+  termsAge: string;
+  termsConduct: string;
+  termsPolicy: string;
+  termsHint: string;
+  optionalToggle: string;
+  email: string;
+  whatsapp: string;
+  shortDescription: string;
+  yearsExperience: string;
+  maps: string;
+  workPhotos: string;
+  verificationDocument: string;
+  submit: string;
   pendingHint: string;
-  submitService: string;
-  submitBusiness: string;
   submissionError: string;
-  noCategory: string;
-  noZone: string;
 };
 
 function getCopy(locale: Locale): FormCopy {
   if (locale === "ar") {
     return {
       required: "مطلوب",
-      essentialsTitle: "المعلومات الأساسية",
-      essentialsHint: "يكفي إدخال الأساسيات للبدء. الباقي اختياري ويمكن استكماله لاحقاً.",
-      typeTitle: "نوع الملف",
-      serviceTypeTitle: "مزود خدمات منزلية",
-      serviceTypeDescription: "سباك، كهربائي، تكييف، طلاء، نجارة وغيرها.",
-      businessTypeTitle: "نشاط منزلي",
-      businessTypeDescription: "طبخ منزلي، خياطة، حلويات، ومنتجات يدوية محلية.",
-      fullName: "الاسم الكامل أو اسم المشروع",
-      workshopName: "اسم الورشة أو النشاط (اختياري)",
-      email: "البريد الإلكتروني",
-      category: "الفئة",
-      province: "الولاية",
-      zone: "المدينة أو المنطقة",
-      phone: "رقم الهاتف (اختياري إذا أدخلت واتساب)",
-      whatsapp: "رقم واتساب (اختياري إذا أدخلت الهاتف)",
-      description: "وصف بسيط عن خدمتك أو نشاطك",
-      optionalTitle: "تفاصيل إضافية اختيارية",
-      optionalHint: "هذه التفاصيل تساعد على بناء الثقة، لكنها لا تمنع إرسال الطلب.",
-      yearsExperience: "سنوات الخبرة",
-      startingPrice: "السعر الأساسي أو سعر البداية",
-      extraFee: "رسوم التنقل أو التوصيل",
-      maps: "رابط Google Maps",
-      socialTitle: "الحضور الرقمي والروابط",
-      socialHint: "اختياري: يساعد هنيني على إظهار قنواتك الرقمية الموثوقة بجانب ملفك.",
-      facebook: "رابط Facebook",
-      instagram: "رابط Instagram",
-      tiktok: "رابط TikTok",
-      whatsappBusiness: "رابط WhatsApp Business",
-      website: "الموقع الإلكتروني",
-      buyerAccessTitle: "الوصول إلى المشترين وطلبات الجملة",
-      buyerAccessHint: "خيار مفيد خصوصاً للطبخ المنزلي، الحلويات، الخياطة، والمنتجات اليدوية أو الإنتاج الصغير.",
-      bulkAvailable: "متاح لطلبات الجملة أو المشترين المهنيين",
-      minimumOrderQuantity: "الحد الأدنى للطلب",
-      productionCapacity: "القدرة الإنتاجية",
-      leadTime: "مدة التحضير",
-      deliveryArea: "منطقة التوصيل أو التسليم",
-      languages: "اللغات",
-      weekdays: "أيام التوفر",
-      startTime: "بداية التوفر",
-      endTime: "نهاية التوفر",
-      uploadsTitle: "صور ووثائق اختيارية",
-      profilePhoto: "الصورة الشخصية أو الشعار",
-      workPhotos: "صور الأعمال",
-      verificationDocument: "وثيقة التحقق",
-      accountAccessTitle: "حماية لوحة مزود الخدمة",
-      accountAccessHint: "اختر كلمة مرور من 8 أحرف أو أكثر حتى يصبح دخولك إلى لوحة مزود الخدمة وحذف الحساب أو إيقافه تحت سيطرتك.",
+      contactTitle: "معلومات التواصل",
+      activityTitle: "نشاطك المهني",
+      identityTitle: "الهوية",
+      optionalTitle: "تفاصيل إضافية (اختياري)",
+      optionalHint: "أضف هذه التفاصيل لتحسين الثقة والظهور. كلها اختيارية.",
+      fullName: "الاسم الكامل أو اسم النشاط",
+      phone: "رقم الهاتف",
+      category: "الفئة المهنية",
+      wilaya: "الولاية",
+      commune: "البلدية",
       password: "كلمة المرور",
       passwordConfirmation: "تأكيد كلمة المرور",
-      ageTitle: "تأكيد العمر",
-      ageConfirmation: "أؤكد أن عمري 16 سنة أو أكثر",
-      conductTitle: "قواعد السلوك والأمان",
-      conductAgreement: "أوافق على قواعد السلوك والأمان في هَنّيني",
-      policyAgreement: "اطّلعت على الشروط والسياسات ذات الصلة وأوافق عليها",
-      policyLink: "عرض الشروط والسياسات",
-      conductLink: "اقرأ قواعد السلوك والأمان",
-      conductHint: "نمنع التحرش، الاستغلال، الاحتيال، التضليل، الأنشطة غير القانونية، وأي سلوك يضر بالأطفال أو القاصرين.",
-      pendingHint: "بعد الإرسال سيظهر الطلب في لوحة الإدارة بحالة pending للمراجعة اليدوية. لا يوجد بريد إلكتروني تلقائي حالياً.",
-      submitService: "إرسال طلب مزود الخدمة",
-      submitBusiness: "إرسال طلب النشاط المنزلي",
+      termsTitle: "الموافقة على الشروط",
+      termsAge: "أؤكد أن عمري 16 سنة أو أكثر",
+      termsConduct: "أوافق على قواعد السلوك والأمان في هَنّيني",
+      termsPolicy: "اطّلعت على الشروط والسياسات ذات الصلة وأوافق عليها",
+      termsHint: "هذه الموافقات ضرورية للحفاظ على سلامة المجتمع.",
+      optionalToggle: "أضف تفاصيل إضافية لتعزيز ملفك (اختياري) ▾",
+      email: "البريد الإلكتروني (اختياري)",
+      whatsapp: "رقم واتساب (اختياري)",
+      shortDescription: "نبذة مختصرة (اختياري)",
+      yearsExperience: "سنوات الخبرة (اختياري)",
+      maps: "رابط خرائط غوغل (اختياري)",
+      workPhotos: "صور الأعمال (اختياري)",
+      verificationDocument: "وثيقة التحقق (اختياري)",
+      submit: "إرسال طلب الانضمام",
+      pendingHint: "بعد الإرسال سيظهر الطلب في لوحة الإدارة بحالة قيد المراجعة.",
       submissionError: "تعذر إرسال الطلب حالياً.",
-      noCategory: "لا توجد فئات متاحة لهذا المسار حالياً.",
-      noZone: "لا توجد مناطق متاحة لهذه الولاية حالياً.",
     };
   }
 
   return {
     required: "Obligatoire",
-    essentialsTitle: "Informations essentielles",
-    essentialsHint: "Seules les bases sont nécessaires pour commencer. Le reste peut être ajouté plus tard.",
-    typeTitle: "Type de profil",
-    serviceTypeTitle: "Prestataire de services à domicile",
-    serviceTypeDescription: "Plomberie, électricité, climatisation, peinture, menuiserie et plus.",
-    businessTypeTitle: "Activité à domicile",
-    businessTypeDescription: "Cuisine maison, couture, pâtisserie et créations locales.",
-    fullName: "Nom complet ou nom du projet",
-    workshopName: "Nom de l'atelier ou de l'activité (optionnel)",
-    email: "E-mail",
+    contactTitle: "Coordonnées",
+    activityTitle: "Votre activité",
+    identityTitle: "Identité",
+    optionalTitle: "Détails complémentaires (optionnel)",
+    optionalHint: "Ajoutez ces détails pour renforcer la confiance. Tout est optionnel.",
+    fullName: "Nom complet ou nom de l’activité",
+    phone: "Téléphone",
     category: "Catégorie",
-    province: "Wilaya",
-    zone: "Ville ou zone",
-    phone: "Téléphone (optionnel si WhatsApp est saisi)",
-    whatsapp: "WhatsApp (optionnel si téléphone est saisi)",
-    description: "Courte description simple de votre activité",
-    optionalTitle: "Détails complémentaires optionnels",
-    optionalHint: "Ces éléments renforcent la confiance, mais ne bloquent pas l'envoi.",
-    yearsExperience: "Années d'expérience",
-    startingPrice: "Tarif de base ou prix de départ",
-    extraFee: "Frais de déplacement ou livraison",
-    maps: "Lien Google Maps",
-    socialTitle: "Présence digitale",
-    socialHint: "Optionnel : permet d'afficher vos canaux numériques de façon propre sur votre profil Hannini.",
-    facebook: "Lien Facebook",
-    instagram: "Lien Instagram",
-    tiktok: "Lien TikTok",
-    whatsappBusiness: "Lien WhatsApp Business",
-    website: "Site web",
-    buyerAccessTitle: "Accès acheteurs et commandes en volume",
-    buyerAccessHint: "Utile surtout pour cuisine maison, pâtisseries, couture, créations locales et petites productions.",
-    bulkAvailable: "Disponible pour commandes en volume / acheteurs pro",
-    minimumOrderQuantity: "Commande minimale",
-    productionCapacity: "Capacité de production",
-    leadTime: "Délai de préparation",
-    deliveryArea: "Zone de livraison ou remise",
-    languages: "Langues",
-    weekdays: "Jours de disponibilité",
-    startTime: "Début",
-    endTime: "Fin",
-    uploadsTitle: "Photos et documents optionnels",
-    profilePhoto: "Photo ou logo",
-    workPhotos: "Photos de réalisations",
-    verificationDocument: "Document de vérification",
-    accountAccessTitle: "Protection de l’espace prestataire",
-    accountAccessHint: "Choisissez un mot de passe d’au moins 8 caractères pour garder l’accès à votre tableau, à la désactivation et à la demande de suppression sous votre contrôle.",
+    wilaya: "Wilaya",
+    commune: "Commune",
     password: "Mot de passe",
     passwordConfirmation: "Confirmer le mot de passe",
-    ageTitle: "Confirmation d'âge",
-    ageConfirmation: "Je confirme avoir 16 ans ou plus",
-    conductTitle: "Code de conduite et sécurité",
-    conductAgreement: "J'accepte le code de conduite et les règles de sécurité de Hannini",
-    policyAgreement: "J’ai lu les conditions et politiques applicables et je les accepte",
-    policyLink: "Voir les conditions et politiques",
-    conductLink: "Lire le code de conduite et les règles de sécurité",
-    conductHint: "Le harcèlement, l'exploitation, la fraude, la fausse représentation, les activités illégales et tout tort envers les enfants ou mineurs sont interdits.",
-    pendingHint: "Après envoi, la candidature apparaît dans l'admin avec le statut pending pour revue manuelle. Aucun email automatique n'est envoyé pour le moment.",
-    submitService: "Envoyer la candidature prestataire",
-    submitBusiness: "Envoyer la candidature activité à domicile",
+    termsTitle: "Acceptation des conditions",
+    termsAge: "Je confirme avoir 16 ans ou plus",
+    termsConduct: "J’accepte le code de conduite et sécurité Hannini",
+    termsPolicy: "J’ai lu les conditions et politiques applicables",
+    termsHint: "Ces confirmations sont obligatoires pour un environnement sûr.",
+    optionalToggle: "Ajouter des détails pour renforcer le profil (optionnel) ▾",
+    email: "E-mail (optionnel)",
+    whatsapp: "WhatsApp (optionnel)",
+    shortDescription: "Courte description (optionnel)",
+    yearsExperience: "Années d’expérience (optionnel)",
+    maps: "Lien Google Maps (optionnel)",
+    workPhotos: "Photos de réalisations (optionnel)",
+    verificationDocument: "Document de vérification (optionnel)",
+    submit: "Envoyer la candidature",
+    pendingHint: "Après envoi, votre dossier passe en revue manuelle.",
     submissionError: "Impossible d'envoyer la candidature pour le moment.",
-    noCategory: "Aucune catégorie disponible pour ce parcours pour le moment.",
-    noZone: "Aucune zone disponible pour cette wilaya pour le moment.",
   };
 }
 
-export function ProviderSignupForm({ locale, categories, zones, labels }: ProviderSignupFormProps) {
+export function ProviderSignupForm({ locale, categories, labels }: ProviderSignupFormProps) {
   const copy = getCopy(locale);
+  const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SignupSubmissionResult | null>(null);
   const [profileType, setProfileType] = useState<ProfileType>("service_provider");
-  const [provinceSlug, setProvinceSlug] = useState<string>(zones[0]?.provinceSlug ?? "");
-  const [provinceQuery, setProvinceQuery] = useState("");
-  const [zoneQuery, setZoneQuery] = useState("");
-  const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
-  const [hasAcceptedConduct, setHasAcceptedConduct] = useState(false);
-  const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
+  const [wilayaCode, setWilayaCode] = useState("");
+  const [commune, setCommune] = useState("");
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [showOptional, setShowOptional] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
-
-  const provinceGroups = useMemo(
-    () =>
-      Array.from(new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])).entries()).map(([slug, name]) => ({
-        slug,
-        name,
-        zones: zones.filter((zone) => zone.provinceSlug === slug),
-      })),
-    [zones],
-  );
-  const filteredProvinceGroups = useMemo(
-    () =>
-      provinceGroups.filter((province) => {
-        if (!provinceQuery.trim()) return true;
-        const name = getLocalizedValue(province.name, locale).toLowerCase();
-        return name.includes(provinceQuery.trim().toLowerCase());
-      }),
-    [provinceGroups, provinceQuery, locale],
-  );
 
   const laneCategories = useMemo(
     () => categories.filter((category) => category.lane === profileType),
     [categories, profileType],
   );
-  const provinceZones = provinceGroups.find((group) => group.slug === provinceSlug)?.zones ?? [];
-  const filteredProvinceZones = useMemo(
-    () =>
-      provinceZones.filter((zone) => {
-        if (!zoneQuery.trim()) return true;
-        const name = getLocalizedValue(zone.name, locale).toLowerCase();
-        return name.includes(zoneQuery.trim().toLowerCase());
-      }),
-    [provinceZones, zoneQuery, locale],
-  );
-  const primaryCategorySlug = laneCategories[0]?.slug ?? "";
-  const primaryZoneSlug = provinceZones[0]?.slug ?? "";
-  const hasPasswordReady = password.trim().length >= 8 && password === passwordConfirmation;
-  const canSubmit = isAgeConfirmed && hasAcceptedConduct && hasAcceptedPolicy && hasPasswordReady;
 
-  async function handleSubmit(formData: FormData) {
-    setPending(true);
+  function setFieldError(field: string, message: string) {
+    setErrors((prev) => ({ ...prev, [field]: message }));
+  }
+
+  function clearFieldError(field: string) {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
+
+  function scrollToField(field: string) {
+    const target = formRef.current?.querySelector(`[data-field='${field}']`);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function validate(formData: FormData) {
+    const nextErrors: FormErrors = {};
+    const fullName = String(formData.get("fullName") ?? "").trim();
+    const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
+    const categorySlug = String(formData.get("categorySlug") ?? "").trim();
+    const passwordValue = String(formData.get("password") ?? "");
+    const passwordConfirmValue = String(formData.get("passwordConfirmation") ?? "");
+    const ageConfirmed = String(formData.get("ageConfirmed") ?? "") === "on";
+    const conductAccepted = String(formData.get("conductAccepted") ?? "") === "on";
+    const policyAccepted = String(formData.get("policyAccepted") ?? "") === "on";
+
+    if (fullName.length < 3) {
+      nextErrors.fullName = locale === "ar" ? "يرجى إدخال الاسم الكامل." : "Merci de saisir votre nom complet.";
+    }
+
+    if (!phoneNumber || !isValidAlgerianPhone(phoneNumber)) {
+      nextErrors.phoneNumber =
+        locale === "ar" ? "يرجى إدخال رقم هاتف جزائري صالح." : "Veuillez saisir un numéro algérien valide.";
+    }
+
+    if (!categorySlug) {
+      nextErrors.categorySlug = locale === "ar" ? "يرجى اختيار الفئة." : "Veuillez choisir la catégorie.";
+    }
+
+    if (!wilayaCode) {
+      nextErrors.wilayaCode = locale === "ar" ? "يرجى اختيار الولاية." : "Veuillez choisir la wilaya.";
+    }
+
+    if (!commune) {
+      nextErrors.commune = locale === "ar" ? "يرجى اختيار البلدية." : "Veuillez choisir la commune.";
+    }
+
+    if (passwordValue.length < 8) {
+      nextErrors.password = locale === "ar" ? "كلمة المرور يجب أن تكون 8 أحرف على الأقل." : "Mot de passe: 8 caractères minimum.";
+    }
+
+    if (passwordValue !== passwordConfirmValue) {
+      nextErrors.passwordConfirmation = locale === "ar" ? "تأكيد كلمة المرور غير مطابق." : "La confirmation ne correspond pas.";
+    }
+
+    if (!ageConfirmed) {
+      nextErrors.ageConfirmed = locale === "ar" ? "يرجى تأكيد العمر." : "Veuillez confirmer votre âge.";
+    }
+
+    if (!conductAccepted) {
+      nextErrors.conductAccepted = locale === "ar" ? "يجب الموافقة على قواعد السلوك." : "Merci d’accepter le code de conduite.";
+    }
+
+    if (!policyAccepted) {
+      nextErrors.policyAccepted = locale === "ar" ? "يجب الموافقة على الشروط." : "Merci d’accepter les conditions.";
+    }
+
+    return nextErrors;
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setResult(null);
+
+    const formData = new FormData(event.currentTarget);
+    formData.set("profileType", profileType);
+    formData.set("wilayaCode", wilayaCode);
+    formData.set("commune", commune);
+    formData.set("phoneNumber", normalizeAlgerianPhone(String(formData.get("phoneNumber") ?? "")));
+
+    const nextErrors = validate(formData);
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      scrollToField(Object.keys(nextErrors)[0]);
+      return;
+    }
+
+    setErrors({});
+    setPending(true);
 
     try {
       const response = await fetch("/api/provider-signups", {
         method: "POST",
         body: formData,
       });
-
       const raw = await response.text();
-      let data: SignupSubmissionResult | null = null;
-
-      try {
-        data = raw ? (JSON.parse(raw) as SignupSubmissionResult) : null;
-      } catch (error) {
-        console.error("provider-signup:invalid_json_response", {
-          status: response.status,
-          rawSnippet: raw.slice(0, 240),
-          error,
-        });
-      }
-
+      const data = raw ? (JSON.parse(raw) as SignupSubmissionResult) : null;
       if (data) {
         setResult(data);
-        return;
+      } else {
+        setResult({ ok: false, message: copy.submissionError });
       }
-
-      console.error("provider-signup:unexpected_response", {
-        status: response.status,
-        rawSnippet: raw.slice(0, 240),
-      });
-      setResult({
-        ok: false,
-        message:
-          locale === "ar"
-            ? "تعذر قراءة رد الخادم. حدّث التطبيق أو أعد فتحه ثم حاول مرة أخرى."
-            : "Impossible de lire la réponse du serveur. Mettez l'application à jour ou relancez-la puis réessayez.",
-      });
     } catch (error) {
       console.error("provider-signup:request_failed", error);
-      setResult({
-        ok: false,
-        message:
-          locale === "ar"
-            ? "تعذر الوصول إلى خادم الإرسال حالياً. حدّث التطبيق أو أعد فتحه ثم حاول مرة أخرى."
-            : "Impossible de joindre le service d'envoi pour le moment. Mettez l'application à jour ou relancez-la puis réessayez.",
-      });
+      setResult({ ok: false, message: copy.submissionError });
     } finally {
       setPending(false);
     }
   }
 
+  if (result?.ok) {
+    return (
+      <div className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-white p-8 text-center">
+        <div className="flex h-14 w-14 items-center justify-center self-center rounded-full bg-emerald-100 text-2xl">✅</div>
+        <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{labels.successTitle}</h2>
+        <p className="text-sm leading-7 text-[var(--muted)]">{labels.successDescription}</p>
+        <Link href={result.dashboardUrl ?? `/${locale}/dashboard`} className="button-primary w-full sm:w-fit">
+          {locale === "ar" ? "ابدأ باستخدام هَنّيني" : "Commencer sur Hannini"}
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <form action={handleSubmit} aria-busy={pending} className="surface-card flex flex-col gap-6 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.94))] p-6">
+    <form ref={formRef} noValidate onSubmit={handleSubmit} className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-white p-6">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="profileType" value={profileType} />
 
       <div>
-        <h2 className={`text-2xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
-        <div className="mt-4 rounded-[1.25rem] border border-[rgba(20,92,255,0.14)] bg-[var(--soft)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+        <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
+        <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
+        <div className="mt-4 rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-3 text-sm text-[var(--muted)]">
           {copy.pendingHint}
         </div>
-        <p className="mt-3 text-sm font-medium text-[var(--navy)]">
-          {locale === "ar" ? "الحقول المعلّمة بكلمة مطلوب هي فقط الأساسية للانضمام الآن." : "Seuls les champs marqués Obligatoire sont nécessaires pour rejoindre la plateforme maintenant."}
-        </p>
       </div>
 
       <section className="grid gap-4">
         <div className="flex flex-col gap-2">
-          <div className="text-sm font-semibold text-[var(--muted)]">{copy.typeTitle}</div>
+          <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "نوع الملف" : "Type de profil"}</div>
           <div className="grid gap-4 md:grid-cols-2">
             <button
               type="button"
               onClick={() => setProfileType("service_provider")}
               aria-pressed={profileType === "service_provider"}
-              className={`rounded-[1.5rem] border p-5 text-start transition ${
-                profileType === "service_provider"
-                  ? "border-[rgba(20,92,255,0.24)] bg-[var(--accent-soft)] shadow-[0_18px_36px_rgba(20,92,255,0.12)]"
-                  : "border-[var(--line)] bg-white"
+              className={`rounded-[1.25rem] border p-4 text-start transition ${
+                profileType === "service_provider" ? "border-terracotta bg-terracotta-pale" : "border-[var(--line)] bg-white"
               }`}
             >
-              <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "المسار الأول" : "Volet 1"}</div>
-              <div className={`mt-2 text-xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.serviceTypeTitle}</div>
-              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{copy.serviceTypeDescription}</p>
+              <div className="text-xs font-semibold text-[var(--muted)]">{locale === "ar" ? "مزود خدمات" : "Prestataire"}</div>
+              <div className={`mt-2 text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+                {locale === "ar" ? "مزود خدمات منزلية" : "Services à domicile"}
+              </div>
             </button>
             <button
               type="button"
               onClick={() => setProfileType("home_business")}
               aria-pressed={profileType === "home_business"}
-              className={`rounded-[1.5rem] border p-5 text-start transition ${
-                profileType === "home_business"
-                  ? "border-[rgba(20,92,255,0.24)] bg-[var(--accent-soft)] shadow-[0_18px_36px_rgba(20,92,255,0.12)]"
-                  : "border-[var(--line)] bg-white"
+              className={`rounded-[1.25rem] border p-4 text-start transition ${
+                profileType === "home_business" ? "border-terracotta bg-terracotta-pale" : "border-[var(--line)] bg-white"
               }`}
             >
-              <div className="text-sm font-semibold text-[var(--muted)]">{locale === "ar" ? "المسار الثاني" : "Volet 2"}</div>
-              <div className={`mt-2 text-xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.businessTypeTitle}</div>
-              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{copy.businessTypeDescription}</p>
+              <div className="text-xs font-semibold text-[var(--muted)]">{locale === "ar" ? "نشاط منزلي" : "Activité à domicile"}</div>
+              <div className={`mt-2 text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+                {locale === "ar" ? "نشاط منزلي" : "Home business"}
+              </div>
             </button>
           </div>
         </div>
       </section>
 
-      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
-        <div className="flex flex-col gap-1">
-          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.essentialsTitle}</h3>
-          <p className="text-sm leading-7 text-[var(--muted)]">{copy.essentialsHint}</p>
+      <section className="rounded-[0.75rem] border border-[var(--line)] bg-white p-6" data-field="contact">
+        <div className="mb-4 border-b border-[var(--line)] pb-3 text-base font-bold text-terracotta">
+          {copy.contactTitle}
         </div>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label data-field="phoneNumber">
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.fullName} <span className="text-[var(--navy)]">• {copy.required}</span>
+              {copy.phone} <span className="text-terracotta">• {copy.required}</span>
             </span>
-            <input name="fullName" required aria-required="true" className="input-base" />
+            <input
+              name="phoneNumber"
+              type="tel"
+              className={`input-base ${errors.phoneNumber ? "border-rose-300" : ""}`}
+              placeholder="05XXXXXXXX"
+              onChange={() => clearFieldError("phoneNumber")}
+            />
+            {errors.phoneNumber ? <p className="mt-1 text-xs text-rose-600">{errors.phoneNumber}</p> : null}
           </label>
-
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workshopName}</span>
-            <input name="workshopName" className="input-base" />
-          </label>
-
-          <label>
+          <label data-field="password">
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.category} <span className="text-[var(--navy)]">• {copy.required}</span>
+              {copy.password} <span className="text-terracotta">• {copy.required}</span>
             </span>
-            <select key={`category-${profileType}`} name="categorySlug" required aria-required="true" defaultValue={primaryCategorySlug} className="input-base">
-              {laneCategories.length === 0 ? <option value="">{copy.noCategory}</option> : null}
+            <input
+              name="password"
+              type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                clearFieldError("password");
+              }}
+              className={`input-base ${errors.password ? "border-rose-300" : ""}`}
+            />
+            {errors.password ? <p className="mt-1 text-xs text-rose-600">{errors.password}</p> : null}
+          </label>
+          <label data-field="passwordConfirmation">
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {copy.passwordConfirmation} <span className="text-terracotta">• {copy.required}</span>
+            </span>
+            <input
+              name="passwordConfirmation"
+              type="password"
+              value={passwordConfirmation}
+              onChange={(event) => {
+                setPasswordConfirmation(event.target.value);
+                clearFieldError("passwordConfirmation");
+              }}
+              className={`input-base ${errors.passwordConfirmation ? "border-rose-300" : ""}`}
+            />
+            {errors.passwordConfirmation ? (
+              <p className="mt-1 text-xs text-rose-600">{errors.passwordConfirmation}</p>
+            ) : null}
+          </label>
+        </div>
+      </section>
+
+      <section className="rounded-[0.75rem] border border-[var(--line)] bg-white p-6" data-field="activity">
+        <div className="mb-4 border-b border-[var(--line)] pb-3 text-base font-bold text-terracotta">
+          {copy.activityTitle}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label data-field="categorySlug">
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {copy.category} <span className="text-terracotta">• {copy.required}</span>
+            </span>
+            <select
+              name="categorySlug"
+              className={`input-base ${errors.categorySlug ? "border-rose-300" : ""}`}
+              defaultValue={laneCategories[0]?.slug ?? ""}
+              onChange={() => clearFieldError("categorySlug")}
+            >
               {laneCategories.map((category) => (
                 <option key={category.slug} value={category.slug}>
                   {category.name[locale]}
                 </option>
               ))}
             </select>
+            {errors.categorySlug ? <p className="mt-1 text-xs text-rose-600">{errors.categorySlug}</p> : null}
           </label>
-
-          <label>
+          <div data-field="wilayaCode">
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.province} <span className="text-[var(--navy)]">• {copy.required}</span>
+              {copy.wilaya} <span className="text-terracotta">• {copy.required}</span>
             </span>
-            <input
-              type="search"
-              value={provinceQuery}
-              onChange={(event) => setProvinceQuery(event.target.value)}
-              placeholder={locale === "ar" ? "ابحث عن ولاية" : "Chercher une wilaya"}
-              className="input-base mb-2"
-            />
-            <select
-              value={provinceSlug}
-              onChange={(event) => {
-                setProvinceSlug(event.target.value);
-                setZoneQuery("");
+            <WilayaSelect
+              locale={locale}
+              required
+              onWilayaChange={(code) => {
+                setWilayaCode(code);
+                clearFieldError("wilayaCode");
               }}
-              aria-label={copy.province}
-              className="input-base"
-            >
-              {filteredProvinceGroups.map((province) => (
-                <option key={province.slug} value={province.slug}>
-                  {province.name[locale]}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.zone} <span className="text-[var(--navy)]">• {copy.required}</span>
-            </span>
-            <input
-              type="search"
-              value={zoneQuery}
-              onChange={(event) => setZoneQuery(event.target.value)}
-              placeholder={locale === "ar" ? "ابحث عن مدينة" : "Chercher une ville"}
-              className="input-base mb-2"
+              onCommuneChange={(value) => {
+                setCommune(value);
+                clearFieldError("commune");
+              }}
             />
-            <select key={`zone-${provinceSlug}`} name="zones" required aria-required="true" defaultValue={primaryZoneSlug} className="input-base">
-              {provinceZones.length === 0 ? <option value="">{copy.noZone}</option> : null}
-              {filteredProvinceZones.map((zone) => (
-                <option key={zone.slug} value={zone.slug}>
-                  {zone.name[locale]}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.email} <span className="text-[var(--navy)]">• {copy.required}</span>
-            </span>
-            <input name="email" type="email" required aria-required="true" className="input-base" />
-          </label>
-
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.phone}</span>
-            <input name="phoneNumber" type="tel" className="input-base" />
-          </label>
-
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.whatsapp}</span>
-            <input name="whatsappNumber" type="tel" className="input-base" />
-          </label>
+            <input type="hidden" name="wilayaCode" value={wilayaCode} />
+            <input type="hidden" name="commune" value={commune} />
+            {errors.wilayaCode ? <p className="mt-1 text-xs text-rose-600">{errors.wilayaCode}</p> : null}
+            {errors.commune ? <p className="mt-1 text-xs text-rose-600">{errors.commune}</p> : null}
+          </div>
         </div>
+      </section>
 
-        <label className="mt-4 block">
+      <section className="rounded-[0.75rem] border border-[var(--line)] bg-white p-6" data-field="fullName">
+        <div className="mb-4 border-b border-[var(--line)] pb-3 text-base font-bold text-terracotta">
+          {copy.identityTitle}
+        </div>
+        <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-            {copy.description} <span className="text-[var(--navy)]">• {copy.required}</span>
+            {copy.fullName} <span className="text-terracotta">• {copy.required}</span>
           </span>
-          <textarea
-            name="shortDescription"
-            required
-            aria-required="true"
-            minLength={6}
-            rows={4}
-            className="input-base min-h-28 resize-y"
-            placeholder={
-              locale === "ar"
-                ? profileType === "home_business"
-                  ? "مثال: أطبخ للولائم العائلية وأحضّر حلويات منزلية حسب الطلب."
-                  : "مثال: سباك متوفر للتدخلات المنزلية السريعة داخل الولاية."
-                : profileType === "home_business"
-                  ? "Exemple : cuisine maison pour occasions et commandes de pâtisserie."
-                  : "Exemple : plombier disponible pour interventions rapides dans la wilaya."
-            }
+          <input
+            name="fullName"
+            className={`input-base ${errors.fullName ? "border-rose-300" : ""}`}
+            placeholder={locale === "ar" ? "مثال: محمد بن علي" : "Ex: Mohamed Ben Ali"}
+            onChange={() => clearFieldError("fullName")}
           />
+          {errors.fullName ? <p className="mt-1 text-xs text-rose-600">{errors.fullName}</p> : null}
         </label>
       </section>
 
-      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
-        <div className="flex flex-col gap-1">
-          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.optionalTitle}</h3>
-          <p className="text-sm leading-7 text-[var(--muted)]">{copy.optionalHint}</p>
-        </div>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.yearsExperience}</span>
-            <input name="yearsExperience" type="number" min={0} className="input-base" />
-          </label>
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.startingPrice}</span>
-            <input name="hourlyRate" type="number" min={0} className="input-base" />
-          </label>
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.extraFee}</span>
-            <input name="travelFee" type="number" min={0} className="input-base" />
-          </label>
-          <label className="sm:col-span-2 lg:col-span-3">
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.maps}</span>
-            <input name="googleMapsUrl" type="url" className="input-base" placeholder="https://maps.google.com/..." />
-          </label>
-        </div>
-
-        <div className="mt-6 rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] p-4">
-          <div className="flex flex-col gap-1">
-            <h4 className="text-sm font-extrabold text-[var(--ink)]">{copy.socialTitle}</h4>
-            <p className="text-sm leading-7 text-[var(--muted)]">{copy.socialHint}</p>
-            <p className="text-xs leading-6 text-[var(--muted)]">
-              {locale === "ar"
-                ? "أضف فقط الروابط التي تمثل نشاطك فعلاً. هذا يساعد على رفع جاهزية الملف وبناء الثقة دون أن يكون إلزامياً."
-                : "Ajoutez seulement les liens qui représentent vraiment votre activité. Ils renforcent la préparation du profil sans être obligatoires."}
-            </p>
-          </div>
+      <section className="rounded-[0.75rem] border border-[var(--line)] bg-white p-6">
+        <button
+          type="button"
+          onClick={() => setShowOptional((current) => !current)}
+          className="flex w-full items-center justify-between text-base font-bold text-terracotta"
+        >
+          <span>{copy.optionalToggle}</span>
+          <span className={`transition ${showOptional ? "rotate-180" : ""}`}>▾</span>
+        </button>
+        {showOptional ? (
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label>
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.facebook}</span>
-              <input name="facebookUrl" type="url" className="input-base" placeholder="https://facebook.com/..." />
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.email}</span>
+              <input name="email" type="email" className="input-base" placeholder="example@email.com" />
             </label>
             <label>
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.instagram}</span>
-              <input name="instagramUrl" type="url" className="input-base" placeholder="https://instagram.com/..." />
-            </label>
-            <label>
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.tiktok}</span>
-              <input name="tiktokUrl" type="url" className="input-base" placeholder="https://tiktok.com/..." />
-            </label>
-            <label>
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.whatsappBusiness}</span>
-              <input name="whatsappBusinessUrl" type="url" className="input-base" placeholder="https://wa.me/..." />
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.whatsapp}</span>
+              <input name="whatsappNumber" type="tel" className="input-base" placeholder="05XXXXXXXX" />
             </label>
             <label className="sm:col-span-2">
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.website}</span>
-              <input name="websiteUrl" type="url" className="input-base" placeholder="https://example.com" />
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.shortDescription}</span>
+              <textarea name="shortDescription" rows={4} className="input-base min-h-28 resize-y" />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.yearsExperience}</span>
+              <input name="yearsExperience" type="number" min={0} className="input-base" />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.maps}</span>
+              <input name="googleMapsUrl" type="url" className="input-base" placeholder="https://maps.google.com/..." />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workPhotos}</span>
+              <input name="workPhotos" type="file" multiple className="input-base py-3" />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.verificationDocument}</span>
+              <input name="verificationDocument" type="file" className="input-base py-3" />
             </label>
           </div>
-        </div>
-
-        {profileType === "home_business" ? (
-          <div className="mt-6 rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-[linear-gradient(180deg,rgba(214,230,255,0.72),rgba(255,255,255,0.95))] p-4">
-            <div className="flex flex-col gap-1">
-              <h4 className="text-sm font-extrabold text-[var(--ink)]">{copy.buyerAccessTitle}</h4>
-              <p className="text-sm leading-7 text-[var(--muted)]">{copy.buyerAccessHint}</p>
-              <p className="text-xs leading-6 text-[var(--muted)]">
-                {locale === "ar"
-                  ? "هذه المعلومات اختيارية لكنها تساعد هنيني على إظهار أنك جاهز لطلبات المناسبات، الشركات، أو المشترين الذين يحتاجون كميات أكبر."
-                  : "Ces informations restent optionnelles, mais elles aident Hannini à montrer que votre activité peut répondre à des commandes d'événements, d'entreprises ou d'acheteurs en volume."}
-              </p>
-            </div>
-            <label className="mt-4 flex items-start gap-3 rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
-              <input name="availableForBulkOrders" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
-              <span className="text-sm font-semibold text-[var(--ink)]">{copy.bulkAvailable}</span>
-            </label>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label>
-                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.minimumOrderQuantity}</span>
-                <input name="minimumOrderQuantity" className="input-base" />
-              </label>
-              <label>
-                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.productionCapacity}</span>
-                <input name="productionCapacity" className="input-base" />
-              </label>
-              <label>
-                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.leadTime}</span>
-                <input name="leadTime" className="input-base" />
-              </label>
-              <label>
-                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.deliveryArea}</span>
-                <input name="deliveryArea" className="input-base" />
-              </label>
-            </div>
-          </div>
-        ) : null}
-
-        <fieldset className="mt-5 space-y-3">
-          <legend className="text-sm font-semibold text-[var(--muted)]">{copy.languages}</legend>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {languageChoices.map((language) => (
-              <label key={language.value} className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
-                <input type="checkbox" name="languages" value={language.value} defaultChecked={language.value === "العربية"} className="h-4 w-4 accent-[var(--accent)]" />
-                <span>{locale === "ar" ? language.ar : language.fr}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="mt-5 space-y-3">
-          <legend className="text-sm font-semibold text-[var(--muted)]">{copy.weekdays}</legend>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {weekdays.map((day) => (
-              <label key={day.value} className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--soft)] px-4 py-3">
-                <input type="checkbox" name="weekdays" value={day.value} className="h-4 w-4 accent-[var(--accent)]" />
-                <span>{locale === "ar" ? day.ar : day.fr}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.startTime}</span>
-            <input name="startTime" type="time" className="input-base" defaultValue="08:00" />
-          </label>
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.endTime}</span>
-            <input name="endTime" type="time" className="input-base" defaultValue="18:00" />
-          </label>
-        </div>
+        ) : (
+          <p className="mt-3 text-sm text-[var(--muted)]">{copy.optionalHint}</p>
+        )}
       </section>
 
-      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
-        <div className="flex flex-col gap-1">
-          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.uploadsTitle}</h3>
-          <p className="text-sm leading-7 text-[var(--muted)]">
-            {locale === "ar"
-              ? "يمكنك إرفاق صور أو وثيقة إثبات الآن، لكن عدم رفعها لا يمنع إرسال الطلب."
-              : "Vous pouvez joindre des photos ou un justificatif maintenant, sans que cela bloque l'envoi."}
-          </p>
+      <section className="rounded-[0.75rem] border border-[var(--line)] bg-white p-6" data-field="terms">
+        <div className="mb-4 border-b border-[var(--line)] pb-3 text-base font-bold text-terracotta">
+          {copy.termsTitle}
         </div>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.profilePhoto}</span>
-            <input name="profilePhoto" type="file" accept="image/*" className="input-base py-3" />
-          </label>
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workPhotos}</span>
-            <input name="workPhotos" type="file" accept="image/*" multiple className="input-base py-3" />
-            <p className="mt-2 text-xs leading-6 text-[var(--muted)]">
-              {locale === "ar"
-                ? profileType === "home_business"
-                  ? "يكفي 1 إلى 3 صور واضحة: صواني، حلويات، خياطة، أو منتجات يدوية جاهزة للتسليم."
-                  : "يكفي 1 إلى 3 صور واضحة: أعمال إصلاح، قبل/بعد، أو نماذج توضح جودة الخدمة."
-                : profileType === "home_business"
-                  ? "1 à 3 photos nettes suffisent : plateaux, pâtisseries, couture ou produits artisanaux prêts à livrer."
-                  : "1 à 3 photos nettes suffisent : réparations, avant/après ou exemples montrant la qualité du service."}
-            </p>
-          </label>
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.verificationDocument}</span>
-            <input name="verificationDocument" type="file" className="input-base py-3" />
-          </label>
-        </div>
-      </section>
-
-      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
-        <div className="flex flex-col gap-1">
-          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.accountAccessTitle}</h3>
-          <p className="text-sm leading-7 text-[var(--muted)]">{copy.accountAccessHint}</p>
-        </div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.password} <span className="text-[var(--navy)]">• {copy.required}</span>
-            </span>
-            <input
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setResult(null);
-              }}
-              className="input-base"
-            />
-          </label>
-          <label>
-            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-              {copy.passwordConfirmation} <span className="text-[var(--navy)]">• {copy.required}</span>
-            </span>
-            <input
-              name="passwordConfirmation"
-              type="password"
-              required
-              minLength={8}
-              value={passwordConfirmation}
-              onChange={(event) => {
-                setPasswordConfirmation(event.target.value);
-                setResult(null);
-              }}
-              className="input-base"
-            />
-          </label>
-        </div>
-      </section>
-
-      {result ? (
-        <div aria-live="polite" className={`rounded-2xl border px-4 py-3 text-sm ${result.ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-rose-200 bg-rose-50 text-rose-700"}`}>
-          <div className="font-semibold">{result.ok ? labels.successTitle : locale === "ar" ? "تعذر الإرسال" : "Envoi impossible"}</div>
-          <div className="mt-1">{result.message}</div>
-          {result.ok ? (
-            <div className="mt-3 flex flex-col gap-2">
-              <Link href={result.loginUrl ?? `/${locale}/provider/login`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
-                {locale === "ar" ? "تسجيل الدخول إلى لوحة مزود الخدمة" : "Se connecter à l’espace prestataire"}
-              </Link>
-              <Link href={result.dashboardUrl ?? `/${locale}/dashboard`} className="inline-flex text-sm font-semibold text-emerald-800 underline underline-offset-4">
-                {locale === "ar" ? "فتح اللوحة لاحقاً بعد الموافقة" : "Ouvrir le tableau de bord après approbation"}
-              </Link>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      <section className="rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white p-5">
-        <div className="flex flex-col gap-1">
-          <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{copy.conductTitle}</h3>
-          <p className="text-sm leading-7 text-[var(--muted)]">{copy.conductHint}</p>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
+        <div className="grid gap-3">
+          <label className="flex items-start gap-3">
             <input
               name="ageConfirmed"
               type="checkbox"
-              required
-              aria-required="true"
-              checked={isAgeConfirmed}
-              onChange={(event) => {
-                setIsAgeConfirmed(event.target.checked);
-                setResult(null);
-              }}
-              className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+              className="mt-1 h-4 w-4 accent-terracotta"
+              onChange={() => clearFieldError("ageConfirmed")}
             />
-            <span className="text-sm font-semibold text-[var(--ink)]">
-              {copy.ageConfirmation} <span className="text-[var(--navy)]">• {copy.required}</span>
-            </span>
+            <span className="text-sm text-[var(--muted)]">{copy.termsAge}</span>
           </label>
-
-          <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
+          {errors.ageConfirmed ? <p className="text-xs text-rose-600">{errors.ageConfirmed}</p> : null}
+          <label className="flex items-start gap-3">
             <input
               name="conductAccepted"
               type="checkbox"
-              required
-              aria-required="true"
-              checked={hasAcceptedConduct}
-              onChange={(event) => {
-                setHasAcceptedConduct(event.target.checked);
-                setResult(null);
-              }}
-              className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+              className="mt-1 h-4 w-4 accent-terracotta"
+              onChange={() => clearFieldError("conductAccepted")}
             />
-            <span className="text-sm font-semibold leading-7 text-[var(--ink)]">
-              {copy.conductAgreement} <span className="text-[var(--navy)]">• {copy.required}</span>
-              <span className="mt-2 block text-sm font-medium text-[var(--muted)]">
-                <a href={`/${locale}/conduct`} target="_blank" rel="noreferrer" className="text-[var(--accent-strong)] underline underline-offset-4">
-                  {copy.conductLink}
-                </a>
-              </span>
-            </span>
+            <span className="text-sm text-[var(--muted)]">{copy.termsConduct}</span>
           </label>
-
-          <label className="flex items-start gap-3 rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] px-4 py-4">
+          {errors.conductAccepted ? <p className="text-xs text-rose-600">{errors.conductAccepted}</p> : null}
+          <label className="flex items-start gap-3">
             <input
               name="policyAccepted"
               type="checkbox"
-              required
-              aria-required="true"
-              checked={hasAcceptedPolicy}
-              onChange={(event) => {
-                setHasAcceptedPolicy(event.target.checked);
-                setResult(null);
-              }}
-              className="mt-1 h-4 w-4 shrink-0 accent-[var(--accent)]"
+              className="mt-1 h-4 w-4 accent-terracotta"
+              onChange={() => clearFieldError("policyAccepted")}
             />
-            <span className="text-sm font-semibold leading-7 text-[var(--ink)]">
-              {copy.policyAgreement} <span className="text-[var(--navy)]">• {copy.required}</span>
-              <span className="mt-2 block text-sm font-medium text-[var(--muted)]">
-                <a href={`/${locale}/conduct`} target="_blank" rel="noreferrer" className="text-[var(--accent-strong)] underline underline-offset-4">
-                  {copy.policyLink}
-                </a>
-              </span>
-            </span>
+            <span className="text-sm text-[var(--muted)]">{copy.termsPolicy}</span>
           </label>
+          {errors.policyAccepted ? <p className="text-xs text-rose-600">{errors.policyAccepted}</p> : null}
+          <p className="text-xs text-[var(--muted)]">{copy.termsHint}</p>
         </div>
       </section>
 
-      {!canSubmit ? (
-        <p className="text-sm font-medium text-[var(--muted)]">
-          {locale === "ar"
-            ? "أكّد العمر ووافق على القواعد وأضف كلمة مرور صالحة لإرسال الطلب."
-            : "Confirmez votre âge, acceptez les règles et ajoutez un mot de passe valide pour envoyer la demande."}
+      {result?.message && !result.ok ? (
+        <p role="alert" className="text-sm font-semibold text-rose-700">
+          {result.message}
         </p>
       ) : null}
 
-      <button type="submit" disabled={pending || !canSubmit} aria-disabled={pending || !canSubmit} className="button-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit">
-        {pending ? (locale === "ar" ? "جارٍ الإرسال..." : "Envoi...") : profileType === "home_business" ? copy.submitBusiness : copy.submitService}
+      <button type="submit" disabled={pending} className="button-primary w-full">
+        {pending ? (locale === "ar" ? "جارٍ التسجيل..." : "Envoi...") : copy.submit}
       </button>
     </form>
   );

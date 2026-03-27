@@ -126,14 +126,6 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
       input.profilePhotoName ? `Profile photo: ${input.profilePhotoName}` : "",
       input.workPhotoNames.length > 0 ? `Work photos: ${input.workPhotoNames.join(", ")}` : "",
       input.verificationDocumentName ? `Verification document: ${input.verificationDocumentName}` : "",
-      input.facebookUrl ? `Facebook: ${input.facebookUrl}` : "",
-      input.instagramUrl ? `Instagram: ${input.instagramUrl}` : "",
-      input.tiktokUrl ? `TikTok: ${input.tiktokUrl}` : "",
-      input.whatsappBusinessUrl ? `WhatsApp Business: ${input.whatsappBusinessUrl}` : "",
-      input.websiteUrl ? `Website: ${input.websiteUrl}` : "",
-      input.availableForBulkOrders
-        ? `Bulk orders: yes${input.minimumOrderQuantity ? ` | MOQ ${input.minimumOrderQuantity}` : ""}${input.productionCapacity ? ` | Capacity ${input.productionCapacity}` : ""}${input.leadTime ? ` | Lead time ${input.leadTime}` : ""}${input.deliveryArea ? ` | Delivery ${input.deliveryArea}` : ""}`
-        : "",
       locale === "ar" ? "طلب جديد بانتظار مراجعة الإدارة." : "Nouvelle candidature en attente de revue admin.",
     ],
   );
@@ -158,7 +150,7 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
     travelFee: input.travelFee ?? 0,
     zones: input.zones,
     coordinates: zone?.coordinates ?? { latitude: 35.6981, longitude: -0.6348 },
-    languages: input.languages.length > 0 ? input.languages : ["العربية"],
+    languages: input.languages && input.languages.length > 0 ? input.languages : ["العربية"],
     phoneNumber: input.phoneNumber || input.whatsappNumber,
     whatsappNumber: input.whatsappNumber || input.phoneNumber,
     googleMapsUrl:
@@ -167,8 +159,8 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
         `${zone?.name.fr ?? input.zones[0]} ${zone?.provinceName.fr ?? "Algeria"}`,
       )}`,
     bio: {
-      ar: input.shortDescription,
-      fr: input.shortDescription,
+      ar: input.shortDescription || input.fullName,
+      fr: input.shortDescription || input.fullName,
     },
     shortTagline: {
       ar: input.workshopName || input.fullName,
@@ -177,45 +169,7 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: buildGallery(input.workPhotoNames),
     galleryCaptions: input.workPhotoNames.slice(0, 3),
-    socialLinks: {
-      facebook: input.facebookUrl || undefined,
-      instagram: input.instagramUrl || undefined,
-      tiktok: input.tiktokUrl || undefined,
-      whatsappBusiness: input.whatsappBusinessUrl || undefined,
-      website: input.websiteUrl || undefined,
-    },
-    bulkOrders: {
-      available: Boolean(input.availableForBulkOrders),
-      minimumOrderQuantity: input.minimumOrderQuantity || undefined,
-      productionCapacity: input.productionCapacity || undefined,
-      leadTime: input.leadTime || undefined,
-      deliveryArea: input.deliveryArea || undefined,
-    },
-    availability: (input.weekdays ?? []).map((weekday) => ({
-      dayKey: weekday,
-      label: {
-        ar:
-          {
-            sat: "السبت",
-            sun: "الأحد",
-            mon: "الاثنين",
-            tue: "الثلاثاء",
-            wed: "الأربعاء",
-            thu: "الخميس",
-          }[weekday] ?? weekday,
-        fr:
-          {
-            sat: "Samedi",
-            sun: "Dimanche",
-            mon: "Lundi",
-            tue: "Mardi",
-            wed: "Mercredi",
-            thu: "Jeudi",
-          }[weekday] ?? weekday,
-      },
-      startTime: input.startTime ?? "08:00",
-      endTime: input.endTime ?? "18:00",
-    })),
+    availability: [],
     verification: {
       status: "pending",
       documentName: input.verificationDocumentName ?? null,

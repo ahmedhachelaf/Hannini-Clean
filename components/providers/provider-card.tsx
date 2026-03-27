@@ -60,6 +60,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
   const categoryLabel = category ? getLocalizedValue(category.name, locale) : provider.categorySlug;
   const portfolioLabel = locale === "ar" ? "معرض الأعمال" : "Portfolio";
   const viewPortfolioLabel = locale === "ar" ? "عرض المعرض" : "Voir le portfolio";
+  const verificationStatus = provider.verification.status;
 
   return (
     <article
@@ -91,13 +92,13 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
 
         {/* Verification badge overlay */}
         <div className="absolute bottom-3 start-3 flex flex-wrap gap-1.5">
-          {provider.isVerified ? (
-            <span className="status-pill status-pill--verified text-[0.78rem]">
-              {locale === "ar" ? "موثّق" : "Vérifié"}
+          {verificationStatus === "verified" ? (
+            <span className="rounded-full border border-olive-light bg-olive-pale px-2.5 py-0.5 text-[0.78rem] font-bold text-olive">
+              {locale === "ar" ? "✓ موثّق" : "✓ Vérifié"}
             </span>
           ) : (
-            <span className="rounded-full border border-white/50 bg-white/80 px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--muted)] backdrop-blur-sm">
-              {locale === "ar" ? "جديد" : "Nouveau"}
+            <span className="rounded-full border border-gold bg-gold-pale px-2.5 py-0.5 text-[0.78rem] font-bold text-gold">
+              {locale === "ar" ? "⏳ قيد التحقق" : "⏳ En vérification"}
             </span>
           )}
           {provider.featured ? (

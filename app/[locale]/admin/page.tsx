@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BusinessRequestActions } from "@/components/admin/business-request-actions";
 import { LogoutButton } from "@/components/admin/logout-button";
@@ -278,10 +279,26 @@ export default async function AdminPage({ params }: AdminPageProps) {
                   <h3 className={`mt-3 text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{supportCase.subject}</h3>
                   <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{supportCase.message}</p>
                   <div className="mt-4 grid gap-2 text-sm text-[var(--muted)] sm:grid-cols-2">
-                    <div>{locale === "ar" ? "المقدّم" : "Auteur"}: {supportCase.actorRole}</div>
-                    <div>{locale === "ar" ? "الهاتف" : "Téléphone"}: {supportCase.phoneNumber ?? "-"}</div>
-                    <div>{locale === "ar" ? "مرجع الحجز" : "Référence réservation"}: {supportCase.bookingId ?? "-"}</div>
-                    <div>{locale === "ar" ? "مرجع المزود" : "Référence prestataire"}: {supportCase.providerSlug ?? "-"}</div>
+                    <div>{locale === "ar" ? "المبلّغ" : "Signalant"}: {supportCase.reporterName ?? "-"}</div>
+                    <div>{locale === "ar" ? "هاتف المبلّغ" : "Téléphone"}: {supportCase.reporterPhone ?? supportCase.phoneNumber ?? "-"}</div>
+                    <div>{locale === "ar" ? "نوع المبلّغ" : "Profil"}: {supportCase.actorRole}</div>
+                    <div>
+                      {locale === "ar" ? "المزوّد المُبلّغ عنه" : "Prestataire signalé"}:{" "}
+                      {supportCase.providerSlug ? (
+                        <Link className="text-terracotta underline-offset-4 hover:underline" href={`/${locale}/providers/${supportCase.providerSlug}`}>
+                          {supportCase.providerSlug}
+                        </Link>
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                    <div>
+                      {locale === "ar" ? "مرجع الحجز" : "Référence réservation"}: {supportCase.bookingId ?? "-"}
+                    </div>
+                    <div>
+                      {locale === "ar" ? "توثيق التفاعل" : "Interaction vérifiée"}:{" "}
+                      {supportCase.interactionVerified ? (locale === "ar" ? "✓ موثّق" : "✓ Vérifiée") : (locale === "ar" ? "غير موثّق" : "Non vérifiée")}
+                    </div>
                     <div>{locale === "ar" ? "طلب حظر التواصل" : "Demande de blocage"}: {supportCase.requestSafetyBlock ? (locale === "ar" ? "نعم" : "Oui") : (locale === "ar" ? "لا" : "Non")}</div>
                     <div>{locale === "ar" ? "معالجة بحساسية أعلى" : "Traitement sensible"}: {supportCase.privacySensitive ? (locale === "ar" ? "نعم" : "Oui") : (locale === "ar" ? "لا" : "Non")}</div>
                   </div>
@@ -346,7 +363,10 @@ export default async function AdminPage({ params }: AdminPageProps) {
                 locale,
               );
               const provinceLabel = getLocalizedValue(
-                dashboard.zones.find((zone) => zone.provinceSlug === businessRequest.wilayaSlug)?.provinceName ?? { ar: businessRequest.wilayaSlug, fr: businessRequest.wilayaSlug },
+                dashboard.zones.find((zone) => zone.provinceSlug === businessRequest.wilayaSlug)?.provinceName ?? {
+                  ar: businessRequest.wilayaSlug ?? "-",
+                  fr: businessRequest.wilayaSlug ?? "-",
+                },
                 locale,
               );
               const suggestedProviders = approvedProviders.filter((provider) => {

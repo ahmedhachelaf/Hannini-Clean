@@ -3,8 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { ProviderLogoutButton } from "@/components/providers/provider-logout-button";
 import { formatDate } from "@/lib/format";
 import { getAuthenticatedProvider } from "@/lib/provider-auth";
-import { isLocale } from "@/lib/i18n";
-import { getBookingsForProvider, getCategories, getReviews, getZones } from "@/lib/repository";
+import { getLocalizedValue, isLocale } from "@/lib/i18n";
+import { getBookingsForProvider, getCategories, getProviderNotifications, getReviews, getZones } from "@/lib/repository";
 
 type ProviderDashboardPageProps = {
   params: Promise<{ locale: string }>;
@@ -129,11 +129,12 @@ export default async function ProviderDashboardPage({ params }: ProviderDashboar
     redirect(`/${locale}/provider/login`);
   }
 
-  const [bookings, categories, zones, reviews] = await Promise.all([
+  const [bookings, categories, zones, reviews, notifications] = await Promise.all([
     getBookingsForProvider(provider.id),
     getCategories(),
     getZones(),
     getReviews(provider.id),
+    getProviderNotifications(provider.id),
   ]);
   const category = categories.find((item) => item.slug === provider.categorySlug);
   const zoneMap = new Map(zones.map((zone) => [zone.slug, zone]));
@@ -141,6 +142,11 @@ export default async function ProviderDashboardPage({ params }: ProviderDashboar
   const recentReviews = reviews.slice(0, 3);
   const statusCopy = getProviderStatusCopy(locale, provider.status);
   const completedBookings = bookings.filter((booking) => booking.status === "completed").length;
+  const unreadNotifications = notifications.filter((note) => !note.isRead);
+  const verificationNotice =
+    unreadNotifications.find((note) => note.type === "verification_approved") ??
+    unreadNotifications.find((note) => note.type === "verification_rejected") ??
+    null;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -157,6 +163,13 @@ export default async function ProviderDashboardPage({ params }: ProviderDashboar
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-3 py-2 text-sm text-[var(--muted)]">
+              <span className="text-base">🔔</span>
+              <span>{locale === "ar" ? "الإشعارات" : "Notifications"}</span>
+              <span className="rounded-full bg-terracotta px-2 py-0.5 text-xs font-semibold text-white">
+                {unreadNotifications.length}
+              </span>
+            </div>
             <Link href={`/${locale}/providers`} className="button-secondary">
               {locale === "ar" ? "استخدم Hannini كزبون" : "Utiliser Hannini comme client"}
             </Link>
@@ -166,6 +179,13 @@ export default async function ProviderDashboardPage({ params }: ProviderDashboar
             </Link>
           </div>
         </div>
+
+        {verificationNotice ? (
+          <div className="mt-4 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
+            <div className="font-semibold">{getLocalizedValue(verificationNotice.title, locale)}</div>
+            <div className="mt-1">{getLocalizedValue(verificationNotice.body, locale)}</div>
+          </div>
+        ) : null}
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-[1.25rem] border border-[var(--line)] bg-white px-4 py-4">

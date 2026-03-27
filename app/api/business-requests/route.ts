@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createDemoBusinessRequest } from "@/lib/business-request-store";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
+import { normalizeAlgerianPhone } from "@/lib/phone";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { businessRequestSchema } from "@/lib/validation";
 import type { BusinessRequestSubmissionResult } from "@/lib/types";
@@ -19,16 +20,17 @@ export async function POST(request: Request) {
 
     const payload = businessRequestSchema.parse({
       companyName: String(formData.get("companyName") ?? ""),
-      contactName: String(formData.get("contactName") ?? ""),
-      phone: String(formData.get("phone") ?? ""),
+      phone: normalizeAlgerianPhone(String(formData.get("phone") ?? "")),
       email: String(formData.get("email") ?? ""),
       categorySlug: String(formData.get("categorySlug") ?? ""),
+      wilayaCode: String(formData.get("wilayaCode") ?? ""),
+      commune: String(formData.get("commune") ?? ""),
+      password: String(formData.get("password") ?? ""),
+      passwordConfirmation: String(formData.get("passwordConfirmation") ?? ""),
+      whatsappNumber: String(formData.get("whatsappNumber") ?? ""),
       description: String(formData.get("description") ?? ""),
-      wilayaSlug: String(formData.get("wilayaSlug") ?? ""),
-      frequency: String(formData.get("frequency") ?? "one_time"),
-      timeline: String(formData.get("timeline") ?? ""),
-      budget: String(formData.get("budget") ?? ""),
-      preferredProviderType: String(formData.get("preferredProviderType") ?? "either"),
+      websiteUrl: String(formData.get("websiteUrl") ?? ""),
+      googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
       attachmentNames,
       consentAccepted: String(formData.get("consentAccepted") ?? "") === "on",
     });
@@ -37,7 +39,6 @@ export async function POST(request: Request) {
       const businessRequest = createDemoBusinessRequest({
         ...payload,
         email: payload.email || undefined,
-        budget: payload.budget || undefined,
         status: "new",
         matchedProviderIds: [],
         adminNotes: "",
@@ -64,16 +65,18 @@ export async function POST(request: Request) {
       .from("business_requests")
       .insert({
         company_name: payload.companyName,
-        contact_name: payload.contactName,
+        contact_name: payload.companyName,
         phone: payload.phone,
         email: payload.email || null,
         category_slug: payload.categorySlug,
-        description: payload.description,
-        wilaya_slug: payload.wilayaSlug,
-        frequency: payload.frequency,
-        timeline: payload.timeline,
-        budget: payload.budget || null,
-        preferred_provider_type: payload.preferredProviderType,
+        description: payload.description || null,
+        wilaya_code: payload.wilayaCode,
+        commune: payload.commune,
+        wilaya_slug: payload.wilayaCode,
+        frequency: "one_time",
+        timeline: null,
+        budget: null,
+        preferred_provider_type: "either",
         attachment_names: payload.attachmentNames,
         status: "new",
         matched_provider_ids: [],
@@ -84,10 +87,10 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !data) {
+      console.error("business-requests:insert_failed", { error });
       const businessRequest = createDemoBusinessRequest({
         ...payload,
         email: payload.email || undefined,
-        budget: payload.budget || undefined,
         status: "new",
         matchedProviderIds: [],
         adminNotes: "",

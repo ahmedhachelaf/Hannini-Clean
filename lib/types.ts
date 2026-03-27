@@ -194,6 +194,16 @@ export type SupportMessage = {
   createdAt: string;
 };
 
+export type ProviderNotification = {
+  id: string;
+  providerId: string;
+  type: string;
+  title: Record<Locale, string>;
+  body: Record<Locale, string>;
+  isRead: boolean;
+  createdAt: string;
+};
+
 export type SupportCase = {
   id: string;
   actorRole: SupportActor;
@@ -203,9 +213,13 @@ export type SupportCase = {
   privacySensitive?: boolean;
   subject: string;
   message: string;
+  reporterName?: string;
+  reporterPhone?: string;
   phoneNumber?: string;
   email?: string;
   bookingId?: string;
+  reportedProviderId?: string;
+  interactionVerified?: boolean;
   providerId?: string;
   providerSlug?: string;
   attachmentNames: string[];
@@ -217,16 +231,18 @@ export type SupportCase = {
 export type BusinessRequest = {
   id: string;
   companyName: string;
-  contactName: string;
+  contactName?: string;
   phone: string;
   email?: string;
   categorySlug: string;
-  description: string;
-  wilayaSlug: string;
-  frequency: BusinessRequestFrequency;
-  timeline: string;
+  description?: string;
+  wilayaCode?: string;
+  commune?: string;
+  wilayaSlug?: string;
+  frequency?: BusinessRequestFrequency;
+  timeline?: string;
   budget?: string;
-  preferredProviderType: BusinessPreferredProviderType;
+  preferredProviderType?: BusinessPreferredProviderType;
   attachmentNames: string[];
   status: BusinessRequestStatus;
   matchedProviderIds: string[];
@@ -244,12 +260,14 @@ export type ProviderSignupInput = {
   phoneNumber: string;
   whatsappNumber: string;
   categorySlug: string;
+  wilayaCode?: string;
+  commune?: string;
   zones: string[];
   hourlyRate?: number;
   travelFee?: number;
   yearsExperience?: number;
-  shortDescription: string;
-  languages: string[];
+  shortDescription?: string;
+  languages?: string[];
   googleMapsUrl?: string;
   weekdays?: string[];
   startTime?: string;

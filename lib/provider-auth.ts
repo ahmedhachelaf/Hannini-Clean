@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { verifyProviderPassword } from "@/lib/provider-password";
 import { cookies } from "next/headers";
 import { getProviderById, getProviders } from "@/lib/repository";
+import { normalizeAlgerianPhone } from "@/lib/phone";
 import type { Provider } from "@/lib/types";
 
 const PROVIDER_COOKIE = "hannini_provider_session";
@@ -100,9 +101,12 @@ export async function isProviderAuthenticated() {
 
 function matchesIdentifier(provider: Provider, normalizedIdentifier: string, normalizedIdentifierLower: string) {
   const accountEmail = provider.email?.trim().toLowerCase();
+  const normalizedPhone = normalizeAlgerianPhone(provider.phoneNumber);
+  const normalizedWhatsapp = normalizeAlgerianPhone(provider.whatsappNumber);
+  const normalizedInput = normalizeAlgerianPhone(normalizedIdentifier);
   return (
-    provider.phoneNumber.trim() === normalizedIdentifier ||
-    provider.whatsappNumber.trim() === normalizedIdentifier ||
+    normalizedPhone === normalizedInput ||
+    normalizedWhatsapp === normalizedInput ||
     accountEmail === normalizedIdentifierLower
   );
 }

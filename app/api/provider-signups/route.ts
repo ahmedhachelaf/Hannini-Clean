@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { categories as seedCategories, zones as seedZones } from "@/data/seed";
+import { getWilayaByCode, getZoneSlugForCommune } from "@/data/algeria-locations";
 import {
   CURRENT_CONDUCT_VERSION,
   CURRENT_POLICY_VERSION,
@@ -9,19 +10,11 @@ import {
 } from "@/lib/provider-lifecycle";
 import { createProviderPasswordSecret } from "@/lib/provider-password";
 import { createDemoProviderApplication } from "@/lib/provider-store";
+import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { providerSignupSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
 import { ZodError } from "zod";
-
-const weekdayLabels: Record<string, { ar: string; fr: string }> = {
-  sat: { ar: "السبت", fr: "Samedi" },
-  sun: { ar: "الأحد", fr: "Dimanche" },
-  mon: { ar: "الاثنين", fr: "Lundi" },
-  tue: { ar: "الثلاثاء", fr: "Mardi" },
-  wed: { ar: "الأربعاء", fr: "Mercredi" },
-  thu: { ar: "الخميس", fr: "Jeudi" },
-};
 
 export async function POST(request: Request) {
   let locale: "ar" | "fr" = "ar";
@@ -36,56 +29,56 @@ export async function POST(request: Request) {
     const payload = providerSignupSchema.parse({
       profileType: String(formData.get("profileType") ?? "service_provider"),
       fullName: String(formData.get("fullName") ?? ""),
+      categorySlug: String(formData.get("categorySlug") ?? ""),
+      wilayaCode: String(formData.get("wilayaCode") ?? ""),
+      commune: String(formData.get("commune") ?? ""),
+      phoneNumber: String(formData.get("phoneNumber") ?? ""),
+      password: String(formData.get("password") ?? ""),
+      passwordConfirmation: String(formData.get("passwordConfirmation") ?? ""),
+      ageConfirmed: String(formData.get("ageConfirmed") ?? "") === "on",
+      conductAccepted: String(formData.get("conductAccepted") ?? "") === "on",
+      policyAccepted: String(formData.get("policyAccepted") ?? "") === "on",
       workshopName: String(formData.get("workshopName") ?? ""),
       email: String(formData.get("email") ?? "").trim().toLowerCase(),
-      phoneNumber: String(formData.get("phoneNumber") ?? ""),
       whatsappNumber: String(formData.get("whatsappNumber") ?? ""),
-      categorySlug: String(formData.get("categorySlug") ?? ""),
-      zones: formData.getAll("zones").map(String),
-      hourlyRate: Number(formData.get("hourlyRate") ?? 0),
-      travelFee: Number(formData.get("travelFee") ?? 0),
-      yearsExperience: Number(formData.get("yearsExperience") ?? 0),
       shortDescription: String(formData.get("shortDescription") ?? ""),
-      languages: formData.getAll("languages").map(String),
+      yearsExperience: Number(formData.get("yearsExperience") ?? 0),
       googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
-      weekdays: formData.getAll("weekdays").map(String),
-      startTime: String(formData.get("startTime") ?? ""),
-      endTime: String(formData.get("endTime") ?? ""),
       profilePhotoName: profilePhoto instanceof File && profilePhoto.size > 0 ? profilePhoto.name : undefined,
       workPhotoNames: workPhotos
         .filter((photo): photo is File => photo instanceof File && photo.size > 0)
         .map((photo) => photo.name),
       verificationDocumentName:
         verificationDocument instanceof File && verificationDocument.size > 0 ? verificationDocument.name : undefined,
-      facebookUrl: String(formData.get("facebookUrl") ?? ""),
-      instagramUrl: String(formData.get("instagramUrl") ?? ""),
-      tiktokUrl: String(formData.get("tiktokUrl") ?? ""),
-      whatsappBusinessUrl: String(formData.get("whatsappBusinessUrl") ?? ""),
-      websiteUrl: String(formData.get("websiteUrl") ?? ""),
-      availableForBulkOrders: String(formData.get("availableForBulkOrders") ?? "") === "on",
-      minimumOrderQuantity: String(formData.get("minimumOrderQuantity") ?? ""),
-      productionCapacity: String(formData.get("productionCapacity") ?? ""),
-      leadTime: String(formData.get("leadTime") ?? ""),
-      deliveryArea: String(formData.get("deliveryArea") ?? ""),
-      password: String(formData.get("password") ?? ""),
-      passwordConfirmation: String(formData.get("passwordConfirmation") ?? ""),
-      ageConfirmed: String(formData.get("ageConfirmed") ?? "") === "on",
-      conductAccepted: String(formData.get("conductAccepted") ?? "") === "on",
-      policyAccepted: String(formData.get("policyAccepted") ?? "") === "on",
     });
 
-    const primaryPhone = payload.phoneNumber || payload.whatsappNumber;
-    const primaryWhatsapp = payload.whatsappNumber || payload.phoneNumber;
+    const normalizedPhone = normalizeAlgerianPhone(payload.phoneNumber);
+    if (!isValidAlgerianPhone(normalizedPhone)) {
+      throw new Error(locale === "ar" ? "يرجى إدخال رقم هاتف جزائري صالح." : "Veuillez saisir un numéro algérien valide.");
+    }
+
+    const primaryPhone = normalizedPhone;
+    const primaryWhatsapp = payload.whatsappNumber || normalizedPhone;
     const generatedSlug = `${slugify(payload.workshopName || payload.fullName)}-${Date.now().toString(36).slice(-5)}`;
-    const primaryZone = seedZones.find((zone) => zone.slug === payload.zones[0]);
+    const zoneSlug = getZoneSlugForCommune(payload.wilayaCode, payload.commune);
+    const primaryZone = seedZones.find((zone) => zone.slug === zoneSlug);
+    const wilaya = getWilayaByCode(payload.wilayaCode);
     const fallbackMapsUrl =
       payload.googleMapsUrl ||
       `https://maps.google.com/?q=${encodeURIComponent(
-        `${primaryZone?.name.fr ?? payload.zones[0]} ${primaryZone?.provinceName.fr ?? "Algeria"}`,
+        `${payload.commune} ${wilaya?.name_fr ?? "Algeria"}`,
       )}`;
 
     if (!hasSupabaseServerEnv()) {
-      const { provider, managementToken } = createDemoProviderApplication(payload, locale);
+      const { provider, managementToken } = createDemoProviderApplication(
+        {
+          ...payload,
+          phoneNumber: normalizedPhone,
+          whatsappNumber: primaryWhatsapp,
+          zones: [zoneSlug],
+        },
+        locale,
+      );
       revalidateMarketplacePaths(provider.slug);
 
       return NextResponse.json({
@@ -151,11 +144,9 @@ export async function POST(request: Request) {
       workshop_name: payload.workshopName || null,
       phone_number: primaryPhone,
       whatsapp_number: primaryWhatsapp,
-      hourly_rate: payload.hourlyRate ?? 0,
-      travel_fee: payload.travelFee ?? 0,
       years_experience: payload.yearsExperience ?? 0,
-      bio_ar: payload.shortDescription,
-      bio_fr: payload.shortDescription,
+      bio_ar: payload.shortDescription || payload.fullName,
+      bio_fr: payload.shortDescription || payload.fullName,
       tagline_ar: payload.workshopName || payload.fullName,
       tagline_fr: payload.workshopName || payload.fullName,
       google_maps_url: fallbackMapsUrl,
@@ -166,6 +157,8 @@ export async function POST(request: Request) {
       approval_status: "pending" as const,
       is_verified: false,
       featured: false,
+      wilaya_code: payload.wilayaCode,
+      commune: payload.commune,
       profile_photo_url: "/placeholders/provider-avatar.svg",
     };
 
@@ -173,16 +166,7 @@ export async function POST(request: Request) {
       .from("providers")
       .insert({
         ...providerInsertBase,
-        facebook_url: payload.facebookUrl || null,
-        instagram_url: payload.instagramUrl || null,
-        tiktok_url: payload.tiktokUrl || null,
-        whatsapp_business_url: payload.whatsappBusinessUrl || null,
-        website_url: payload.websiteUrl || null,
-        available_for_bulk_orders: payload.availableForBulkOrders ?? false,
-        minimum_order_quantity: payload.minimumOrderQuantity || null,
-        production_capacity: payload.productionCapacity || null,
-        lead_time: payload.leadTime || null,
-        delivery_area: payload.deliveryArea || null,
+        email: payload.email || null,
       })
       .select("id")
       .single();
@@ -220,8 +204,8 @@ export async function POST(request: Request) {
       throw new Error(localizeServerWriteError("service", locale));
     }
 
-    if (payload.zones.length > 0) {
-      const normalizedZoneSlugs = Array.from(new Set(payload.zones.map((zone) => zone.trim()).filter(Boolean)));
+    if (zoneSlug) {
+      const normalizedZoneSlugs = [zoneSlug];
       const selectedZones = normalizedZoneSlugs
         .map((zoneSlug) => seedZones.find((zone) => zone.slug === zoneSlug))
         .filter((zone): zone is (typeof seedZones)[number] => Boolean(zone));
@@ -230,7 +214,7 @@ export async function POST(request: Request) {
         console.error("provider-signups:invalid_zone_payload", {
           locale,
           providerId,
-          zones: payload.zones,
+          zones: [zoneSlug],
         });
         await cleanupFailedProviderSignup(supabase, providerId);
         throw new Error(localizeServerWriteError("zone_invalid", locale));
@@ -277,30 +261,6 @@ export async function POST(request: Request) {
       }
     }
 
-    if ((payload.weekdays?.length ?? 0) > 0) {
-      const availabilityInsert = await supabase.from("availability").insert(
-        payload.weekdays!.map((weekday) => ({
-          provider_id: providerId,
-          day_key: weekday,
-          label_ar: weekdayLabels[weekday]?.ar ?? weekday,
-          label_fr: weekdayLabels[weekday]?.fr ?? weekday,
-          start_time: payload.startTime ?? "08:00",
-          end_time: payload.endTime ?? "18:00",
-        })),
-      );
-
-      if (availabilityInsert.error) {
-        console.error("provider-signups:availability_insert_failed", {
-          locale,
-          providerId,
-          weekdays: payload.weekdays,
-          error: availabilityInsert.error,
-        });
-        await cleanupFailedProviderSignup(supabase, providerId);
-        throw new Error(localizeServerWriteError("availability", locale));
-      }
-    }
-
     if (payload.workPhotoNames.length > 0) {
       const photoInsert = await supabase.from("provider_photos").insert(
         payload.workPhotoNames.slice(0, 3).map((photoName, index) => ({
@@ -341,14 +301,6 @@ export async function POST(request: Request) {
       [
         payload.profilePhotoName ? `Profile photo: ${payload.profilePhotoName}` : "",
         payload.workPhotoNames.length > 0 ? `Work photos: ${payload.workPhotoNames.join(", ")}` : "",
-        payload.facebookUrl ? `Facebook: ${payload.facebookUrl}` : "",
-        payload.instagramUrl ? `Instagram: ${payload.instagramUrl}` : "",
-        payload.tiktokUrl ? `TikTok: ${payload.tiktokUrl}` : "",
-        payload.whatsappBusinessUrl ? `WhatsApp Business: ${payload.whatsappBusinessUrl}` : "",
-        payload.websiteUrl ? `Website: ${payload.websiteUrl}` : "",
-        payload.availableForBulkOrders
-          ? `Bulk orders: yes${payload.minimumOrderQuantity ? ` | MOQ ${payload.minimumOrderQuantity}` : ""}${payload.productionCapacity ? ` | Capacity ${payload.productionCapacity}` : ""}${payload.leadTime ? ` | Lead time ${payload.leadTime}` : ""}${payload.deliveryArea ? ` | Delivery ${payload.deliveryArea}` : ""}`
-          : "",
         payload.ageConfirmed ? (locale === "ar" ? "أكد 16+" : "Confirmed 16+") : "",
         payload.conductAccepted ? (locale === "ar" ? "وافق على قواعد السلوك والأمان" : "Accepted code of conduct and safety rules") : "",
         payload.policyAccepted ? (locale === "ar" ? "وافق على الشروط والسياسات ذات الصلة" : "Accepted applicable policies and terms") : "",
@@ -406,12 +358,6 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
       return locale === "ar" ? "يرجى مراجعة المعلومات وإعادة الإرسال." : "Merci de vérifier les informations puis de réessayer.";
     }
 
-    if (issue.message === "phone_or_whatsapp_required") {
-      return locale === "ar"
-        ? "يرجى إدخال رقم هاتف أو رقم واتساب واحد على الأقل."
-        : "Veuillez renseigner au moins un numéro de téléphone ou WhatsApp.";
-    }
-
     if (issue.message === "age_confirmation_required") {
       return locale === "ar"
         ? "يجب تأكيد أن عمرك 16 سنة أو أكثر قبل إرسال الطلب."
@@ -442,16 +388,12 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
         : "Choisissez un mot de passe d’au moins 8 caractères pour protéger votre espace prestataire.";
     }
 
-    if (issue.path[0] === "shortDescription") {
-      return locale === "ar"
-        ? "يرجى إضافة وصف قصير وبسيط عن نشاطك أو خدمتك."
-        : "Veuillez ajouter une courte description simple de votre activité ou service.";
+    if (issue.path[0] === "wilayaCode") {
+      return locale === "ar" ? "يرجى اختيار الولاية." : "Veuillez choisir la wilaya.";
     }
 
-    if (issue.path[0] === "zones") {
-      return locale === "ar"
-        ? "يرجى اختيار ولاية ومدينة أو منطقة واحدة على الأقل."
-        : "Veuillez choisir au moins une wilaya et une ville ou zone.";
+    if (issue.path[0] === "commune") {
+      return locale === "ar" ? "يرجى اختيار البلدية." : "Veuillez choisir la commune.";
     }
 
     if (issue.path[0] === "categorySlug") {

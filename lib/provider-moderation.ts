@@ -77,6 +77,14 @@ export async function updateProviderModeration({
     providerPatch.is_verified = isVerified;
   }
 
+  if (verification?.status) {
+    providerPatch.verification_status = verification.status;
+    if (verification.status === "verified") {
+      providerPatch.verified_at = new Date().toISOString();
+      providerPatch.verified_by_admin_id = "admin";
+    }
+  }
+
   if (Object.keys(providerPatch).length > 0) {
     const providerUpdate = await supabase.from("providers").update(providerPatch).eq("id", providerId);
 
@@ -127,6 +135,32 @@ export async function updateProviderModeration({
 
     if (verificationUpdate.error) {
       return { ok: false as const, message: verificationUpdate.error.message };
+    }
+
+    if (verification.status === "verified") {
+      await supabase.from("notifications").insert({
+        provider_id: providerId,
+        type: "verification_approved",
+        title_ar: "تم التحقق من حسابك! ✓",
+        body_ar: "مبروك! تم التحقق من ملفك على منصة هَنّيني. يمكنك الآن الاستفادة من جميع مزايا المنصة.",
+        title_fr: "Votre compte est vérifié! ✓",
+        body_fr: "Félicitations! Votre profil Hannini a été vérifié.",
+      });
+    }
+
+    if (verification.status === "rejected") {
+      await supabase.from("notifications").insert({
+        provider_id: providerId,
+        type: "verification_rejected",
+        title_ar: "تم رفض طلب التحقق",
+        body_ar: rejectionReason
+          ? `سبب الرفض: ${rejectionReason}`
+          : "نأسف، لم يتم قبول الطلب حالياً. يمكنك تحديث بياناتك ثم إعادة المحاولة.",
+        title_fr: "Demande refusée",
+        body_fr: rejectionReason
+          ? `Motif: ${rejectionReason}`
+          : "Votre demande n’a pas été acceptée pour le moment. Mettez à jour votre profil puis réessayez.",
+      });
     }
   }
 

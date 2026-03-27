@@ -26,9 +26,10 @@ export async function POST(request: Request) {
       privacySensitive: String(formData.get("privacySensitive") ?? "") === "on",
       subject: String(formData.get("subject") ?? ""),
       message: String(formData.get("message") ?? ""),
+      reporterName: String(formData.get("reporterName") ?? ""),
       phoneNumber: String(formData.get("phoneNumber") ?? ""),
       email: String(formData.get("email") ?? ""),
-      bookingId: String(formData.get("bookingId") ?? ""),
+      bookingReference: String(formData.get("bookingReference") ?? ""),
       providerId: String(formData.get("providerId") ?? ""),
       providerSlug: String(formData.get("providerSlug") ?? ""),
       attachmentNames,
@@ -45,9 +46,11 @@ export async function POST(request: Request) {
         privacySensitive: payload.privacySensitive,
         subject: payload.subject,
         message: payload.message,
+        reporterName: payload.reporterName,
+        reporterPhone: payload.phoneNumber,
         phoneNumber: payload.phoneNumber || undefined,
         email: payload.email || undefined,
-        bookingId: payload.bookingId || undefined,
+        bookingId: payload.bookingReference || undefined,
         providerId: payload.providerId || undefined,
         providerSlug: payload.providerSlug || undefined,
         attachmentNames: payload.attachmentNames,
@@ -70,8 +73,30 @@ export async function POST(request: Request) {
     // Validate UUIDs before hitting the database — non-UUID text in a uuid column
     // causes a PostgreSQL type error that surfaces as the generic "Unable to create
     // support case." message.
-    const bookingUuid = parseUuidOrNull(payload.bookingId);
+    const bookingUuid = parseUuidOrNull(payload.bookingReference);
     const providerUuid = parseUuidOrNull(payload.providerId);
+    let interactionVerified = false;
+    let resolvedBookingId = bookingUuid;
+    let resolvedProviderId = providerUuid;
+
+    if (payload.bookingReference) {
+      const bookingLookup =
+        bookingUuid
+          ? await supabase.from("bookings").select("id, provider_id, phone_number").eq("id", bookingUuid).maybeSingle()
+          : await supabase
+              .from("bookings")
+              .select("id, provider_id, phone_number")
+              .eq("phone_number", payload.bookingReference)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+      if (bookingLookup?.data) {
+        interactionVerified = true;
+        resolvedBookingId = bookingLookup.data.id;
+        resolvedProviderId = resolvedProviderId ?? bookingLookup.data.provider_id ?? null;
+      }
+    }
 
     let { data: supportCase, error } = await supabase
       .from("support_cases")
@@ -84,10 +109,14 @@ export async function POST(request: Request) {
         subject: payload.subject,
         message: payload.message,
         phone_number: payload.phoneNumber || null,
+        reporter_name: payload.reporterName,
+        reporter_phone: payload.phoneNumber || null,
         email: payload.email || null,
-        booking_id: bookingUuid,
-        provider_id: providerUuid,
+        booking_id: resolvedBookingId,
+        provider_id: resolvedProviderId,
         provider_slug: payload.providerSlug || null,
+        reported_provider_id: resolvedProviderId,
+        interaction_verified: interactionVerified,
         attachment_names: payload.attachmentNames,
       })
       .select("id")
@@ -105,10 +134,14 @@ export async function POST(request: Request) {
           subject: payload.subject,
           message: legacyTaggedMessage,
           phone_number: payload.phoneNumber || null,
+          reporter_name: payload.reporterName,
+          reporter_phone: payload.phoneNumber || null,
           email: payload.email || null,
-          booking_id: bookingUuid,
-          provider_id: providerUuid,
+          booking_id: resolvedBookingId,
+          provider_id: resolvedProviderId,
           provider_slug: payload.providerSlug || null,
+          reported_provider_id: resolvedProviderId,
+          interaction_verified: interactionVerified,
           attachment_names: payload.attachmentNames,
         })
         .select("id")

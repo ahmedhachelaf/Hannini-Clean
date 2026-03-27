@@ -52,6 +52,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
   const [result, setResult] = useState<SupportSubmissionResult | null>(null);
   const [selectedCategory, setSelectedCategory] = useState(defaultValues?.category ?? "general_support");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+  const [bookingMode, setBookingMode] = useState(defaultValues?.bookingId ? "with_booking" : "without_booking");
 
   const categoryHints = {
     harassment:
@@ -224,26 +225,71 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         />
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.phoneLabel}</span>
-          <input name="phoneNumber" type="tel" className="input-base" />
-        </label>
-        <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.emailLabel}</span>
-          <input name="email" type="email" className="input-base" />
-        </label>
+      <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+        {locale === "ar"
+          ? "نحتاج اسمك ورقم هاتفك للتواصل معك بسرعة عند الحاجة."
+          : "Nous avons besoin de votre nom et téléphone pour vous contacter rapidement si besoin."}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.bookingReferenceLabel}</span>
-          <input name="bookingId" defaultValue={defaultValues?.bookingId ?? ""} className="input-base" />
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "اسمك الكامل" : "Votre nom"} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
+          </span>
+          <input name="reporterName" required className="input-base" />
         </label>
         <label>
-          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.providerReferenceLabel}</span>
-          <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} className="input-base" />
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {labels.phoneLabel} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
+          </span>
+          <input name="phoneNumber" type="tel" required className="input-base" />
         </label>
+      </div>
+
+      <label>
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.emailLabel}</span>
+        <input name="email" type="email" className="input-base" />
+      </label>
+
+      <div className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
+        <div className="text-sm font-semibold text-[var(--ink)]">{locale === "ar" ? "هل لديك رقم حجز؟" : "Avez-vous un numéro de réservation ?"}</div>
+        <div className="mt-3 flex flex-wrap gap-3 text-sm">
+          <button
+            type="button"
+            onClick={() => setBookingMode("with_booking")}
+            className={`rounded-full border px-4 py-2 ${bookingMode === "with_booking" ? "border-terracotta bg-terracotta-pale text-terracotta" : "border-[var(--line)] bg-white text-[var(--muted)]"}`}
+          >
+            {locale === "ar" ? "نعم، لدي رقم الحجز" : "Oui, j'ai un numéro"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setBookingMode("without_booking")}
+            className={`rounded-full border px-4 py-2 ${bookingMode === "without_booking" ? "border-terracotta bg-terracotta-pale text-terracotta" : "border-[var(--line)] bg-white text-[var(--muted)]"}`}
+          >
+            {locale === "ar" ? "لا، أبلّغ بدون حجز" : "Non, pas de réservation"}
+          </button>
+        </div>
+        {bookingMode === "with_booking" ? (
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+                {locale === "ar" ? "رقم الحجز أو رقم الهاتف المستخدم" : "Référence ou téléphone utilisé"}
+              </span>
+              <input name="bookingReference" defaultValue={defaultValues?.bookingId ?? ""} className="input-base" />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.providerReferenceLabel}</span>
+              <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} className="input-base" />
+            </label>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.providerReferenceLabel}</span>
+              <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} className="input-base" />
+            </label>
+          </div>
+        )}
       </div>
 
       <input type="hidden" name="providerId" value={defaultValues?.providerId ?? ""} />

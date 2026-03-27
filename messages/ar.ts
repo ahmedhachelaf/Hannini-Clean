@@ -698,9 +698,9 @@ export const ar = {
     categoryLabel: "نوع المشكلة",
     subjectLabel: "عنوان مختصر",
     messageLabel: "تفاصيل الطلب",
-    phoneLabel: "رقم الهاتف (اختياري)",
+    phoneLabel: "رقم الهاتف",
     emailLabel: "البريد الإلكتروني (اختياري)",
-    bookingReferenceLabel: "مرجع الحجز (اختياري)",
+    bookingReferenceLabel: "مرجع الحجز أو رقم الهاتف المستخدم",
     providerReferenceLabel: "مرجع مزود الخدمة (اختياري)",
     attachmentsLabel: "صور أو مرفقات (اختياري)",
     categories: {

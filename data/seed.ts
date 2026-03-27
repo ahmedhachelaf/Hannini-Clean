@@ -1,5 +1,6 @@
 import type { Booking, BusinessRequest, Category, Provider, Review, SupportCase, Zone } from "@/lib/types";
-import { wilayas } from "@/data/wilayas";
+import { COMMUNES, WILAYAS, getZoneSlugForCommune } from "@/data/algeria-locations";
+import { wilayaCoordinates } from "@/data/wilaya-coordinates";
 
 export const categories: Category[] = [
   {
@@ -144,197 +145,41 @@ export const categories: Category[] = [
   },
 ];
 
-const baseZones: Zone[] = [
-  {
-    slug: "oran-centre",
-    provinceSlug: "oran",
-    provinceName: { ar: "وهران", fr: "Oran" },
-    wilaya: "Oran",
-    name: { ar: "وهران الوسط", fr: "Oran Centre" },
-    coordinates: { latitude: 35.6981, longitude: -0.6348 },
-  },
-  {
-    slug: "bir-el-djir",
-    provinceSlug: "oran",
-    provinceName: { ar: "وهران", fr: "Oran" },
-    wilaya: "Oran",
-    name: { ar: "بئر الجير", fr: "Bir El Djir" },
-    coordinates: { latitude: 35.72, longitude: -0.57 },
-  },
-  {
-    slug: "es-senia",
-    provinceSlug: "oran",
-    provinceName: { ar: "وهران", fr: "Oran" },
-    wilaya: "Oran",
-    name: { ar: "السانيا", fr: "Es Senia" },
-    coordinates: { latitude: 35.6464, longitude: -0.6236 },
-  },
-  {
-    slug: "ain-turk",
-    provinceSlug: "oran",
-    provinceName: { ar: "وهران", fr: "Oran" },
-    wilaya: "Oran",
-    name: { ar: "عين الترك", fr: "Ain Turk" },
-    coordinates: { latitude: 35.7438, longitude: -0.7687 },
-  },
-  {
-    slug: "arzew",
-    provinceSlug: "oran",
-    provinceName: { ar: "وهران", fr: "Oran" },
-    wilaya: "Oran",
-    name: { ar: "أرزيو", fr: "Arzew" },
-    coordinates: { latitude: 35.8464, longitude: -0.3118 },
-  },
-  {
-    slug: "bethioua",
-    provinceSlug: "oran",
-    provinceName: { ar: "وهران", fr: "Oran" },
-    wilaya: "Oran",
-    name: { ar: "بطيوة", fr: "Bethioua" },
-    coordinates: { latitude: 35.8039, longitude: -0.2857 },
-  },
-  {
-    slug: "djelfa-centre",
-    provinceSlug: "djelfa",
-    provinceName: { ar: "الجلفة", fr: "Djelfa" },
-    wilaya: "Djelfa",
-    name: { ar: "الجلفة الوسط", fr: "Djelfa Centre" },
-    coordinates: { latitude: 34.6728, longitude: 3.263 },
-  },
-  {
-    slug: "hassi-bahbah",
-    provinceSlug: "djelfa",
-    provinceName: { ar: "الجلفة", fr: "Djelfa" },
-    wilaya: "Djelfa",
-    name: { ar: "حاسي بحبح", fr: "Hassi Bahbah" },
-    coordinates: { latitude: 35.1857, longitude: 3.0262 },
-  },
-  {
-    slug: "ain-maabed",
-    provinceSlug: "djelfa",
-    provinceName: { ar: "الجلفة", fr: "Djelfa" },
-    wilaya: "Djelfa",
-    name: { ar: "عين معبد", fr: "Ain Maabed" },
-    coordinates: { latitude: 34.8427, longitude: 3.1484 },
-  },
-  {
-    slug: "messaad",
-    provinceSlug: "djelfa",
-    provinceName: { ar: "الجلفة", fr: "Djelfa" },
-    wilaya: "Djelfa",
-    name: { ar: "مسعد", fr: "Messaad" },
-    coordinates: { latitude: 34.1556, longitude: 3.5039 },
-  },
-  {
-    slug: "dar-chioukh",
-    provinceSlug: "djelfa",
-    provinceName: { ar: "الجلفة", fr: "Djelfa" },
-    wilaya: "Djelfa",
-    name: { ar: "دار الشيوخ", fr: "Dar Chioukh" },
-    coordinates: { latitude: 34.8988, longitude: 3.4855 },
-  },
-  {
-    slug: "sidi-bel-abbes-centre",
-    provinceSlug: "sidi-bel-abbes",
-    provinceName: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbès" },
-    wilaya: "Sidi Bel Abbes",
-    name: { ar: "سيدي بلعباس الوسط", fr: "Sidi Bel Abbès Centre" },
-    coordinates: { latitude: 35.1899, longitude: -0.6308 },
-  },
-  {
-    slug: "tessala",
-    provinceSlug: "sidi-bel-abbes",
-    provinceName: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbès" },
-    wilaya: "Sidi Bel Abbes",
-    name: { ar: "تسالة", fr: "Tessala" },
-    coordinates: { latitude: 35.2458, longitude: -0.7685 },
-  },
-  {
-    slug: "ben-badis",
-    provinceSlug: "sidi-bel-abbes",
-    provinceName: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbès" },
-    wilaya: "Sidi Bel Abbes",
-    name: { ar: "بن باديس", fr: "Ben Badis" },
-    coordinates: { latitude: 35.0712, longitude: -0.8388 },
-  },
-  {
-    slug: "sfisef",
-    provinceSlug: "sidi-bel-abbes",
-    provinceName: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbès" },
-    wilaya: "Sidi Bel Abbes",
-    name: { ar: "سفيزف", fr: "Sfisef" },
-    coordinates: { latitude: 35.2322, longitude: -0.2434 },
-  },
-  {
-    slug: "telagh",
-    provinceSlug: "sidi-bel-abbes",
-    provinceName: { ar: "سيدي بلعباس", fr: "Sidi Bel Abbès" },
-    wilaya: "Sidi Bel Abbes",
-    name: { ar: "تلاغ", fr: "Telagh" },
-    coordinates: { latitude: 34.7846, longitude: -0.5731 },
-  },
-  {
-    slug: "algiers-centre",
-    provinceSlug: "algiers",
-    provinceName: { ar: "الجزائر العاصمة", fr: "Alger" },
-    wilaya: "Algiers",
-    name: { ar: "الجزائر الوسط", fr: "Alger Centre" },
-    coordinates: { latitude: 36.7762, longitude: 3.0588 },
-  },
-  {
-    slug: "bab-ezzouar",
-    provinceSlug: "algiers",
-    provinceName: { ar: "الجزائر العاصمة", fr: "Alger" },
-    wilaya: "Algiers",
-    name: { ar: "باب الزوار", fr: "Bab Ezzouar" },
-    coordinates: { latitude: 36.7215, longitude: 3.1836 },
-  },
-  {
-    slug: "hydra",
-    provinceSlug: "algiers",
-    provinceName: { ar: "الجزائر العاصمة", fr: "Alger" },
-    wilaya: "Algiers",
-    name: { ar: "حيدرة", fr: "Hydra" },
-    coordinates: { latitude: 36.7396, longitude: 3.0402 },
-  },
-  {
-    slug: "bir-mourad-rais",
-    provinceSlug: "algiers",
-    provinceName: { ar: "الجزائر العاصمة", fr: "Alger" },
-    wilaya: "Algiers",
-    name: { ar: "بئر مراد رايس", fr: "Bir Mourad Raïs" },
-    coordinates: { latitude: 36.7404, longitude: 3.0409 },
-  },
-  {
-    slug: "cheraga",
-    provinceSlug: "algiers",
-    provinceName: { ar: "الجزائر العاصمة", fr: "Alger" },
-    wilaya: "Algiers",
-    name: { ar: "الشراقة", fr: "Chéraga" },
-    coordinates: { latitude: 36.7695, longitude: 2.9592 },
-  },
-  {
-    slug: "rouiba",
-    provinceSlug: "algiers",
-    provinceName: { ar: "الجزائر العاصمة", fr: "Alger" },
-    wilaya: "Algiers",
-    name: { ar: "رويبة", fr: "Rouiba" },
-    coordinates: { latitude: 36.7383, longitude: 3.2808 },
-  },
-];
+const coordinateByCode = new Map(
+  wilayaCoordinates.map((row) => [
+    String(row.id).padStart(2, "0"),
+    { latitude: row.latitude, longitude: row.longitude },
+  ]),
+);
 
-const generatedZones: Zone[] = wilayas
-  .filter((wilaya) => !baseZones.some((zone) => zone.provinceSlug === wilaya.slug))
-  .map((wilaya) => ({
-    slug: `${wilaya.slug}-centre`,
-    provinceSlug: wilaya.slug,
-    provinceName: { ar: wilaya.name.ar, fr: wilaya.name.fr },
-    wilaya: wilaya.name.fr,
-    name: { ar: `${wilaya.name.ar} الوسط`, fr: `${wilaya.name.fr} Centre` },
-    coordinates: wilaya.coordinates ?? { latitude: 36.7538, longitude: 3.0588 },
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+const defaultCoordinates = { latitude: 36.7538, longitude: 3.0588 };
+
+export const zones: Zone[] = WILAYAS.flatMap((wilaya) => {
+  const communes = COMMUNES[wilaya.code] ?? [wilaya.name_ar];
+  const provinceSlug = slugify(wilaya.name_fr);
+  const coords = coordinateByCode.get(wilaya.code) ?? defaultCoordinates;
+
+  return communes.map((commune, index) => ({
+    slug: getZoneSlugForCommune(wilaya.code, commune, index),
+    provinceSlug,
+    provinceName: { ar: wilaya.name_ar, fr: wilaya.name_fr },
+    wilaya: wilaya.name_fr,
+    name: {
+      ar: `${wilaya.name_ar} > ${commune}`,
+      fr: `${wilaya.name_fr} > ${commune}`,
+    },
+    coordinates: coords,
   }));
-
-export const zones: Zone[] = [...baseZones, ...generatedZones];
+});
 
 const workGallery = [
   "/gallery/work-1.svg",
@@ -360,7 +205,7 @@ export const providers: Provider[] = [
     yearsExperience: 11,
     hourlyRate: 2500,
     travelFee: 1000,
-    zones: ["oran-centre", "bir-el-djir"],
+    zones: [getZoneSlugForCommune("31", "وهران"), getZoneSlugForCommune("31", "بئر الجير")],
     coordinates: { latitude: 35.7035, longitude: -0.6285 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 12 34 56",
@@ -419,7 +264,7 @@ export const providers: Provider[] = [
     yearsExperience: 14,
     hourlyRate: 3200,
     travelFee: 1200,
-    zones: ["bir-el-djir", "oran-centre", "es-senia"],
+    zones: [getZoneSlugForCommune("31", "بئر الجير"), getZoneSlugForCommune("31", "وهران"), getZoneSlugForCommune("31", "السانية")],
     coordinates: { latitude: 35.7132, longitude: -0.5842 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 666 22 11 00",
@@ -478,7 +323,7 @@ export const providers: Provider[] = [
     yearsExperience: 9,
     hourlyRate: 3500,
     travelFee: 1200,
-    zones: ["es-senia", "oran-centre"],
+    zones: [getZoneSlugForCommune("31", "السانية"), getZoneSlugForCommune("31", "وهران")],
     coordinates: { latitude: 35.6554, longitude: -0.6215 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 777 88 90 12",
@@ -537,7 +382,7 @@ export const providers: Provider[] = [
     yearsExperience: 12,
     hourlyRate: 3400,
     travelFee: 1500,
-    zones: ["ain-turk", "arzew"],
+    zones: [getZoneSlugForCommune("31", "عين الترك"), getZoneSlugForCommune("31", "أرزيو")],
     coordinates: { latitude: 35.7801, longitude: -0.5483 },
     languages: ["العربية"],
     phoneNumber: "+213 698 77 66 55",
@@ -596,7 +441,7 @@ export const providers: Provider[] = [
     yearsExperience: 8,
     hourlyRate: 2200,
     travelFee: 1000,
-    zones: ["bir-el-djir", "bethioua"],
+    zones: [getZoneSlugForCommune("31", "بئر الجير"), getZoneSlugForCommune("31", "بطيوة")],
     coordinates: { latitude: 35.702, longitude: -0.593 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 550 98 44 12",
@@ -655,7 +500,7 @@ export const providers: Provider[] = [
     yearsExperience: 10,
     hourlyRate: 2900,
     travelFee: 1200,
-    zones: ["oran-centre"],
+    zones: [getZoneSlugForCommune("31", "وهران")],
     coordinates: { latitude: 35.697, longitude: -0.6359 },
     languages: ["العربية"],
     phoneNumber: "+213 661 17 22 10",
@@ -714,7 +559,7 @@ export const providers: Provider[] = [
     yearsExperience: 7,
     hourlyRate: 2400,
     travelFee: 900,
-    zones: ["oran-centre", "bir-el-djir"],
+    zones: [getZoneSlugForCommune("31", "وهران"), getZoneSlugForCommune("31", "بئر الجير")],
     coordinates: { latitude: 35.7058, longitude: -0.6128 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 66 12 20",
@@ -773,7 +618,7 @@ export const providers: Provider[] = [
     yearsExperience: 10,
     hourlyRate: 3300,
     travelFee: 1100,
-    zones: ["djelfa-centre", "hassi-bahbah"],
+    zones: [getZoneSlugForCommune("17", "الجلفة"), getZoneSlugForCommune("17", "حاسي بحبح")],
     coordinates: { latitude: 34.6735, longitude: 3.2615 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 661 44 80 21",
@@ -832,7 +677,7 @@ export const providers: Provider[] = [
     yearsExperience: 13,
     hourlyRate: 3100,
     travelFee: 1000,
-    zones: ["sidi-bel-abbes-centre", "sfisef"],
+    zones: [getZoneSlugForCommune("22", "سيدي بلعباس"), getZoneSlugForCommune("22", "سفيزف")],
     coordinates: { latitude: 35.1931, longitude: -0.6341 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 90 61 22",
@@ -891,7 +736,7 @@ export const providers: Provider[] = [
     yearsExperience: 9,
     hourlyRate: 7000,
     travelFee: 1200,
-    zones: ["oran-centre", "ain-turk"],
+    zones: [getZoneSlugForCommune("31", "وهران"), getZoneSlugForCommune("31", "عين الترك")],
     coordinates: { latitude: 35.7061, longitude: -0.6392 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 80 11 23",
@@ -947,7 +792,7 @@ export const providers: Provider[] = [
     yearsExperience: 12,
     hourlyRate: 4500,
     travelFee: 600,
-    zones: ["djelfa-centre", "hassi-bahbah"],
+    zones: [getZoneSlugForCommune("17", "الجلفة"), getZoneSlugForCommune("17", "حاسي بحبح")],
     coordinates: { latitude: 34.6812, longitude: 3.2741 },
     languages: ["العربية"],
     phoneNumber: "+213 667 50 44 18",
@@ -1003,7 +848,7 @@ export const providers: Provider[] = [
     yearsExperience: 8,
     hourlyRate: 5500,
     travelFee: 800,
-    zones: ["sidi-bel-abbes-centre", "telagh"],
+    zones: [getZoneSlugForCommune("22", "سيدي بلعباس"), getZoneSlugForCommune("22", "تلاغ")],
     coordinates: { latitude: 35.1908, longitude: -0.6271 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 555 22 71 09",
@@ -1061,7 +906,7 @@ export const providers: Provider[] = [
     yearsExperience: 6,
     hourlyRate: 3200,
     travelFee: 500,
-    zones: ["bir-el-djir", "oran-centre"],
+    zones: [getZoneSlugForCommune("31", "بئر الجير"), getZoneSlugForCommune("31", "وهران")],
     coordinates: { latitude: 35.7178, longitude: -0.5804 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 666 80 12 61",
@@ -1117,7 +962,7 @@ export const providers: Provider[] = [
     yearsExperience: 7,
     hourlyRate: 4200,
     travelFee: 1200,
-    zones: ["algiers-centre", "hydra", "bab-ezzouar"],
+    zones: [getZoneSlugForCommune("16", "الجزائر الوسطى"), getZoneSlugForCommune("16", "حيدرة"), getZoneSlugForCommune("16", "باب الزوار")],
     coordinates: { latitude: 36.7538, longitude: 3.0588 },
     languages: ["العربية", "Français"],
     phoneNumber: "+213 770 41 20 18",
@@ -1167,9 +1012,13 @@ export const supportCases: SupportCase[] = [
     privacySensitive: false,
     subject: "تغيير موعد زيارة السباك",
     message: "أحتاج تغيير موعد الحجز من مساء اليوم إلى صباح الغد لأن العمارة ستكون مغلقة.",
+    reporterName: "أمين بوجمعة",
+    reporterPhone: "+213699001122",
     phoneNumber: "+213699001122",
     bookingId: "booking-1",
     providerId: "provider-karim-benali",
+    reportedProviderId: "provider-karim-benali",
+    interactionVerified: true,
     providerSlug: "karim-benali",
     attachmentNames: ["kitchen-leak.jpg"],
     createdAt: "2026-03-19T09:10:00.000Z",
@@ -1204,8 +1053,12 @@ export const supportCases: SupportCase[] = [
     privacySensitive: false,
     subject: "استفسار حول وثائق التحقق",
     message: "أرسلت الوثيقة لكن أحتاج معرفة إن كانت صورة السجل التجاري واضحة بما يكفي.",
+    reporterName: "رضا نجّار",
+    reporterPhone: "+213661172210",
     phoneNumber: "+213661172210",
     providerId: "provider-reda-bois",
+    reportedProviderId: "provider-reda-bois",
+    interactionVerified: false,
     providerSlug: "reda-bois",
     attachmentNames: ["registre-commerce-reda.jpg"],
     createdAt: "2026-03-18T10:30:00.000Z",
@@ -1240,8 +1093,12 @@ export const supportCases: SupportCase[] = [
     privacySensitive: true,
     subject: "طلب إيقاف تواصل مباشر غير مناسب",
     message: "تم التواصل معي عدة مرات خارج إطار الطلب وبطريقة غير مريحة. أريد أن يبقى التواصل فقط عبر واتساب المرتبط بالطلب وأن تتم مراجعة السلوك.",
+    reporterName: "أم ياسمين للطبخ",
+    reporterPhone: "+213555667788",
     phoneNumber: "+213555667788",
     providerId: "provider-oum-yasmine-cuisine",
+    reportedProviderId: "provider-oum-yasmine-cuisine",
+    interactionVerified: false,
     providerSlug: "oum-yasmine-cuisine",
     attachmentNames: ["conversation-capture-1.jpg"],
     createdAt: "2026-03-21T09:20:00.000Z",
@@ -1353,7 +1210,7 @@ export const bookings: Booking[] = [
     selectedService: "plumber",
     date: "2026-03-08",
     time: "10:30",
-    zoneSlug: "oran-centre",
+    zoneSlug: getZoneSlugForCommune("31", "وهران"),
     address: "حي الصديقية، وهران",
     googleMapsUrl: "https://maps.google.com/?q=Hai%20Es%20Sedikia%20Oran",
     issueDescription: "تسرب تحت حوض المطبخ.",
@@ -1370,7 +1227,7 @@ export const bookings: Booking[] = [
     selectedService: "electrician",
     date: "2026-03-10",
     time: "16:00",
-    zoneSlug: "bir-el-djir",
+    zoneSlug: getZoneSlugForCommune("31", "بئر الجير"),
     address: "USTO, Bir El Djir",
     googleMapsUrl: "https://maps.google.com/?q=USTO%20Bir%20El%20Djir",
     issueDescription: "Disjoncteur qui saute chaque soir.",
@@ -1387,7 +1244,7 @@ export const bookings: Booking[] = [
     selectedService: "ac-repair",
     date: "2026-03-12",
     time: "12:00",
-    zoneSlug: "es-senia",
+    zoneSlug: getZoneSlugForCommune("31", "السانية"),
     address: "قرب مطار السانيا",
     googleMapsUrl: "https://maps.google.com/?q=Es%20Senia%20Airport",
     issueDescription: "المكيّف لا يبرد بشكل كافٍ.",

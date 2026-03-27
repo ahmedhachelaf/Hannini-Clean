@@ -158,7 +158,15 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
           <div className="space-y-5">
             <div className="flex flex-wrap items-center gap-3">
               <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{dictionary.provider.heroLabel}</span>
-              {provider.isVerified ? <span className="status-pill status-pill--verified">{dictionary.common.verified}</span> : null}
+              {provider.verification.status === "verified" ? (
+                <span className="rounded-full border border-olive-light bg-olive-pale px-2.5 py-0.5 text-xs font-bold text-olive">
+                  {locale === "ar" ? "✓ موثّق" : "✓ Vérifié"}
+                </span>
+              ) : (
+                <span className="rounded-full border border-gold bg-gold-pale px-2.5 py-0.5 text-xs font-bold text-gold">
+                  {locale === "ar" ? "⏳ قيد التحقق" : "⏳ En vérification"}
+                </span>
+              )}
             </div>
             <div>
               <h1 className={`text-4xl font-extrabold tracking-[-0.05em] ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h1>

@@ -699,9 +699,9 @@ export const fr = {
     categoryLabel: "Catégorie du problème",
     subjectLabel: "Sujet",
     messageLabel: "Message",
-    phoneLabel: "Téléphone (optionnel)",
+    phoneLabel: "Téléphone",
     emailLabel: "Email (optionnel)",
-    bookingReferenceLabel: "Référence réservation (optionnel)",
+    bookingReferenceLabel: "Référence réservation ou téléphone utilisé",
     providerReferenceLabel: "Référence prestataire (optionnel)",
     attachmentsLabel: "Images ou pièces jointes (optionnel)",
     categories: {
