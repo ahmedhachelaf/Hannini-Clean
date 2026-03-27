@@ -138,7 +138,7 @@ export async function updateProviderModeration({
     }
 
     if (verification.status === "verified") {
-      await supabase.from("notifications").insert({
+      const notificationInsert = await supabase.from("notifications").insert({
         provider_id: providerId,
         type: "verification_approved",
         title_ar: "تم التحقق من حسابك! ✓",
@@ -146,10 +146,18 @@ export async function updateProviderModeration({
         title_fr: "Votre compte est vérifié! ✓",
         body_fr: "Félicitations! Votre profil Hannini a été vérifié.",
       });
+
+      if (notificationInsert.error) {
+        console.error("provider-moderation:verification_notification_failed", {
+          providerId,
+          status: verification.status,
+          error: notificationInsert.error,
+        });
+      }
     }
 
     if (verification.status === "rejected") {
-      await supabase.from("notifications").insert({
+      const notificationInsert = await supabase.from("notifications").insert({
         provider_id: providerId,
         type: "verification_rejected",
         title_ar: "تم رفض طلب التحقق",
@@ -161,6 +169,14 @@ export async function updateProviderModeration({
           ? `Motif: ${rejectionReason}`
           : "Votre demande n’a pas été acceptée pour le moment. Mettez à jour votre profil puis réessayez.",
       });
+
+      if (notificationInsert.error) {
+        console.error("provider-moderation:verification_notification_failed", {
+          providerId,
+          status: verification.status,
+          error: notificationInsert.error,
+        });
+      }
     }
   }
 

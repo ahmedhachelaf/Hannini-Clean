@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { getWilayaByCode } from "@/data/algeria-locations";
 import { createDemoBusinessRequest } from "@/lib/business-request-store";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { normalizeAlgerianPhone } from "@/lib/phone";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { businessRequestSchema } from "@/lib/validation";
+import { slugify } from "@/lib/utils";
 import type { BusinessRequestSubmissionResult } from "@/lib/types";
 import { ZodError } from "zod";
 
@@ -56,6 +58,8 @@ export async function POST(request: Request) {
     }
 
     const supabase = createServerSupabaseClient();
+    const wilaya = getWilayaByCode(payload.wilayaCode);
+    const wilayaSlug = wilaya ? slugify(wilaya.name_fr) : payload.wilayaCode;
 
     if (!supabase) {
       throw new Error("Supabase client is not available.");
@@ -72,7 +76,7 @@ export async function POST(request: Request) {
         description: payload.description || null,
         wilaya_code: payload.wilayaCode,
         commune: payload.commune,
-        wilaya_slug: payload.wilayaCode,
+        wilaya_slug: wilayaSlug,
         frequency: "one_time",
         timeline: null,
         budget: null,
@@ -87,24 +91,19 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !data) {
-      console.error("business-requests:insert_failed", { error });
-      const businessRequest = createDemoBusinessRequest({
-        ...payload,
-        email: payload.email || undefined,
-        status: "new",
-        matchedProviderIds: [],
-        adminNotes: "",
+      console.error("business-requests:insert_failed", {
+        locale,
+        companyName: payload.companyName,
+        categorySlug: payload.categorySlug,
+        wilayaCode: payload.wilayaCode,
+        commune: payload.commune,
+        error,
       });
-
-      return NextResponse.json({
-        ok: true,
-        demoMode: true,
-        requestId: businessRequest.id,
-        message:
-          locale === "ar"
-            ? "تم استلام طلب شركتك وسيظهر الآن في لوحة الإدارة للمراجعة."
-            : "La demande entreprise a été reçue et apparaît maintenant dans l'admin pour revue.",
-      } satisfies BusinessRequestSubmissionResult);
+      throw new Error(
+        locale === "ar"
+          ? "تعذر حفظ طلب النشاط حالياً. يرجى المحاولة مرة أخرى."
+          : "Impossible d'enregistrer la demande d'activité pour le moment. Merci de réessayer.",
+      );
     }
 
     revalidateMarketplacePaths();
@@ -143,9 +142,9 @@ function localizeBusinessRequestError(error: unknown, locale: "ar" | "fr") {
       : "Merci de vérifier les champs obligatoires puis de réessayer.";
   }
 
-  return error instanceof Error
-    ? error.message
-    : locale === "ar"
-      ? "تعذر إرسال الطلب حالياً."
-      : "Impossible d'envoyer la demande pour le moment.";
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return locale === "ar" ? "تعذر إرسال الطلب حالياً." : "Impossible d'envoyer la demande pour le moment.";
 }
