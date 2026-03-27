@@ -274,7 +274,9 @@ export type ProviderSignupInput = {
   endTime?: string;
   profilePhotoName?: string;
   workPhotoNames: string[];
+  certificateFileNames?: string[];
   verificationDocumentName?: string;
+  qualificationNotes?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   tiktokUrl?: string;

@@ -40,12 +40,20 @@ type FormCopy = {
   termsPolicy: string;
   termsHint: string;
   optionalToggle: string;
+  workshopName: string;
   email: string;
   whatsapp: string;
   shortDescription: string;
   yearsExperience: string;
   maps: string;
+  profilePhoto: string;
   workPhotos: string;
+  certificateFiles: string;
+  qualificationNotes: string;
+  facebook: string;
+  instagram: string;
+  tiktok: string;
+  website: string;
   verificationDocument: string;
   submit: string;
   pendingHint: string;
@@ -74,12 +82,20 @@ function getCopy(locale: Locale): FormCopy {
       termsPolicy: "اطّلعت على الشروط والسياسات ذات الصلة وأوافق عليها",
       termsHint: "هذه الموافقات ضرورية للحفاظ على سلامة المجتمع.",
       optionalToggle: "أضف تفاصيل إضافية لتعزيز ملفك (اختياري) ▾",
+      workshopName: "اسم النشاط أو الورشة (اختياري)",
       email: "البريد الإلكتروني (اختياري)",
       whatsapp: "رقم واتساب (اختياري)",
       shortDescription: "نبذة مختصرة (اختياري)",
       yearsExperience: "سنوات الخبرة (اختياري)",
       maps: "رابط خرائط غوغل (اختياري)",
+      profilePhoto: "صورة الملف أو الشعار (اختياري)",
       workPhotos: "صور الأعمال (اختياري)",
+      certificateFiles: "شهادات أو إثباتات مهنية (اختياري)",
+      qualificationNotes: "تفاصيل إضافية عن الخبرة أو المؤهلات (اختياري)",
+      facebook: "رابط أو حساب Facebook (اختياري)",
+      instagram: "رابط أو حساب Instagram (اختياري)",
+      tiktok: "رابط أو حساب TikTok (اختياري)",
+      website: "الموقع الإلكتروني (اختياري)",
       verificationDocument: "وثيقة التحقق (اختياري)",
       submit: "إرسال طلب الانضمام",
       pendingHint: "بعد الإرسال سيظهر الطلب في لوحة الإدارة بحالة قيد المراجعة.",
@@ -107,12 +123,20 @@ function getCopy(locale: Locale): FormCopy {
     termsPolicy: "J’ai lu les conditions et politiques applicables",
     termsHint: "Ces confirmations sont obligatoires pour un environnement sûr.",
     optionalToggle: "Ajouter des détails pour renforcer le profil (optionnel) ▾",
+    workshopName: "Nom d’activité ou atelier (optionnel)",
     email: "E-mail (optionnel)",
     whatsapp: "WhatsApp (optionnel)",
     shortDescription: "Courte description (optionnel)",
     yearsExperience: "Années d’expérience (optionnel)",
     maps: "Lien Google Maps (optionnel)",
+    profilePhoto: "Photo de profil ou logo (optionnel)",
     workPhotos: "Photos de réalisations (optionnel)",
+    certificateFiles: "Certificats ou preuves de qualification (optionnel)",
+    qualificationNotes: "Détails supplémentaires sur l’expérience ou les qualifications (optionnel)",
+    facebook: "Lien ou compte Facebook (optionnel)",
+    instagram: "Lien ou compte Instagram (optionnel)",
+    tiktok: "Lien ou compte TikTok (optionnel)",
+    website: "Site web (optionnel)",
     verificationDocument: "Document de vérification (optionnel)",
     submit: "Envoyer la candidature",
     pendingHint: "Après envoi, votre dossier passe en revue manuelle.",
@@ -445,6 +469,10 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
         {showOptional ? (
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workshopName}</span>
+              <input name="workshopName" className="input-base" placeholder={locale === "ar" ? "مثال: ورشة بن علي" : "Ex: Atelier Ben Ali"} />
+            </label>
+            <label>
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.email}</span>
               <input name="email" type="email" className="input-base" placeholder="example@email.com" />
             </label>
@@ -464,9 +492,37 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.maps}</span>
               <input name="googleMapsUrl" type="url" className="input-base" placeholder="https://maps.google.com/..." />
             </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.website}</span>
+              <input name="websiteUrl" type="text" className="input-base" placeholder="https://..." />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.facebook}</span>
+              <input name="facebookUrl" type="text" className="input-base" placeholder="@page or https://facebook.com/..." />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.instagram}</span>
+              <input name="instagramUrl" type="text" className="input-base" placeholder="@username or https://instagram.com/..." />
+            </label>
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.tiktok}</span>
+              <input name="tiktokUrl" type="text" className="input-base" placeholder="@username or https://tiktok.com/@..." />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.profilePhoto}</span>
+              <input name="profilePhoto" type="file" accept="image/*" className="input-base py-3" />
+            </label>
             <label className="sm:col-span-2">
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workPhotos}</span>
-              <input name="workPhotos" type="file" multiple className="input-base py-3" />
+              <input name="workPhotos" type="file" multiple accept="image/*" className="input-base py-3" />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.certificateFiles}</span>
+              <input name="certificateFiles" type="file" multiple className="input-base py-3" />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.qualificationNotes}</span>
+              <textarea name="qualificationNotes" rows={3} className="input-base min-h-24 resize-y" />
             </label>
             <label className="sm:col-span-2">
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.verificationDocument}</span>

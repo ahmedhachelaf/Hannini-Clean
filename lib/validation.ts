@@ -126,7 +126,13 @@ export const providerSignupSchema = z.object({
   googleMapsUrl: z.string().optional().or(z.literal("")).default(""),
   profilePhotoName: z.string().optional(),
   workPhotoNames: z.array(z.string()).default([]),
+  certificateFileNames: z.array(z.string()).default([]),
   verificationDocumentName: z.string().optional(),
+  qualificationNotes: z.string().optional().or(z.literal("")).default(""),
+  facebookUrl: z.string().optional().or(z.literal("")).default(""),
+  instagramUrl: z.string().optional().or(z.literal("")).default(""),
+  tiktokUrl: z.string().optional().or(z.literal("")).default(""),
+  websiteUrl: z.string().optional().or(z.literal("")).default(""),
 }).superRefine((value, ctx) => {
   if (!value.ageConfirmed) {
     ctx.addIssue({

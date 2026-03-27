@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     const profilePhoto = formData.get("profilePhoto");
     const verificationDocument = formData.get("verificationDocument");
     const workPhotos = formData.getAll("workPhotos");
+    const certificateFiles = formData.getAll("certificateFiles");
 
     const payload = providerSignupSchema.parse({
       profileType: String(formData.get("profileType") ?? "service_provider"),
@@ -44,12 +45,20 @@ export async function POST(request: Request) {
       shortDescription: String(formData.get("shortDescription") ?? ""),
       yearsExperience: Number(formData.get("yearsExperience") ?? 0),
       googleMapsUrl: String(formData.get("googleMapsUrl") ?? ""),
+      websiteUrl: String(formData.get("websiteUrl") ?? ""),
+      facebookUrl: String(formData.get("facebookUrl") ?? ""),
+      instagramUrl: String(formData.get("instagramUrl") ?? ""),
+      tiktokUrl: String(formData.get("tiktokUrl") ?? ""),
       profilePhotoName: profilePhoto instanceof File && profilePhoto.size > 0 ? profilePhoto.name : undefined,
       workPhotoNames: workPhotos
         .filter((photo): photo is File => photo instanceof File && photo.size > 0)
         .map((photo) => photo.name),
+      certificateFileNames: certificateFiles
+        .filter((file): file is File => file instanceof File && file.size > 0)
+        .map((file) => file.name),
       verificationDocumentName:
         verificationDocument instanceof File && verificationDocument.size > 0 ? verificationDocument.name : undefined,
+      qualificationNotes: String(formData.get("qualificationNotes") ?? ""),
     });
 
     const normalizedPhone = normalizeAlgerianPhone(payload.phoneNumber);
@@ -64,10 +73,16 @@ export async function POST(request: Request) {
     const primaryZone = seedZones.find((zone) => zone.slug === zoneSlug);
     const wilaya = getWilayaByCode(payload.wilayaCode);
     const fallbackMapsUrl =
-      payload.googleMapsUrl ||
+      normalizeWebUrl(payload.googleMapsUrl) ||
       `https://maps.google.com/?q=${encodeURIComponent(
         `${payload.commune} ${wilaya?.name_fr ?? "Algeria"}`,
       )}`;
+    const socialLinks = {
+      facebook_url: normalizeSocialUrl(payload.facebookUrl, "facebook"),
+      instagram_url: normalizeSocialUrl(payload.instagramUrl, "instagram"),
+      tiktok_url: normalizeSocialUrl(payload.tiktokUrl, "tiktok"),
+      website_url: normalizeWebUrl(payload.websiteUrl),
+    };
 
     if (!hasSupabaseServerEnv()) {
       const { provider, managementToken } = createDemoProviderApplication(
@@ -167,6 +182,7 @@ export async function POST(request: Request) {
       .insert({
         ...providerInsertBase,
         email: payload.email || null,
+        ...socialLinks,
       })
       .select("id")
       .single();
@@ -182,7 +198,16 @@ export async function POST(request: Request) {
     }
 
     if (providerError || !providerRecord) {
-      throw providerError ?? new Error("Unable to create provider.");
+      console.error("provider-signups:provider_insert_failed", {
+        locale,
+        fullName: payload.fullName,
+        phoneNumber: primaryPhone,
+        categorySlug: payload.categorySlug,
+        wilayaCode: payload.wilayaCode,
+        commune: payload.commune,
+        error: providerError,
+      });
+      throw new Error(localizeServerWriteError("provider", locale));
     }
 
     const providerId = providerRecord.id;
@@ -301,6 +326,12 @@ export async function POST(request: Request) {
       [
         payload.profilePhotoName ? `Profile photo: ${payload.profilePhotoName}` : "",
         payload.workPhotoNames.length > 0 ? `Work photos: ${payload.workPhotoNames.join(", ")}` : "",
+        payload.certificateFileNames.length > 0 ? `Certificates: ${payload.certificateFileNames.join(", ")}` : "",
+        payload.qualificationNotes ? `Qualifications: ${payload.qualificationNotes}` : "",
+        socialLinks.facebook_url ? `Facebook: ${socialLinks.facebook_url}` : "",
+        socialLinks.instagram_url ? `Instagram: ${socialLinks.instagram_url}` : "",
+        socialLinks.tiktok_url ? `TikTok: ${socialLinks.tiktok_url}` : "",
+        socialLinks.website_url ? `Website: ${socialLinks.website_url}` : "",
         payload.ageConfirmed ? (locale === "ar" ? "أكد 16+" : "Confirmed 16+") : "",
         payload.conductAccepted ? (locale === "ar" ? "وافق على قواعد السلوك والأمان" : "Accepted code of conduct and safety rules") : "",
         payload.policyAccepted ? (locale === "ar" ? "وافق على الشروط والسياسات ذات الصلة" : "Accepted applicable policies and terms") : "",
@@ -409,17 +440,22 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
     return error.message;
   }
 
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+
   return locale === "ar" ? "تعذر إرسال الطلب حالياً." : "Impossible d'envoyer la demande pour le moment.";
 }
 
 function localizeServerWriteError(
-  step: "user" | "category" | "service" | "zone" | "zone_invalid" | "zone_seed" | "availability" | "gallery" | "verification",
+  step: "user" | "category" | "provider" | "service" | "zone" | "zone_invalid" | "zone_seed" | "availability" | "gallery" | "verification",
   locale: "ar" | "fr",
 ) {
   if (locale === "ar") {
     return {
       user: "تعذر حفظ بيانات الحساب الأساسية.",
       category: "تعذر حفظ فئة النشاط المختارة.",
+      provider: "تعذر حفظ بيانات الملف الأساسي. يرجى مراجعة البيانات ثم المحاولة مرة أخرى.",
       service: "تعذر ربط النشاط بالفئة المختارة.",
       zone: "تعذر حفظ مناطق الخدمة.",
       zone_invalid: "قيمة الولاية أو المنطقة المختارة غير صالحة. اختر منطقة الخدمة مرة أخرى.",
@@ -433,6 +469,7 @@ function localizeServerWriteError(
   return {
     user: "Impossible d'enregistrer les informations de base du compte.",
     category: "Impossible d'enregistrer la catégorie sélectionnée.",
+    provider: "Impossible d'enregistrer les données principales du profil. Merci de vérifier les informations puis de réessayer.",
     service: "Impossible de relier le profil à la catégorie choisie.",
     zone: "Impossible d'enregistrer les zones de service.",
     zone_invalid: "La wilaya ou la zone choisie n'est pas valide. Merci de la sélectionner de nouveau.",
@@ -441,6 +478,45 @@ function localizeServerWriteError(
     gallery: "Impossible d'enregistrer les photos de réalisations.",
     verification: "Impossible d'enregistrer le document de vérification et les données de revue.",
   }[step];
+}
+
+function normalizeWebUrl(value: string | undefined) {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
+function normalizeSocialUrl(value: string | undefined, platform: "facebook" | "instagram" | "tiktok") {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  const handle = trimmed.replace(/^@/, "");
+  if (!handle) {
+    return null;
+  }
+
+  if (platform === "facebook") {
+    return `https://www.facebook.com/${handle}`;
+  }
+
+  if (platform === "instagram") {
+    return `https://www.instagram.com/${handle}`;
+  }
+
+  return `https://www.tiktok.com/@${handle}`;
 }
 
 async function upsertSelectedZones(

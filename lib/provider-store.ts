@@ -125,7 +125,9 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
     [
       input.profilePhotoName ? `Profile photo: ${input.profilePhotoName}` : "",
       input.workPhotoNames.length > 0 ? `Work photos: ${input.workPhotoNames.join(", ")}` : "",
+      input.certificateFileNames && input.certificateFileNames.length > 0 ? `Certificates: ${input.certificateFileNames.join(", ")}` : "",
       input.verificationDocumentName ? `Verification document: ${input.verificationDocumentName}` : "",
+      input.qualificationNotes ? `Qualifications: ${input.qualificationNotes}` : "",
       locale === "ar" ? "طلب جديد بانتظار مراجعة الإدارة." : "Nouvelle candidature en attente de revue admin.",
     ],
   );
@@ -169,6 +171,13 @@ export function createDemoProviderApplication(input: ProviderSignupInput, locale
     profilePhotoUrl: "/placeholders/provider-avatar.svg",
     gallery: buildGallery(input.workPhotoNames),
     galleryCaptions: input.workPhotoNames.slice(0, 3),
+    socialLinks: {
+      facebook: input.facebookUrl || undefined,
+      instagram: input.instagramUrl || undefined,
+      tiktok: input.tiktokUrl || undefined,
+      whatsappBusiness: input.whatsappBusinessUrl || undefined,
+      website: input.websiteUrl || undefined,
+    },
     availability: [],
     verification: {
       status: "pending",
