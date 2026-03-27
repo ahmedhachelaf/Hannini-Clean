@@ -620,9 +620,7 @@ export function HomePageContent({
         </div>
       </section>
 
-<<<<<<< HEAD
       <JourneySection locale={locale} t={dictionary.journey} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} conductHref={`/${locale}/conduct`} privacyHref={`/${locale}/safety`} termsHref={`/${locale}/conduct`} />
-=======
       <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] sm:p-8">
         <div className="mb-6 rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(238,245,255,0.96))] p-5 shadow-[0_14px_30px_rgba(15,95,255,0.08)] backdrop-blur">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -666,7 +664,6 @@ export function HomePageContent({
           </Link>
         </div>
       </section>
->>>>>>> 3da70f8 (Polish mobile nav and learn-grow contrast)
     </div>
     </>
   );
