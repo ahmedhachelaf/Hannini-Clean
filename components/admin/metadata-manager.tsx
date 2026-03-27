@@ -64,7 +64,7 @@ export function MetadataManager({ locale, labels }: MetadataManagerProps) {
           <input name="slug" required className="input-base" placeholder={locale === "ar" ? "slug" : "slug"} />
           <input name="nameAr" required className="input-base" placeholder={locale === "ar" ? "الاسم بالعربية" : "Nom arabe"} />
           <input name="nameFr" required className="input-base" placeholder={locale === "ar" ? "الاسم بالفرنسية" : "Nom français"} />
-          <input name="icon" className="input-base" placeholder={locale === "ar" ? "أيقونة مثل 🔧" : "Icône ex. 🔧"} />
+          <input name="icon" className="input-base" placeholder={locale === "ar" ? "أيقونة الفئة (اختياري)" : "Icône de la catégorie (optionnel)"} />
           <button type="submit" className="button-primary w-full">
             {labels.addCategory}
           </button>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PhotoGallery } from "@/components/providers/photo-gallery";
 import { formatCurrency, formatDate, formatNumber, formatResponseTime } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
+import { getCategoryIcon } from "@/lib/icon-map";
 import { getGrowthStage, getOpportunityTypes, getProviderJourney, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import { getCategories, getProviderBySlug, getReviews, getZones } from "@/lib/repository";
 import { notFound } from "next/navigation";
@@ -68,6 +69,7 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
   ]);
 
   const category = categories.find((item) => item.slug === provider.categorySlug) ?? null;
+  const CategoryIcon = getCategoryIcon(category?.slug ?? provider.categorySlug);
   const providerZones = provider.zones
     .map((zoneSlug) => zones.find((zone) => zone.slug === zoneSlug))
     .filter((zone): zone is NonNullable<typeof zone> => Boolean(zone));
@@ -160,8 +162,11 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
             </div>
             <div>
               <h1 className={`text-4xl font-extrabold tracking-[-0.05em] ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h1>
-              <p className="mt-2 text-sm font-medium text-[var(--muted)]">
-                {category ? `${category.icon} ${getLocalizedValue(category.name, locale)}` : provider.categorySlug}
+              <p className="mt-2 flex items-center gap-2 text-sm font-medium text-[var(--muted)]">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(15,95,255,0.16)] bg-white shadow-[0_8px_18px_rgba(12,40,104,0.12)]">
+                  <CategoryIcon size={14} strokeWidth={2.2} className="text-[var(--navy)]" />
+                </span>
+                <span>{category ? getLocalizedValue(category.name, locale) : provider.categorySlug}</span>
               </p>
             </div>
             <p className="max-w-3xl text-sm leading-8 text-[var(--muted)]">{getLocalizedValue(provider.bio, locale)}</p>

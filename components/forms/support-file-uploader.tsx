@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, DragEvent, ChangeEvent } from "react";
+import { FileText, UploadCloud } from "lucide-react";
 
 type UploadedFile = {
   file: File;
@@ -100,20 +101,7 @@ export function SupportFileUploader({ files, onFilesChange, labels, maxFiles = 5
             onChange={handleChange}
           />
           <div className="pointer-events-none flex flex-col items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-[var(--muted)]"
-            >
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-            </svg>
+            <UploadCloud size={32} strokeWidth={1.6} className="text-[var(--muted)]" />
             <span className="text-sm font-medium text-[var(--ink)]">{labels.uploadLabel}</span>
             <span className="text-xs text-[var(--muted)]">{labels.uploadFormats}</span>
           </div>
@@ -132,8 +120,8 @@ export function SupportFileUploader({ files, onFilesChange, labels, maxFiles = 5
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={previews[i]!} alt="" className="h-10 w-10 flex-shrink-0 rounded-lg object-cover" />
               ) : (
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--soft)] text-lg">
-                  📄
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-[rgba(15,95,255,0.12)] bg-white text-[var(--navy)] shadow-[0_8px_18px_rgba(12,40,104,0.12)]">
+                  <FileText size={18} strokeWidth={2} />
                 </div>
               )}
               <div className="min-w-0 flex-1">

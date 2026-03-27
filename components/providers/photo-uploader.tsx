@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { deleteProviderPhoto, uploadProviderPhoto } from "@/app/actions/photos";
 import type { Locale } from "@/lib/types";
@@ -185,23 +186,9 @@ export function PhotoUploader({
           onClick={() => inputRef.current?.click()}
           onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && inputRef.current?.click()}
         >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            aria-hidden="true"
-            className="opacity-40"
-          >
-            <rect width="36" height="36" rx="10" fill="currentColor" fillOpacity=".08" />
-            <path
-              d="M18 8v14M11 15l7-7 7 7M8 28h20"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <span className="flex h-12 w-12 items-center justify-center rounded-[0.9rem] border border-[rgba(11,63,184,0.2)] bg-white text-[var(--navy)] shadow-[0_12px_28px_rgba(12,40,104,0.12)]">
+            <UploadCloud size={22} strokeWidth={2} />
+          </span>
           <p className="text-sm text-[var(--muted)]">
             {isDragOver ? copy.dragActive : copy.hint}
           </p>
@@ -282,9 +269,7 @@ export function PhotoUploader({
                   aria-label={`${copy.deleteLabel} photo ${index + 1}`}
                   className="absolute end-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(185,28,28,0.8)] text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                 >
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                  </svg>
+                  <X size={12} strokeWidth={2} />
                 </button>
               ) : null}
             </div>

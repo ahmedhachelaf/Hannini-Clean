@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { Locale } from "@/lib/types";
 
 type PhotoGalleryProps = {
@@ -162,9 +163,7 @@ export function PhotoGallery({ images, captions, providerName, locale }: PhotoGa
             aria-label={closeLabel}
             className="absolute end-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+            <X size={20} strokeWidth={2} />
           </button>
 
           {/* Prev */}
@@ -175,9 +174,7 @@ export function PhotoGallery({ images, captions, providerName, locale }: PhotoGa
               aria-label={prevLabel}
               className="absolute start-3 top-1/2 z-10 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                <path d="M14 5l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ChevronLeft size={22} strokeWidth={2} />
             </button>
           ) : null}
 
@@ -201,9 +198,7 @@ export function PhotoGallery({ images, captions, providerName, locale }: PhotoGa
               aria-label={nextLabel}
               className="absolute end-3 top-1/2 z-10 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                <path d="M8 5l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ChevronRight size={22} strokeWidth={2} />
             </button>
           ) : null}
 

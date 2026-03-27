@@ -2,6 +2,7 @@ import { BookingForm } from "@/components/forms/booking-form";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
+import { getCategoryIcon } from "@/lib/icon-map";
 import { getCategories, getProviderBySlug, getZones } from "@/lib/repository";
 import { notFound } from "next/navigation";
 
@@ -25,6 +26,7 @@ export default async function BookingPage({ params }: BookingPageProps) {
   const dictionary = getDictionary(locale);
   const [categories, zones] = await Promise.all([getCategories(), getZones()]);
   const category = categories.find((item) => item.slug === provider.categorySlug) ?? null;
+  const CategoryIcon = getCategoryIcon(category?.slug ?? provider.categorySlug);
   const primaryPriceLabel = provider.profileType === "home_business" ? dictionary.common.startingPrice : dictionary.common.hourlyRate;
   const secondaryFeeLabel = provider.profileType === "home_business" ? dictionary.common.deliveryFee : dictionary.common.travelFee;
 
@@ -34,7 +36,12 @@ export default async function BookingPage({ params }: BookingPageProps) {
 
       <aside className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.9))] p-6">
         <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">{category ? `${category.icon} ${getLocalizedValue(category.name, locale)}` : provider.categorySlug}</p>
+        <p className="mt-2 flex items-center gap-2 text-sm text-[var(--muted)]">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(15,95,255,0.16)] bg-white shadow-[0_8px_18px_rgba(12,40,104,0.12)]">
+            <CategoryIcon size={14} strokeWidth={2.2} className="text-[var(--navy)]" />
+          </span>
+          <span>{category ? getLocalizedValue(category.name, locale) : provider.categorySlug}</span>
+        </p>
         <div className="mt-6 space-y-3 text-sm text-[var(--muted)]">
           <div>
             <span className="font-semibold text-[var(--ink)]">{primaryPriceLabel}:</span> {formatCurrency(provider.hourlyRate, locale)}

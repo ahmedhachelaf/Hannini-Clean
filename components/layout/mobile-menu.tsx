@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import type { Locale } from "@/lib/types";
 
 type NavItem = {
@@ -58,11 +59,7 @@ export function MobileMenu({
         aria-controls="mobile-nav-drawer"
         className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[rgba(20,92,255,0.2)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(235,243,255,0.95))] text-[var(--navy)] shadow-[0_4px_14px_rgba(11,63,184,0.1)]"
       >
-        <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
-          <rect width="18" height="2" rx="1" fill="currentColor" />
-          <rect y="6" width="18" height="2" rx="1" fill="currentColor" />
-          <rect y="12" width="18" height="2" rx="1" fill="currentColor" />
-        </svg>
+        <Menu size={18} strokeWidth={2.2} />
       </button>
 
       {/* Backdrop */}
@@ -102,9 +99,7 @@ export function MobileMenu({
             aria-label={closeLabel}
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] bg-white text-[var(--muted)] transition-colors hover:bg-[var(--soft)]"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-            </svg>
+            <X size={14} strokeWidth={2} />
           </button>
         </div>
 

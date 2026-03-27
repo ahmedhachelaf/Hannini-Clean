@@ -2,7 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatCurrency, formatNumber, formatResponseTime } from "@/lib/format";
 import { getLocalizedValue } from "@/lib/i18n";
+import { getCategoryIcon } from "@/lib/icon-map";
 import { getGrowthStage, getOpportunityTypes } from "@/lib/provider-growth";
+import { IconBadge } from "@/components/ui/icon-badge";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
 
 type ProviderCardProps = {
@@ -14,10 +16,10 @@ type ProviderCardProps = {
 };
 
 // Minimal SVG placeholder for category when no gallery photos exist
-function CategoryPlaceholder({ icon, label }: { icon: string; label: string }) {
+function CategoryPlaceholder({ icon, label }: { icon: ReturnType<typeof getCategoryIcon>; label: string }) {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-[rgba(20,92,255,0.08)] to-[rgba(13,28,69,0.12)]">
-      <span className="text-4xl opacity-60" aria-hidden="true">{icon}</span>
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-[rgba(20,92,255,0.08)] to-[rgba(13,28,69,0.12)]">
+      <IconBadge icon={icon} size={22} className="h-12 w-12" />
       <span className="text-xs font-semibold text-[var(--muted)] opacity-70">{label}</span>
     </div>
   );
@@ -54,7 +56,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
   const coverPhoto = provider.gallery[0] ?? null;
   const thumbPhotos = provider.gallery.slice(1, 4);
   const hasGallery = provider.gallery.length > 0;
-  const categoryIcon = category?.icon ?? "🔧";
+  const categoryIcon = getCategoryIcon(category?.slug ?? provider.categorySlug);
   const categoryLabel = category ? getLocalizedValue(category.name, locale) : provider.categorySlug;
   const portfolioLabel = locale === "ar" ? "معرض الأعمال" : "Portfolio";
   const viewPortfolioLabel = locale === "ar" ? "عرض المعرض" : "Voir le portfolio";
@@ -146,8 +148,14 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
             <h3 className={`text-lg font-extrabold leading-tight tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>
               {provider.displayName}
             </h3>
-            <p className="mt-0.5 text-sm font-medium text-[var(--muted)]">
-              {category ? `${category.icon} ${getLocalizedValue(category.name, locale)}` : provider.categorySlug}
+            <p className="mt-0.5 flex items-center gap-2 text-sm font-medium text-[var(--muted)]">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(15,95,255,0.16)] bg-white shadow-[0_8px_18px_rgba(12,40,104,0.12)]">
+                {(() => {
+                  const Icon = categoryIcon;
+                  return <Icon size={14} strokeWidth={2.2} className="text-[var(--navy)]" />;
+                })()}
+              </span>
+              <span>{category ? getLocalizedValue(category.name, locale) : provider.categorySlug}</span>
             </p>
             <p className="mt-1 line-clamp-2 text-[0.875rem] leading-6 text-[var(--muted)]">
               {getLocalizedValue(provider.shortTagline, locale)}

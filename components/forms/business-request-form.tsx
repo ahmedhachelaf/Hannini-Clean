@@ -118,7 +118,7 @@ export function BusinessRequestForm({ locale, categories, zones, labels }: Busin
           <select name="categorySlug" required className="input-base" defaultValue={categories[0]?.slug ?? ""}>
             {categories.map((category) => (
               <option key={category.slug} value={category.slug}>
-                {category.icon} {category.name[locale]}
+                {category.name[locale]}
               </option>
             ))}
           </select>

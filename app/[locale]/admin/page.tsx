@@ -10,6 +10,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { APP_BUILD_LABEL } from "@/lib/build-info";
 import { formatDate } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
+import { getCategoryIcon } from "@/lib/icon-map";
 import { getGrowthStage, getOpportunityTypes, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import { getAdminDashboardData } from "@/lib/repository";
 import { notFound } from "next/navigation";
@@ -424,8 +425,12 @@ export default async function AdminPage({ params }: AdminPageProps) {
             <h3 className="font-bold">{dictionary.admin.categories}</h3>
             <div className="mt-4 flex flex-wrap gap-2">
               {dashboard.categories.map((category) => (
-                <span key={category.slug} className="rounded-full border border-[var(--line)] bg-[var(--soft)] px-3 py-2 text-sm">
-                  {category.icon} {getLocalizedValue(category.name, locale)}
+                <span key={category.slug} className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--soft)] px-3 py-2 text-sm">
+                  {(() => {
+                    const Icon = getCategoryIcon(category.slug);
+                    return <Icon size={14} strokeWidth={2.2} className="text-[var(--navy)]" />;
+                  })()}
+                  <span>{getLocalizedValue(category.name, locale)}</span>
                 </span>
               ))}
             </div>

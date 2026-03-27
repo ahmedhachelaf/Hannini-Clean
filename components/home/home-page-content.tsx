@@ -6,6 +6,7 @@ import { RoleBanner } from "@/components/RoleBanner";
 import { HomeSearchForm } from "@/components/home/home-search-form";
 import { ProviderCard } from "@/components/providers/provider-card";
 import { getLocalizedValue } from "@/lib/i18n";
+import { getCategoryIcon } from "@/lib/icon-map";
 import { getGrowthStage, getOpportunityTypes, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
 
@@ -189,7 +190,12 @@ export function HomePageContent({
                     href={`/${locale}/providers?category=${category.slug}`}
                     className="chip-button max-w-full border-white/10 bg-[rgba(8,23,69,0.34)] text-sm text-white shadow-[0_10px_24px_rgba(8,18,37,0.18)]"
                   >
-                    <span>{category.icon}</span>
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-[0_8px_18px_rgba(8,18,37,0.2)]">
+                      {(() => {
+                        const Icon = getCategoryIcon(category.slug);
+                        return <Icon size={14} strokeWidth={2.2} />;
+                      })()}
+                    </span>
                     <span>{getLocalizedValue(category.name, locale)}</span>
                   </Link>
                 ))}
@@ -348,10 +354,19 @@ export function HomePageContent({
                   />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[rgba(5,12,35,0.78)] to-transparent px-3 pb-3 pt-8">
                     <p className="truncate text-xs font-bold text-white">{item.providerName}</p>
-                    <p className="mt-0.5 text-[0.7rem] text-white/70">
-                      {categoryMap.get(item.categorySlug)
-                        ? `${categoryMap.get(item.categorySlug)!.icon} ${getLocalizedValue(categoryMap.get(item.categorySlug)!.name, locale)}`
-                        : item.categorySlug}
+                    <p className="mt-0.5 flex items-center gap-2 text-[0.7rem] text-white/70">
+                      {(() => {
+                        const category = categoryMap.get(item.categorySlug);
+                        const Icon = getCategoryIcon(category?.slug ?? item.categorySlug);
+                        return (
+                          <>
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/20 bg-white/10">
+                              <Icon size={12} strokeWidth={2.2} className="text-white" />
+                            </span>
+                            <span>{category ? getLocalizedValue(category.name, locale) : item.categorySlug}</span>
+                          </>
+                        );
+                      })()}
                     </p>
                   </div>
                 </Link>
