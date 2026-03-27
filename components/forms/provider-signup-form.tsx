@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { getLocalizedValue } from "@/lib/i18n";
 import type { Category, Locale, ProfileType, SignupSubmissionResult, Zone } from "@/lib/types";
 
 type ProviderSignupFormProps = {
