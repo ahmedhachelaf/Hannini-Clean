@@ -33,6 +33,9 @@ type SiteHeaderProps = {
       helper: string;
       button: string;
       compact: string;
+      inAppTitle: string;
+      inAppDescription: string;
+      openInBrowser: string;
       menuLabel: string;
       fallbackTitle: string;
       fallbackDescription: string;
