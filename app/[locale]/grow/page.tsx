@@ -223,7 +223,7 @@ export default async function GrowPage({ params }: GrowPageProps) {
                   {module.signals?.length ? (
                     <div className="mt-4 rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-3">
                       <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--navy)]">
-                        {module.signalsTitle ?? dictionary.grow.signalsTitle}
+                        {dictionary.grow.signalsTitle}
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2 text-sm text-[var(--muted)]">
                         {module.signals.map((item) => (
@@ -237,7 +237,7 @@ export default async function GrowPage({ params }: GrowPageProps) {
                   {module.examples?.length ? (
                     <div className="mt-4 rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(235,244,255,0.9))] px-4 py-3">
                       <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--navy)]">
-                        {module.examplesTitle ?? dictionary.grow.examplesTitle}
+                        {dictionary.grow.examplesTitle}
                       </div>
                       <ul className="mt-2 space-y-2 text-sm leading-7 text-[var(--muted)]">
                         {module.examples.map((item) => (
