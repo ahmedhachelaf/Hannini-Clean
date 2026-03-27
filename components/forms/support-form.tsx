@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { Locale, SupportSubmissionResult } from "@/lib/types";
+import { SupportFileUploader } from "./support-file-uploader";
 
 type SupportFormProps = {
   locale: Locale;
@@ -37,6 +38,12 @@ type SupportFormProps = {
     successTitle: string;
     successDescription: string;
     openThread: string;
+    uploadLabel: string;
+    uploadFormats: string;
+    uploadMaxReached: string;
+    uploadRemove: string;
+    submitError: string;
+    caseRef: string;
   };
 };
 
@@ -44,6 +51,8 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SupportSubmissionResult | null>(null);
   const [selectedCategory, setSelectedCategory] = useState(defaultValues?.category ?? "general_support");
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+
   const categoryHints = {
     harassment:
       locale === "ar"
@@ -71,30 +80,83 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         : "Pour toute aide générale ou un problème qui n'entre pas dans les autres catégories.",
   };
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setPending(true);
     setResult(null);
 
     try {
+      const formData = new FormData(e.currentTarget);
+      // Remove any empty browser file input values and replace with the
+      // state-managed files from the styled uploader.
+      formData.delete("attachments");
+      for (const file of attachedFiles) {
+        formData.append("attachments", file);
+      }
+
       const response = await fetch("/api/support", {
         method: "POST",
         body: formData,
       });
       const data = (await response.json()) as SupportSubmissionResult;
-      setResult(data);
+
+      if (!data.ok) {
+        // Always show a localized error regardless of what the API returned.
+        setResult({
+          ok: false,
+          message: labels.submitError,
+        });
+      } else {
+        setResult(data);
+      }
     } catch {
       setResult({
         ok: false,
-        message: locale === "ar" ? "تعذر فتح طلب الدعم حالياً." : "Impossible de creer la demande de support pour le moment.",
+        message: labels.submitError,
       });
     } finally {
       setPending(false);
     }
   }
 
+  // Full success screen
+  if (result?.ok) {
+    const caseRef = result.caseId ? result.caseId.slice(0, 6).toUpperCase() : null;
+    return (
+      <div
+        className="surface-card flex flex-col items-center gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(231,240,255,0.94))] p-8 text-center"
+        style={{ animation: "fadeSlideUp 0.3s ease both" }}
+      >
+        <style>{`@keyframes fadeSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-3xl">✅</div>
+        <div>
+          <h2 className={`text-2xl font-extrabold text-[var(--ink)] ${locale === "ar" ? "arabic-display" : ""}`}>
+            {labels.successTitle}
+          </h2>
+          <p className="mt-3 max-w-sm text-sm leading-7 text-[var(--muted)]">{labels.successDescription}</p>
+        </div>
+        {caseRef && (
+          <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] px-5 py-3 text-sm">
+            <span className="text-[var(--muted)]">{labels.caseRef} </span>
+            <span className="font-mono font-bold text-[var(--ink)]">#{caseRef}</span>
+          </div>
+        )}
+        {result.caseId && !result.demoMode ? (
+          <Link href={`/${locale}/support/${result.caseId}`} className="button-primary mt-2">
+            {labels.openThread}
+          </Link>
+        ) : (
+          <Link href={`/${locale}`} className="button-primary mt-2">
+            {locale === "ar" ? "العودة إلى الرئيسية" : "Retour à l'accueil"}
+          </Link>
+        )}
+      </div>
+    );
+  }
+
   return (
     <form
-      action={handleSubmit}
+      onSubmit={handleSubmit}
       className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(231,240,255,0.94))] p-6"
     >
       <div>
@@ -186,10 +248,19 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
 
       <input type="hidden" name="providerId" value={defaultValues?.providerId ?? ""} />
 
-      <label>
+      <div>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.attachmentsLabel}</span>
-        <input name="attachments" type="file" accept="image/*" multiple className="input-base py-3" />
-      </label>
+        <SupportFileUploader
+          files={attachedFiles}
+          onFilesChange={setAttachedFiles}
+          labels={{
+            uploadLabel: labels.uploadLabel,
+            uploadFormats: labels.uploadFormats,
+            uploadMaxReached: labels.uploadMaxReached,
+            uploadRemove: labels.uploadRemove,
+          }}
+        />
+      </div>
 
       <div className="grid gap-4 rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[var(--soft)] p-5 md:grid-cols-2">
         <label className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
@@ -216,18 +287,6 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         <div className="font-semibold text-[var(--ink)]">{labels.safetyNoteTitle}</div>
         <div className="mt-2">{labels.safetyNoteBody}</div>
       </div>
-
-      {result?.ok ? (
-        <div role="status" aria-live="polite" className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
-          <div className="font-semibold">{labels.successTitle}</div>
-          <div className="mt-1">{labels.successDescription}</div>
-          {result.caseId ? (
-            <Link href={`/${locale}/support/${result.caseId}`} className="button-primary mt-4 inline-flex">
-              {labels.openThread}
-            </Link>
-          ) : null}
-        </div>
-      ) : null}
 
       {result?.message && !result.ok ? (
         <p role="alert" aria-live="polite" className="text-sm font-medium text-rose-700">
