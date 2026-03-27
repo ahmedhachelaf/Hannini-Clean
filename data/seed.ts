@@ -1,4 +1,5 @@
 import type { Booking, BusinessRequest, Category, Provider, Review, SupportCase, Zone } from "@/lib/types";
+import { wilayas } from "@/data/wilayas";
 
 export const categories: Category[] = [
   {
@@ -143,7 +144,7 @@ export const categories: Category[] = [
   },
 ];
 
-export const zones: Zone[] = [
+const baseZones: Zone[] = [
   {
     slug: "oran-centre",
     provinceSlug: "oran",
@@ -321,6 +322,19 @@ export const zones: Zone[] = [
     coordinates: { latitude: 36.7383, longitude: 3.2808 },
   },
 ];
+
+const generatedZones: Zone[] = wilayas
+  .filter((wilaya) => !baseZones.some((zone) => zone.provinceSlug === wilaya.slug))
+  .map((wilaya) => ({
+    slug: `${wilaya.slug}-centre`,
+    provinceSlug: wilaya.slug,
+    provinceName: { ar: wilaya.name.ar, fr: wilaya.name.fr },
+    wilaya: wilaya.name.fr,
+    name: { ar: `${wilaya.name.ar} الوسط`, fr: `${wilaya.name.fr} Centre` },
+    coordinates: wilaya.coordinates ?? { latitude: 36.7538, longitude: 3.0588 },
+  }));
+
+export const zones: Zone[] = [...baseZones, ...generatedZones];
 
 const workGallery = [
   "/gallery/work-1.svg",
