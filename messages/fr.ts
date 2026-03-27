@@ -22,6 +22,9 @@ export const fr = {
     helper: "Ajouter Hannini à votre téléphone",
     button: "Installer l’application",
     compact: "Installer",
+    inAppTitle: "Installation non disponible ici",
+    inAppDescription: "Pour installer l’application, ouvrez Hannini dans Chrome ou dans le navigateur principal de votre téléphone.",
+    openInBrowser: "Ouvrir dans Chrome",
     menuLabel: "Installer l’application",
     fallbackTitle: "Installation manuelle",
     fallbackDescription:

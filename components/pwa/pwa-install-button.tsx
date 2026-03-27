@@ -15,6 +15,9 @@ type InstallCopy = {
   helper: string;
   button: string;
   compact: string;
+  inAppTitle: string;
+  inAppDescription: string;
+  openInBrowser: string;
   fallbackTitle: string;
   fallbackDescription: string;
   android: string;
@@ -33,6 +36,7 @@ type InstallSnapshot = {
   installed: boolean;
   isIos: boolean;
   isAndroid: boolean;
+  isInAppBrowser: boolean;
 };
 
 let installSnapshot: InstallSnapshot = {
@@ -40,6 +44,7 @@ let installSnapshot: InstallSnapshot = {
   installed: false,
   isIos: false,
   isAndroid: false,
+  isInAppBrowser: false,
 };
 
 let listenersBound = false;
@@ -64,11 +69,14 @@ function detectInstallState() {
   const iosStandalone = Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
   const displayModeStandalone = window.matchMedia("(display-mode: standalone)").matches;
   const ua = window.navigator.userAgent.toLowerCase();
+  const isInAppBrowser =
+    /(fbav|fban|fbios|instagram|messenger|fb_iab|fb4a)/.test(ua);
 
   setInstallSnapshot({
     installed: iosStandalone || displayModeStandalone,
     isIos: /iphone|ipad|ipod/.test(ua),
     isAndroid: /android/.test(ua),
+    isInAppBrowser,
   });
 }
 
@@ -169,6 +177,12 @@ export function PwaInstallButton({ locale, copy, variant = "floating" }: PwaInst
     return null;
   }
 
+  function handleOpenInBrowser() {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   async function handleInstall() {
     if (!snapshot.deferredPrompt) {
       setShowFallback((current) => !current);
@@ -184,44 +198,76 @@ export function PwaInstallButton({ locale, copy, variant = "floating" }: PwaInst
   if (variant === "inline") {
     return (
       <div className="relative">
-        <button
-          type="button"
-          onClick={handleInstall}
-          aria-expanded={showFallback}
-          aria-label={copy.button}
-          className="button-secondary min-h-11 px-4 text-sm font-bold"
-        >
-          {copy.compact}
-        </button>
-        {showFallback ? (
-          <div className="absolute end-0 top-[calc(100%+0.65rem)] z-40 w-[min(22rem,calc(100vw-2rem))] rounded-[1.25rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(235,244,255,0.97))] p-4 text-[var(--ink)] shadow-[0_24px_52px_rgba(13,28,69,0.18)]">
-            <div className="text-sm font-extrabold text-[var(--navy)]">{copy.fallbackTitle}</div>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy.fallbackDescription}</p>
-            <p className="mt-2 text-sm font-semibold leading-6 text-[var(--ink)]">{fallbackText}</p>
+        {snapshot.isInAppBrowser ? (
+          <div className="rounded-[1.1rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(235,244,255,0.97))] px-4 py-3 text-[var(--ink)] shadow-[0_18px_40px_rgba(13,28,69,0.12)]">
+            <div className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--navy)]">{copy.inAppTitle}</div>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy.inAppDescription}</p>
+            <button
+              type="button"
+              onClick={handleOpenInBrowser}
+              className="mt-3 inline-flex min-h-10 items-center justify-center rounded-full border border-[rgba(20,92,255,0.22)] bg-white px-4 text-xs font-bold text-[var(--navy)]"
+            >
+              {copy.openInBrowser}
+            </button>
           </div>
-        ) : null}
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={handleInstall}
+              aria-expanded={showFallback}
+              aria-label={copy.button}
+              className="button-secondary min-h-11 px-4 text-sm font-bold"
+            >
+              {copy.compact}
+            </button>
+            {showFallback ? (
+              <div className="absolute end-0 top-[calc(100%+0.65rem)] z-40 w-[min(22rem,calc(100vw-2rem))] rounded-[1.25rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(235,244,255,0.97))] p-4 text-[var(--ink)] shadow-[0_24px_52px_rgba(13,28,69,0.18)]">
+                <div className="text-sm font-extrabold text-[var(--navy)]">{copy.fallbackTitle}</div>
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy.fallbackDescription}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[var(--ink)]">{fallbackText}</p>
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
     );
   }
 
   return (
     <div className="relative w-fit max-w-[calc(100vw-2rem)]">
-      <button
-        type="button"
-        onClick={handleInstall}
-        aria-expanded={showFallback}
-        aria-label={copy.button}
-        className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(10,31,87,0.96),rgba(18,78,211,0.94)_62%,rgba(63,140,255,0.9))] px-4 text-sm font-extrabold text-white shadow-[0_20px_40px_rgba(8,34,99,0.28)]"
-      >
-        <span className="truncate">{copy.compact}</span>
-      </button>
-      {showFallback ? (
-        <div className="absolute bottom-[calc(100%+0.65rem)] end-0 z-40 w-[min(20rem,calc(100vw-2rem))] rounded-[1.25rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(235,244,255,0.97))] p-4 text-[var(--ink)] shadow-[0_24px_52px_rgba(13,28,69,0.18)]">
-          <div className="text-sm font-extrabold text-[var(--navy)]">{copy.fallbackTitle}</div>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy.fallbackDescription}</p>
-          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--ink)]">{fallbackText}</p>
+      {snapshot.isInAppBrowser ? (
+        <div className="rounded-[1.25rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(235,244,255,0.97))] p-4 text-[var(--ink)] shadow-[0_24px_52px_rgba(13,28,69,0.18)]">
+          <div className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--navy)]">{copy.inAppTitle}</div>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy.inAppDescription}</p>
+          <button
+            type="button"
+            onClick={handleOpenInBrowser}
+            className="mt-3 inline-flex min-h-10 items-center justify-center rounded-full border border-[rgba(20,92,255,0.22)] bg-white px-4 text-xs font-bold text-[var(--navy)]"
+          >
+            {copy.openInBrowser}
+          </button>
         </div>
-      ) : null}
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={handleInstall}
+            aria-expanded={showFallback}
+            aria-label={copy.button}
+            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(10,31,87,0.96),rgba(18,78,211,0.94)_62%,rgba(63,140,255,0.9))] px-4 text-sm font-extrabold text-white shadow-[0_20px_40px_rgba(8,34,99,0.28)]"
+          >
+            <span className="truncate">{copy.compact}</span>
+          </button>
+          {showFallback ? (
+            <div className="absolute bottom-[calc(100%+0.65rem)] end-0 z-40 w-[min(20rem,calc(100vw-2rem))] rounded-[1.25rem] border border-[rgba(20,92,255,0.18)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(235,244,255,0.97))] p-4 text-[var(--ink)] shadow-[0_24px_52px_rgba(13,28,69,0.18)]">
+              <div className="text-sm font-extrabold text-[var(--navy)]">{copy.fallbackTitle}</div>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{copy.fallbackDescription}</p>
+              <p className="mt-2 text-sm font-semibold leading-6 text-[var(--ink)]">{fallbackText}</p>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
