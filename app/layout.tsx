@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Hannini is a clean bilingual marketplace MVP for booking trusted home-service providers in Algeria.",
   applicationName: "Hannini",
   metadataBase: appUrl ? new URL(appUrl) : undefined,
-  manifest: "/manifest.webmanifest",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
