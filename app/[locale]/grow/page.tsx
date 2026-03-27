@@ -197,6 +197,78 @@ export default async function GrowPage({ params }: GrowPageProps) {
             </article>
           </div>
 
+          <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.92))] p-6 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.grow.practicalTitle}</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">{dictionary.grow.practicalDescription}</p>
+              </div>
+              <span className="status-pill border border-[var(--line)] bg-[var(--soft)] text-[var(--ink)]">
+                {dictionary.grow.practicalBadge}
+              </span>
+            </div>
+            <div className="mt-5 grid gap-4 lg:grid-cols-2">
+              {dictionary.grow.modules.map((module) => (
+                <article key={module.title} className="rounded-[1.5rem] border border-[rgba(15,95,255,0.12)] bg-white p-5 shadow-[0_12px_28px_rgba(15,95,255,0.06)]">
+                  <h3 className={`text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{module.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{module.description}</p>
+                  <ul className="mt-4 space-y-3">
+                    {module.bullets.map((bullet) => (
+                      <li key={bullet} className="flex items-start gap-3 text-sm leading-7 text-[var(--muted)]">
+                        <span className="mt-2 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {module.signals?.length ? (
+                    <div className="mt-4 rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-[var(--soft)] px-4 py-3">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--navy)]">
+                        {module.signalsTitle ?? dictionary.grow.signalsTitle}
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2 text-sm text-[var(--muted)]">
+                        {module.signals.map((item) => (
+                          <span key={item} className="rounded-full border border-[rgba(15,95,255,0.16)] bg-white px-3 py-1 text-xs font-semibold text-[var(--navy)]">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {module.examples?.length ? (
+                    <div className="mt-4 rounded-[1.15rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(235,244,255,0.9))] px-4 py-3">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--navy)]">
+                        {module.examplesTitle ?? dictionary.grow.examplesTitle}
+                      </div>
+                      <ul className="mt-2 space-y-2 text-sm leading-7 text-[var(--muted)]">
+                        {module.examples.map((item) => (
+                          <li key={item} className="flex items-start gap-3">
+                            <span className="mt-2 inline-flex h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {module.avoid?.length ? (
+                    <div className="mt-4 rounded-[1.15rem] border border-[rgba(255,96,96,0.18)] bg-[rgba(255,96,96,0.08)] px-4 py-3">
+                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgba(171,38,38,0.9)]">
+                        {dictionary.grow.avoidTitle}
+                      </div>
+                      <ul className="mt-2 space-y-2 text-sm leading-7 text-[rgba(109,27,27,0.9)]">
+                        {module.avoid.map((item) => (
+                          <li key={item} className="flex items-start gap-3">
+                            <span className="mt-2 inline-flex h-2 w-2 shrink-0 rounded-full bg-[rgba(171,38,38,0.9)]" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </div>
+
           <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.9))] p-6 shadow-[0_18px_40px_rgba(15,95,255,0.08)]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
