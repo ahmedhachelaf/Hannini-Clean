@@ -24,6 +24,10 @@ type HomePageContentProps = {
       grow: string;
       safety: string;
     };
+    grow: {
+      laneService: string;
+      laneBusiness: string;
+    };
     home: {
       badge: string;
       title: string;
@@ -616,7 +620,53 @@ export function HomePageContent({
         </div>
       </section>
 
+<<<<<<< HEAD
       <JourneySection locale={locale} t={dictionary.journey} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} conductHref={`/${locale}/conduct`} privacyHref={`/${locale}/safety`} termsHref={`/${locale}/conduct`} />
+=======
+      <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] sm:p-8">
+        <div className="mb-6 rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(238,245,255,0.96))] p-5 shadow-[0_14px_30px_rgba(15,95,255,0.08)] backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--navy)]">{dictionary.nav.grow}</div>
+              <h2 className={`mt-2 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+                {dictionary.home.growTitle}
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-8 text-[var(--ink)]">{dictionary.home.growDescription}</p>
+            </div>
+            <div className="flex flex-col gap-3 lg:max-w-sm">
+              <span className="rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-white px-4 py-3 text-sm font-semibold text-[var(--navy)] shadow-[0_10px_24px_rgba(15,95,255,0.05)]">
+                {dictionary.home.growSoon}
+              </span>
+              <Link href={`/${locale}/grow`} className="button-secondary">
+                {dictionary.home.growCta}
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div>
+            <h2 className={`section-title font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>
+              {dictionary.home.joinTitle}
+            </h2>
+            <p className="mt-4 max-w-2xl text-sm leading-8 text-[var(--ink)]">
+              {dictionary.home.joinDescription}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="rounded-full border border-[rgba(15,95,255,0.14)] bg-white px-4 py-2 text-sm font-semibold text-[var(--navy)] shadow-[0_10px_20px_rgba(15,95,255,0.05)]">
+                {dictionary.grow.laneService}
+              </span>
+              <span className="rounded-full border border-[rgba(15,95,255,0.14)] bg-white px-4 py-2 text-sm font-semibold text-[var(--navy)] shadow-[0_10px_20px_rgba(15,95,255,0.05)]">
+                {dictionary.grow.laneBusiness}
+              </span>
+            </div>
+          </div>
+          <Link href={`/${locale}/join`} className="button-secondary">
+            {dictionary.home.joinCta}
+          </Link>
+        </div>
+      </section>
+>>>>>>> 3da70f8 (Polish mobile nav and learn-grow contrast)
     </div>
     </>
   );

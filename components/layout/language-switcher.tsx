@@ -11,9 +11,10 @@ type LanguageSwitcherProps = {
     current: string;
     alternate: string;
   };
+  compact?: boolean;
 };
 
-export function LanguageSwitcher({ locale, labels }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ locale, labels, compact = false }: LanguageSwitcherProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const alternateLocale = getAlternateLocale(locale);
@@ -34,12 +35,14 @@ export function LanguageSwitcher({ locale, labels }: LanguageSwitcherProps) {
   return (
     <Link
       href={href}
-      className="inline-flex max-w-full min-h-11 items-center self-start rounded-full border border-[var(--line)] bg-white px-4 text-sm font-semibold text-[var(--ink)] transition hover:-translate-y-0.5 sm:self-auto"
+      className={`inline-flex max-w-full items-center self-start rounded-full border border-[var(--line)] bg-white font-semibold text-[var(--ink)] transition hover:-translate-y-0.5 sm:self-auto ${
+        compact ? "min-h-10 px-3 text-xs" : "min-h-11 px-4 text-sm"
+      }`}
       aria-label={locale === "ar" ? "التبديل إلى الفرنسية" : "Basculer vers l'arabe"}
       title={locale === "ar" ? "التبديل إلى الفرنسية" : "Basculer vers l'arabe"}
     >
       <span>{labels.current}</span>
-      <span className="mx-2 h-4 w-px bg-[var(--line)]" />
+      <span className={`mx-2 h-4 w-px bg-[var(--line)] ${compact ? "h-3" : ""}`} />
       <span className="text-[var(--muted)]">{labels.alternate}</span>
     </Link>
   );
