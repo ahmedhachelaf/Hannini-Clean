@@ -134,6 +134,11 @@ export type Provider = {
     status: "pending" | "verified" | "rejected";
     documentName?: string | null;
     notes?: string | null;
+    phoneVerified?: boolean;
+    emailVerified?: boolean;
+    verificationMethod?: "phone" | "email" | null;
+    contactVerifiedAt?: string | null;
+    authUserId?: string | null;
     ageConfirmed?: boolean;
     conductAccepted?: boolean;
     policyAccepted?: boolean;

@@ -190,6 +190,7 @@ export default async function AdminProvidersPage({ params, searchParams }: Admin
               .filter(Boolean)
               .map((zone) => zone?.provinceName);
             const primaryZoneLabel = zoneLabels[0] ? getLocalizedValue(zoneLabels[0]!, locale) : "-";
+            const contactVerified = Boolean(provider.verification.phoneVerified || provider.verification.emailVerified);
 
             return (
               <article key={provider.id} className="grid gap-5 rounded-[1.5rem] border border-[var(--line)] bg-white p-5 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -204,6 +205,11 @@ export default async function AdminProvidersPage({ params, searchParams }: Admin
                       {getLocalizedValue(categoryLabel, locale)}
                     </span>
                     <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">{primaryZoneLabel}</span>
+                    <span className={`status-pill border ${contactVerified ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
+                      {contactVerified
+                        ? locale === "ar" ? "جهة الاتصال مؤكدة" : "Contact vérifié"
+                        : locale === "ar" ? "التحقق من جهة الاتصال مفقود" : "Contact non vérifié"}
+                    </span>
                   </div>
                   <h3 className={`mt-3 text-lg font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h3>
                   <p className="mt-2 text-sm text-[var(--muted)]">
@@ -218,7 +224,12 @@ export default async function AdminProvidersPage({ params, searchParams }: Admin
                   </Link>
                 </div>
 
-                <ProviderVerificationActions locale={locale} providerId={provider.id} status={provider.verification.status} />
+                <ProviderVerificationActions
+                  locale={locale}
+                  providerId={provider.id}
+                  status={provider.verification.status}
+                  contactVerified={contactVerified}
+                />
               </article>
             );
           })

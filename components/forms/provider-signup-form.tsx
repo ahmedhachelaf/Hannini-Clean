@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { OTPInput } from "@/components/OTPInput";
 import { WilayaSelect } from "@/components/WilayaSelect";
 import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 import type { Category, Locale, ProfileType, SignupSubmissionResult, Zone } from "@/lib/types";
@@ -20,9 +21,36 @@ type ProviderSignupFormProps = {
 
 type FormErrors = Partial<Record<string, string>>;
 
+type VerificationMethod = "phone" | "email";
+
+type VerificationCookieState = {
+  method: VerificationMethod;
+  target: string;
+  expiresAt: string;
+  resendAvailableAt?: string;
+  verifiedAt?: string;
+};
+
 type FormCopy = {
   required: string;
   contactTitle: string;
+  verificationTitle: string;
+  verificationDescription: string;
+  verificationPhoneOption: string;
+  verificationEmailOption: string;
+  verificationEmailLabel: string;
+  verificationStart: string;
+  verificationResend: string;
+  verificationWaiting: string;
+  verificationVerified: string;
+  verificationUsePhone: string;
+  verificationUseEmail: string;
+  verificationPhoneUnavailable: string;
+  verificationCodePrompt: string;
+  verificationTimeout: string;
+  verificationAttempts: string;
+  verificationRequired: string;
+  verificationSendFailed: string;
   activityTitle: string;
   identityTitle: string;
   optionalTitle: string;
@@ -65,6 +93,23 @@ function getCopy(locale: Locale): FormCopy {
     return {
       required: "مطلوب",
       contactTitle: "معلومات التواصل",
+      verificationTitle: "خطوة التحقق قبل الإرسال",
+      verificationDescription: "أكمل التحقق من الهاتف أو البريد الإلكتروني أولاً قبل إرسال الطلب.",
+      verificationPhoneOption: "تحقق عبر الهاتف",
+      verificationEmailOption: "تحقق عبر البريد الإلكتروني",
+      verificationEmailLabel: "البريد الإلكتروني للتحقق",
+      verificationStart: "إرسال رمز التحقق",
+      verificationResend: "إعادة إرسال الرمز",
+      verificationWaiting: "تم إرسال الرمز. أدخله هنا لإكمال التحقق.",
+      verificationVerified: "تم التحقق بنجاح. يمكنك الآن إرسال الطلب.",
+      verificationUsePhone: "سنرسل رمزاً إلى رقم الهاتف الذي أدخلته.",
+      verificationUseEmail: "سنرسل رمزاً إلى بريدك الإلكتروني لإتمام التحقق.",
+      verificationPhoneUnavailable: "التحقق عبر الهاتف غير مفعّل حالياً، لذا سنستخدم البريد الإلكتروني كخيار آمن.",
+      verificationCodePrompt: "أدخل الرمز المكوّن من 6 أرقام",
+      verificationTimeout: "تنتهي صلاحية الرمز بعد",
+      verificationAttempts: "عدد المحاولات المتبقية",
+      verificationRequired: "يجب إكمال خطوة التحقق قبل إرسال الطلب.",
+      verificationSendFailed: "تعذر بدء خطوة التحقق حالياً.",
       activityTitle: "نشاطك المهني",
       identityTitle: "الهوية",
       optionalTitle: "تفاصيل إضافية (اختياري)",
@@ -106,6 +151,23 @@ function getCopy(locale: Locale): FormCopy {
   return {
     required: "Obligatoire",
     contactTitle: "Coordonnées",
+    verificationTitle: "Étape de vérification avant l'envoi",
+    verificationDescription: "Vérifiez d'abord votre téléphone ou votre e-mail avant d'envoyer la candidature.",
+    verificationPhoneOption: "Vérifier par téléphone",
+    verificationEmailOption: "Vérifier par e-mail",
+    verificationEmailLabel: "E-mail de vérification",
+    verificationStart: "Envoyer le code",
+    verificationResend: "Renvoyer le code",
+    verificationWaiting: "Le code a été envoyé. Saisissez-le ici pour terminer la vérification.",
+    verificationVerified: "Vérification réussie. Vous pouvez maintenant envoyer votre demande.",
+    verificationUsePhone: "Nous enverrons un code au numéro saisi.",
+    verificationUseEmail: "Nous enverrons un code à votre e-mail pour confirmer le contact.",
+    verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée pour le moment, l'e-mail sera donc utilisé.",
+    verificationCodePrompt: "Entrez le code à 6 chiffres",
+    verificationTimeout: "Le code expire dans",
+    verificationAttempts: "Essais restants",
+    verificationRequired: "La vérification doit être terminée avant l'envoi.",
+    verificationSendFailed: "Impossible de démarrer la vérification pour le moment.",
     activityTitle: "Votre activité",
     identityTitle: "Identité",
     optionalTitle: "Détails complémentaires (optionnel)",
@@ -154,13 +216,79 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
   const [commune, setCommune] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
   const [showOptional, setShowOptional] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("phone");
+  const [phoneOtpEnabled, setPhoneOtpEnabled] = useState(false);
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [verificationChecking, setVerificationChecking] = useState(false);
+  const [verificationFeedback, setVerificationFeedback] = useState<{ type: "error" | "success" | "info"; message: string } | null>(null);
+  const [verificationState, setVerificationState] = useState<{
+    pending: VerificationCookieState | null;
+    verified: VerificationCookieState | null;
+    attemptsRemaining: number | null;
+  }>({
+    pending: null,
+    verified: null,
+    attemptsRemaining: null,
+  });
+  const [otpResetKey, setOtpResetKey] = useState(0);
+  const [clock, setClock] = useState(Date.now());
 
   const laneCategories = useMemo(
     () => categories.filter((category) => category.lane === profileType),
     [categories, profileType],
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadVerificationStatus() {
+      try {
+        const response = await fetch("/api/provider-verification/status", { cache: "no-store" });
+        const data = (await response.json().catch(() => null)) as
+          | {
+              ok?: boolean;
+              phoneOtpEnabled?: boolean;
+              pending?: VerificationCookieState | null;
+              verified?: VerificationCookieState | null;
+            }
+          | null;
+
+        if (!cancelled && data?.ok) {
+          setPhoneOtpEnabled(Boolean(data.phoneOtpEnabled));
+          setVerificationState((current) => ({
+            ...current,
+            pending: data.pending ?? null,
+            verified: data.verified ?? null,
+          }));
+          if (!data.phoneOtpEnabled) {
+            setVerificationMethod("email");
+          }
+        }
+      } catch (error) {
+        console.error("provider-signup:verification_status_failed", error);
+      }
+    }
+
+    void loadVerificationStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    clearFieldError("verification");
+    setResult(null);
+  }, [phoneNumber, email, verificationMethod]);
 
   function setFieldError(field: string, message: string) {
     setErrors((prev) => ({ ...prev, [field]: message }));
@@ -182,6 +310,167 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
     }
   }
 
+  function getVerificationTarget(method: VerificationMethod) {
+    return method === "phone" ? normalizeAlgerianPhone(phoneNumber) : email.trim().toLowerCase();
+  }
+
+  function isEmailCandidateValid(value: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim().toLowerCase());
+  }
+
+  const activeVerificationTarget = getVerificationTarget(verificationMethod);
+  const pendingForCurrentTarget =
+    verificationState.pending &&
+    verificationState.pending.method === verificationMethod &&
+    verificationState.pending.target === activeVerificationTarget &&
+    Date.parse(verificationState.pending.expiresAt) > clock
+      ? verificationState.pending
+      : null;
+  const verifiedForCurrentTarget =
+    verificationState.verified &&
+    verificationState.verified.method === verificationMethod &&
+    verificationState.verified.target === activeVerificationTarget &&
+    Date.parse(verificationState.verified.expiresAt) > clock
+      ? verificationState.verified
+      : null;
+  const resendSecondsRemaining = pendingForCurrentTarget?.resendAvailableAt
+    ? Math.max(0, Math.ceil((Date.parse(pendingForCurrentTarget.resendAvailableAt) - clock) / 1000))
+    : 0;
+  const verificationSecondsRemaining = pendingForCurrentTarget
+    ? Math.max(0, Math.ceil((Date.parse(pendingForCurrentTarget.expiresAt) - clock) / 1000))
+    : 0;
+
+  async function startVerification(resend = false) {
+    const target = getVerificationTarget(verificationMethod);
+
+    if (verificationMethod === "phone" && !isValidAlgerianPhone(target)) {
+      setFieldError("phoneNumber", locale === "ar" ? "أدخل رقم هاتف جزائري صالحاً قبل التحقق." : "Saisissez un numéro algérien valide avant la vérification.");
+      scrollToField("phoneNumber");
+      return;
+    }
+
+    if (verificationMethod === "email" && !isEmailCandidateValid(target)) {
+      setFieldError("email", locale === "ar" ? "أدخل بريداً إلكترونياً صالحاً لإرسال الرمز." : "Saisissez un e-mail valide pour recevoir le code.");
+      scrollToField("verification");
+      return;
+    }
+
+    setVerificationPending(true);
+    setVerificationFeedback(null);
+
+    try {
+      const response = await fetch("/api/provider-verification/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          locale,
+          method: verificationMethod,
+          target,
+          resend,
+        }),
+      });
+
+      const data = (await response.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            message?: string;
+            retryAfterSeconds?: number;
+            pending?: VerificationCookieState | null;
+          }
+        | null;
+
+      if (!response.ok || !data?.ok) {
+        setVerificationFeedback({
+          type: "error",
+          message: data?.message ?? copy.verificationSendFailed,
+        });
+        return;
+      }
+
+      setVerificationState((current) => ({
+        ...current,
+        pending: data.pending ?? null,
+        verified: null,
+        attemptsRemaining: 5,
+      }));
+      clearFieldError("verification");
+      clearFieldError("email");
+      setOtpResetKey((value) => value + 1);
+      setVerificationFeedback({
+        type: "info",
+        message: data.message ?? copy.verificationWaiting,
+      });
+    } catch (error) {
+      console.error("provider-signup:verification_start_failed", error);
+      setVerificationFeedback({ type: "error", message: copy.verificationSendFailed });
+    } finally {
+      setVerificationPending(false);
+    }
+  }
+
+  async function handleOtpComplete(code: string) {
+    if (verificationChecking) return;
+
+    setVerificationChecking(true);
+    setVerificationFeedback(null);
+
+    try {
+      const response = await fetch("/api/provider-verification/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          locale,
+          method: verificationMethod,
+          target: getVerificationTarget(verificationMethod),
+          code,
+        }),
+      });
+
+      const data = (await response.json().catch(() => null)) as
+        | {
+            ok?: boolean;
+            message?: string;
+            verified?: VerificationCookieState | null;
+            attemptsRemaining?: number;
+          }
+        | null;
+
+      if (!response.ok || !data?.ok) {
+        setVerificationState((current) => ({
+          ...current,
+          pending: data?.attemptsRemaining === 0 || response.status === 429 ? null : current.pending,
+          attemptsRemaining: data?.attemptsRemaining ?? current.attemptsRemaining,
+        }));
+        setVerificationFeedback({
+          type: "error",
+          message: data?.message ?? (locale === "ar" ? "الرمز غير صحيح." : "Code incorrect."),
+        });
+        setOtpResetKey((value) => value + 1);
+        return;
+      }
+
+      setVerificationState({
+        pending: null,
+        verified: data.verified ?? null,
+        attemptsRemaining: null,
+      });
+      clearFieldError("verification");
+      setVerificationFeedback({
+        type: "success",
+        message: data.message ?? copy.verificationVerified,
+      });
+    } catch (error) {
+      console.error("provider-signup:verification_verify_failed", error);
+      setVerificationFeedback({
+        type: "error",
+        message: locale === "ar" ? "تعذر التحقق من الرمز حالياً." : "Impossible de vérifier le code pour le moment.",
+      });
+      setOtpResetKey((value) => value + 1);
+    } finally {
+      setVerificationChecking(false);
+    }
+  }
+
   function validate(formData: FormData) {
     const nextErrors: FormErrors = {};
     const fullName = String(formData.get("fullName") ?? "").trim();
@@ -200,6 +489,15 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
     if (!phoneNumber || !isValidAlgerianPhone(phoneNumber)) {
       nextErrors.phoneNumber =
         locale === "ar" ? "يرجى إدخال رقم هاتف جزائري صالح." : "Veuillez saisir un numéro algérien valide.";
+    }
+
+    if (verificationMethod === "email" && !isEmailCandidateValid(email)) {
+      nextErrors.email =
+        locale === "ar" ? "يرجى إدخال بريد إلكتروني صالح لإتمام التحقق." : "Merci de saisir un e-mail valide pour la vérification.";
+    }
+
+    if (!verifiedForCurrentTarget) {
+      nextErrors.verification = copy.verificationRequired;
     }
 
     if (!categorySlug) {
@@ -245,7 +543,8 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
     formData.set("profileType", profileType);
     formData.set("wilayaCode", wilayaCode);
     formData.set("commune", commune);
-    formData.set("phoneNumber", normalizeAlgerianPhone(String(formData.get("phoneNumber") ?? "")));
+    formData.set("phoneNumber", normalizeAlgerianPhone(phoneNumber));
+    formData.set("email", email.trim().toLowerCase());
 
     const nextErrors = validate(formData);
     if (Object.keys(nextErrors).length > 0) {
@@ -349,9 +648,13 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
             <input
               name="phoneNumber"
               type="tel"
+              value={phoneNumber}
               className={`input-base ${errors.phoneNumber ? "border-rose-300" : ""}`}
               placeholder="05XXXXXXXX"
-              onChange={() => clearFieldError("phoneNumber")}
+              onChange={(event) => {
+                setPhoneNumber(event.target.value);
+                clearFieldError("phoneNumber");
+              }}
             />
             {errors.phoneNumber ? <p className="mt-1 text-xs text-rose-600">{errors.phoneNumber}</p> : null}
           </label>
@@ -389,6 +692,138 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
               <p className="mt-1 text-xs text-rose-600">{errors.passwordConfirmation}</p>
             ) : null}
           </label>
+        </div>
+      </section>
+
+      <section className="rounded-[0.75rem] border border-[var(--line)] bg-white p-6" data-field="verification">
+        <div className="mb-4 border-b border-[var(--line)] pb-3 text-base font-bold text-terracotta">
+          {copy.verificationTitle}
+        </div>
+        <p className="text-sm leading-7 text-[var(--muted)]">{copy.verificationDescription}</p>
+        {!phoneOtpEnabled ? (
+          <div className="mt-3 rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            {copy.verificationPhoneUnavailable}
+          </div>
+        ) : null}
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            disabled={!phoneOtpEnabled}
+            onClick={() => {
+              setVerificationMethod("phone");
+              setVerificationFeedback(null);
+            }}
+            className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
+              verificationMethod === "phone"
+                ? "border-terracotta bg-terracotta-pale text-terracotta"
+                : "border-[var(--line)] bg-white text-[var(--muted)]"
+            } disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            {copy.verificationPhoneOption}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setVerificationMethod("email");
+              setVerificationFeedback(null);
+            }}
+            className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
+              verificationMethod === "email"
+                ? "border-terracotta bg-terracotta-pale text-terracotta"
+                : "border-[var(--line)] bg-white text-[var(--muted)]"
+            }`}
+          >
+            {copy.verificationEmailOption}
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {verificationMethod === "email" ? (
+            <label>
+              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+                {copy.verificationEmailLabel} <span className="text-terracotta">• {copy.required}</span>
+              </span>
+              <input
+                name="email"
+                type="email"
+                value={email}
+                className={`input-base ${errors.email ? "border-rose-300" : ""}`}
+                placeholder="example@email.com"
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  clearFieldError("email");
+                }}
+              />
+              {errors.email ? <p className="mt-1 text-xs text-rose-600">{errors.email}</p> : null}
+            </label>
+          ) : (
+            <p className="text-sm text-[var(--muted)]">{copy.verificationUsePhone}</p>
+          )}
+
+          {verificationMethod === "email" ? <p className="text-sm text-[var(--muted)]">{copy.verificationUseEmail}</p> : null}
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              disabled={verificationPending || verificationChecking || Boolean(verifiedForCurrentTarget)}
+              onClick={() => void startVerification(false)}
+              className="button-primary w-full sm:w-auto disabled:opacity-60"
+            >
+              {verificationPending ? "..." : copy.verificationStart}
+            </button>
+            {pendingForCurrentTarget ? (
+              <button
+                type="button"
+                disabled={verificationPending || verificationChecking || resendSecondsRemaining > 0}
+                onClick={() => void startVerification(true)}
+                className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--ink)] disabled:opacity-50"
+              >
+                {copy.verificationResend}
+                {resendSecondsRemaining > 0 ? ` (${resendSecondsRemaining}s)` : ""}
+              </button>
+            ) : null}
+          </div>
+
+          {pendingForCurrentTarget ? (
+            <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] p-4">
+              <p className="text-sm font-semibold text-[var(--ink)]">{copy.verificationWaiting}</p>
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                {copy.verificationTimeout} {verificationSecondsRemaining}s
+              </p>
+              {verificationState.attemptsRemaining !== null ? (
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  {copy.verificationAttempts}: {verificationState.attemptsRemaining}
+                </p>
+              ) : null}
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{copy.verificationCodePrompt}</p>
+              <div className="mt-3">
+                <OTPInput key={otpResetKey} onComplete={(code) => void handleOtpComplete(code)} />
+              </div>
+            </div>
+          ) : null}
+
+          {verifiedForCurrentTarget ? (
+            <div className="rounded-[1rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+              {copy.verificationVerified}
+            </div>
+          ) : null}
+
+          {verificationFeedback ? (
+            <p
+              className={`text-sm font-medium ${
+                verificationFeedback.type === "error"
+                  ? "text-rose-700"
+                  : verificationFeedback.type === "success"
+                    ? "text-emerald-700"
+                    : "text-[var(--muted)]"
+              }`}
+            >
+              {verificationFeedback.message}
+            </p>
+          ) : null}
+
+          {errors.verification ? <p className="text-xs text-rose-600">{errors.verification}</p> : null}
         </div>
       </section>
 
@@ -472,10 +907,25 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.workshopName}</span>
               <input name="workshopName" className="input-base" placeholder={locale === "ar" ? "مثال: ورشة بن علي" : "Ex: Atelier Ben Ali"} />
             </label>
-            <label>
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.email}</span>
-              <input name="email" type="email" className="input-base" placeholder="example@email.com" />
-            </label>
+            {verificationMethod !== "email" ? (
+              <label>
+                <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.email}</span>
+                <input
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="input-base"
+                  placeholder="example@email.com"
+                />
+              </label>
+            ) : (
+              <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-3 text-sm text-[var(--muted)]">
+                {locale === "ar"
+                  ? "سيتم حفظ بريد التحقق نفسه داخل ملفك ويمكن استخدامه لإشعارات المتابعة."
+                  : "L’e-mail utilisé pour la vérification sera aussi conservé dans votre profil pour les notifications."}
+              </div>
+            )}
             <label>
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.whatsapp}</span>
               <input name="whatsappNumber" type="tel" className="input-base" placeholder="05XXXXXXXX" />

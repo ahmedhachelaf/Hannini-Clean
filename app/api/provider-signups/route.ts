@@ -9,6 +9,12 @@ import {
   mergeProviderLifecycleNotes,
 } from "@/lib/provider-lifecycle";
 import { createProviderPasswordSecret } from "@/lib/provider-password";
+import {
+  clearProviderVerificationCookies,
+  getVerificationErrorMessage,
+  getVerifiedProviderContact,
+  normalizeVerificationTarget,
+} from "@/lib/provider-contact-verification";
 import { createDemoProviderApplication } from "@/lib/provider-store";
 import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
@@ -60,14 +66,30 @@ export async function POST(request: Request) {
         verificationDocument instanceof File && verificationDocument.size > 0 ? verificationDocument.name : undefined,
       qualificationNotes: String(formData.get("qualificationNotes") ?? ""),
     });
+    const verifiedContact = await getVerifiedProviderContact();
 
     const normalizedPhone = normalizeAlgerianPhone(payload.phoneNumber);
     if (!isValidAlgerianPhone(normalizedPhone)) {
       throw new Error(locale === "ar" ? "يرجى إدخال رقم هاتف جزائري صالح." : "Veuillez saisir un numéro algérien valide.");
     }
 
+    if (!verifiedContact) {
+      throw new Error(getVerificationErrorMessage("not_verified", locale));
+    }
+
+    const verifiedTargetMatches =
+      (verifiedContact.method === "phone" &&
+        normalizeVerificationTarget("phone", normalizedPhone) === verifiedContact.target) ||
+      (verifiedContact.method === "email" &&
+        normalizeVerificationTarget("email", payload.email || "") === verifiedContact.target);
+
+    if (!verifiedTargetMatches) {
+      throw new Error(getVerificationErrorMessage("not_verified", locale));
+    }
+
     const primaryPhone = normalizedPhone;
     const primaryWhatsapp = payload.whatsappNumber || normalizedPhone;
+    const profileEmail = payload.email || (verifiedContact.method === "email" ? verifiedContact.target : "");
     const generatedSlug = `${slugify(payload.workshopName || payload.fullName)}-${Date.now().toString(36).slice(-5)}`;
     const zoneSlug = getZoneSlugForCommune(payload.wilayaCode, payload.commune);
     const primaryZone = seedZones.find((zone) => zone.slug === zoneSlug);
@@ -88,6 +110,7 @@ export async function POST(request: Request) {
       const { provider, managementToken } = createDemoProviderApplication(
         {
           ...payload,
+          email: profileEmail,
           phoneNumber: normalizedPhone,
           whatsappNumber: primaryWhatsapp,
           zones: [zoneSlug],
@@ -95,6 +118,7 @@ export async function POST(request: Request) {
         locale,
       );
       revalidateMarketplacePaths(provider.slug);
+      await clearProviderVerificationCookies();
 
       return NextResponse.json({
         ok: true,
@@ -120,6 +144,38 @@ export async function POST(request: Request) {
     const acceptedAt = new Date().toISOString();
     const managementToken = createProviderManagementToken();
     const passwordSecret = createProviderPasswordSecret(payload.password);
+
+    if (!String(verifiedContact.authUserId).startsWith("demo-")) {
+      const authUpdate = await supabase.auth.admin.updateUserById(verifiedContact.authUserId, {
+        password: payload.password,
+        ...(verifiedContact.method === "phone"
+          ? { phone: verifiedContact.target }
+          : { email: profileEmail || verifiedContact.target }),
+        user_metadata: {
+          providerProfile: {
+            fullName: payload.fullName,
+            profileType: payload.profileType,
+            phoneNumber: primaryPhone,
+            email: profileEmail || null,
+          },
+        },
+      });
+
+      if (authUpdate.error) {
+        console.error("provider-signups:auth_user_update_failed", {
+          locale,
+          authUserId: verifiedContact.authUserId,
+          method: verifiedContact.method,
+          target: verifiedContact.target,
+          error: authUpdate.error,
+        });
+        throw new Error(
+          locale === "ar"
+            ? "تم التحقق من جهة الاتصال لكن تعذر تجهيز حساب الدخول. حاول مرة أخرى."
+            : "Le contact est vérifié mais le compte de connexion n'a pas pu être préparé. Réessayez.",
+        );
+      }
+    }
 
     const userUpsert = await supabase.from("users").upsert(
       {
@@ -181,7 +237,12 @@ export async function POST(request: Request) {
       .from("providers")
       .insert({
         ...providerInsertBase,
-        email: payload.email || null,
+        email: profileEmail || null,
+        auth_user_id: verifiedContact.authUserId,
+        phone_verified: verifiedContact.method === "phone",
+        email_verified: verifiedContact.method === "email",
+        verification_method: verifiedContact.method,
+        contact_verified_at: verifiedContact.verifiedAt,
         ...socialLinks,
       })
       .select("id")
@@ -311,7 +372,12 @@ export async function POST(request: Request) {
     const verificationNotes = mergeProviderLifecycleNotes(
       "",
       {
-        accountEmail: payload.email,
+        accountEmail: profileEmail,
+        phoneVerified: verifiedContact.method === "phone",
+        emailVerified: verifiedContact.method === "email",
+        verificationMethod: verifiedContact.method,
+        contactVerifiedAt: verifiedContact.verifiedAt,
+        verifiedAuthUserId: verifiedContact.authUserId,
         ageConfirmed: payload.ageConfirmed,
         conductAccepted: payload.conductAccepted,
         policyAccepted: payload.policyAccepted,
@@ -356,6 +422,7 @@ export async function POST(request: Request) {
     }
 
     revalidateMarketplacePaths(generatedSlug);
+    await clearProviderVerificationCookies();
 
     return NextResponse.json({
       ok: true,

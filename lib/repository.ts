@@ -49,6 +49,11 @@ type ProviderRow = {
   verification_status?: "pending" | "verified" | "rejected" | null;
   verified_at?: string | null;
   verified_by_admin_id?: string | null;
+  auth_user_id?: string | null;
+  phone_verified?: boolean | null;
+  email_verified?: boolean | null;
+  verification_method?: "phone" | "email" | null;
+  contact_verified_at?: string | null;
   featured: boolean | null;
   years_experience: number | null;
   hourly_rate: number | null;
@@ -253,6 +258,11 @@ function parseVerificationNotes(notes: string | null | undefined) {
 
   return {
     accountEmail: value.accountEmail,
+    phoneVerified: value.phoneVerified,
+    emailVerified: value.emailVerified,
+    verificationMethod: value.verificationMethod,
+    contactVerifiedAt: value.contactVerifiedAt,
+    verifiedAuthUserId: value.verifiedAuthUserId,
     ageConfirmed: value.ageConfirmed,
     conductAccepted: value.conductAccepted,
     policyAccepted: value.policyAccepted,
@@ -402,6 +412,11 @@ function mapProviderRow(row: ProviderRow): Provider {
       status: verificationStatus,
       documentName: verification?.document_name ?? null,
       notes: stripProviderLifecycleTags(verification?.notes),
+      phoneVerified: row.phone_verified ?? verificationFlags.phoneVerified,
+      emailVerified: row.email_verified ?? verificationFlags.emailVerified,
+      verificationMethod: row.verification_method ?? verificationFlags.verificationMethod ?? null,
+      contactVerifiedAt: row.contact_verified_at ?? verificationFlags.contactVerifiedAt ?? null,
+      authUserId: row.auth_user_id ?? verificationFlags.verifiedAuthUserId ?? null,
       ageConfirmed: verificationFlags.ageConfirmed,
       conductAccepted: verificationFlags.conductAccepted,
       policyAccepted: verificationFlags.policyAccepted,
@@ -572,6 +587,11 @@ async function fetchSupabaseProviders() {
         verification_status,
         verified_at,
         verified_by_admin_id,
+        auth_user_id,
+        phone_verified,
+        email_verified,
+        verification_method,
+        contact_verified_at,
         featured,
         years_experience,
         hourly_rate,
@@ -608,6 +628,11 @@ async function fetchSupabaseProviders() {
         verification_status,
         verified_at,
         verified_by_admin_id,
+        auth_user_id,
+        phone_verified,
+        email_verified,
+        verification_method,
+        contact_verified_at,
         featured,
         years_experience,
         hourly_rate,

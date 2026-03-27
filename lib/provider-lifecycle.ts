@@ -8,6 +8,11 @@ type ProviderLifecycleMeta = {
   ageConfirmed: boolean;
   conductAccepted: boolean;
   policyAccepted: boolean;
+  phoneVerified?: boolean;
+  emailVerified?: boolean;
+  verificationMethod?: "phone" | "email" | null;
+  contactVerifiedAt?: string | null;
+  verifiedAuthUserId?: string | null;
   acceptedAt?: string | null;
   conductVersion?: string | null;
   policyVersion?: string | null;
@@ -21,6 +26,9 @@ type ProviderLifecycleMeta = {
 
 const TAG_PATTERNS = {
   accountEmail: /\[account_email:([^\]]+)\]/,
+  verificationMethod: /\[verification_method:([^\]]+)\]/,
+  contactVerifiedAt: /\[contact_verified_at:([^\]]+)\]/,
+  verifiedAuthUserId: /\[verified_auth_user_id:([^\]]+)\]/,
   acceptedAt: /\[accepted_at:([^\]]+)\]/,
   conductVersion: /\[conduct_version:([^\]]+)\]/,
   policyVersion: /\[policy_version:([^\]]+)\]/,
@@ -44,6 +52,11 @@ export function parseProviderLifecycleMeta(notes: string | null | undefined): Pr
     ageConfirmed: value.includes("[age_confirmed]"),
     conductAccepted: value.includes("[conduct_accepted]"),
     policyAccepted: value.includes("[policy_accepted]"),
+    phoneVerified: value.includes("[phone_verified]"),
+    emailVerified: value.includes("[email_verified]"),
+    verificationMethod: readTag(value, TAG_PATTERNS.verificationMethod) as "phone" | "email" | null,
+    contactVerifiedAt: readTag(value, TAG_PATTERNS.contactVerifiedAt),
+    verifiedAuthUserId: readTag(value, TAG_PATTERNS.verifiedAuthUserId),
     acceptedAt: readTag(value, TAG_PATTERNS.acceptedAt),
     conductVersion: readTag(value, TAG_PATTERNS.conductVersion),
     policyVersion: readTag(value, TAG_PATTERNS.policyVersion),
@@ -112,7 +125,12 @@ export function mergeProviderLifecycleNotes(
     merged.ageConfirmed ? "[age_confirmed]" : "",
     merged.conductAccepted ? "[conduct_accepted]" : "",
     merged.policyAccepted ? "[policy_accepted]" : "",
+    merged.phoneVerified ? "[phone_verified]" : "",
+    merged.emailVerified ? "[email_verified]" : "",
     merged.accountEmail ? `[account_email:${merged.accountEmail}]` : "",
+    merged.verificationMethod ? `[verification_method:${merged.verificationMethod}]` : "",
+    merged.contactVerifiedAt ? `[contact_verified_at:${merged.contactVerifiedAt}]` : "",
+    merged.verifiedAuthUserId ? `[verified_auth_user_id:${merged.verifiedAuthUserId}]` : "",
     merged.acceptedAt ? `[accepted_at:${merged.acceptedAt}]` : "",
     merged.conductVersion ? `[conduct_version:${merged.conductVersion}]` : "",
     merged.policyVersion ? `[policy_version:${merged.policyVersion}]` : "",

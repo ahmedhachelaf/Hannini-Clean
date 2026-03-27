@@ -8,9 +8,15 @@ type ProviderVerificationActionsProps = {
   locale: Locale;
   providerId: string;
   status: "pending" | "verified" | "rejected";
+  contactVerified: boolean;
 };
 
-export function ProviderVerificationActions({ locale, providerId, status }: ProviderVerificationActionsProps) {
+export function ProviderVerificationActions({
+  locale,
+  providerId,
+  status,
+  contactVerified,
+}: ProviderVerificationActionsProps) {
   const router = useRouter();
   const [pending, setPending] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -67,7 +73,7 @@ export function ProviderVerificationActions({ locale, providerId, status }: Prov
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
-          disabled={pending !== null || status === "verified"}
+          disabled={pending !== null || status === "verified" || !contactVerified}
           className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 disabled:opacity-50"
           onClick={() => runAction("verify")}
         >
@@ -92,6 +98,13 @@ export function ProviderVerificationActions({ locale, providerId, status }: Prov
       </div>
       {message ? (
         <p className={`mt-3 text-xs font-medium ${isError ? "text-rose-700" : "text-emerald-700"}`}>{message}</p>
+      ) : null}
+      {!contactVerified ? (
+        <p className="mt-3 text-xs font-medium text-amber-700">
+          {locale === "ar"
+            ? "لا يمكن اعتماد المزوّد قبل التحقق من الهاتف أو البريد الإلكتروني."
+            : "La validation admin reste bloquée tant que le téléphone ou l’e-mail n’est pas vérifié."}
+        </p>
       ) : null}
     </div>
   );

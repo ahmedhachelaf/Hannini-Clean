@@ -51,12 +51,27 @@ export async function updateProviderModeration({
 
   const { data: providerRow, error: providerLookupError } = await supabase
     .from("providers")
-    .select("id, slug, approval_status, is_verified")
+    .select("id, slug, approval_status, is_verified, phone_verified, email_verified, provider_verifications ( notes )")
     .eq("id", providerId)
     .single();
 
   if (providerLookupError || !providerRow) {
     return { ok: false as const, message: providerLookupError?.message ?? "Provider not found." };
+  }
+
+  const verificationMeta = parseProviderLifecycleMeta(providerRow.provider_verifications?.[0]?.notes);
+  const isContactVerified = Boolean(
+    providerRow.phone_verified ||
+      providerRow.email_verified ||
+      verificationMeta.phoneVerified ||
+      verificationMeta.emailVerified,
+  );
+
+  if (verification?.status === "verified" && !isContactVerified) {
+    return {
+      ok: false as const,
+      message: "Provider contact must be verified before admin approval.",
+    };
   }
 
   const providerPatch: Record<string, unknown> = {};
