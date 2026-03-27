@@ -66,7 +66,7 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-[rgba(13,28,69,0.08)] bg-[rgba(225,236,255,0.72)] backdrop-blur-xl">
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-2 rounded-[1.75rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(231,240,255,0.84))] px-4 py-3 shadow-[0_24px_60px_rgba(13,28,69,0.14)]">
+        <div className="flex items-center justify-between gap-3 rounded-[1.75rem] border border-[rgba(20,92,255,0.14)] bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(231,240,255,0.84))] px-4 py-3 shadow-[0_24px_60px_rgba(13,28,69,0.14)] sm:px-5">
 
           {/* Logo */}
           <Link
@@ -79,13 +79,13 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
               alt="هَنّيني | Hannini"
               width={48}
               height={48}
-              className="h-12 w-12 shrink-0 rounded-2xl ring-1 ring-[rgba(15,95,255,0.12)]"
+              className="h-11 w-11 shrink-0 rounded-2xl ring-1 ring-[rgba(15,95,255,0.12)] sm:h-12 sm:w-12"
             />
             <div className="min-w-0">
-              <div className={`truncate text-lg font-extrabold tracking-tight text-[var(--ink)] ${locale === "ar" ? "arabic-display" : ""}`}>
+              <div className={`truncate text-base font-extrabold tracking-tight text-[var(--ink)] sm:text-lg ${locale === "ar" ? "arabic-display" : ""}`}>
                 هَنّيني
               </div>
-              <div className="truncate text-sm font-medium text-[var(--muted)]">
+              <div className="truncate text-xs font-medium text-[var(--muted)] sm:text-sm">
                 {locale === "ar" ? "خدمات منزلية موثوقة" : "Services de confiance"}
               </div>
             </div>
@@ -130,7 +130,7 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
           </div>
 
           {/* Mobile right side: lang + login + hamburger — hidden on desktop */}
-          <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
+          <div className="flex shrink-0 items-center gap-2 lg:hidden">
             <Suspense
               fallback={
                 <span className="inline-flex min-h-10 items-center rounded-full border border-[var(--line)] bg-white px-3 text-xs font-semibold text-[var(--muted)]">
@@ -151,7 +151,7 @@ export async function SiteHeader({ locale, dictionary }: SiteHeaderProps) {
             {/* Login / Account compact button */}
             <Link
               href={loginHref}
-              className="inline-flex h-10 shrink-0 items-center rounded-full border border-[rgba(20,92,255,0.22)] bg-[linear-gradient(135deg,var(--navy)_0%,var(--accent)_52%,#4d9bff_100%)] px-3 text-xs font-bold text-white shadow-[0_10px_24px_rgba(14,50,132,0.22)]"
+              className="inline-flex h-10 shrink-0 items-center rounded-full border border-[rgba(20,92,255,0.22)] bg-[linear-gradient(135deg,var(--navy)_0%,var(--accent)_52%,#4d9bff_100%)] px-3.5 text-xs font-bold text-white shadow-[0_10px_24px_rgba(14,50,132,0.22)]"
             >
               {loginLabelCompact}
             </Link>

@@ -67,10 +67,11 @@ export function MobileMenu({
 
       {/* Backdrop */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-[rgba(8,18,37,0.48)] backdrop-blur-[2px]"
+        <button
+          type="button"
+          className="fixed inset-0 z-[9998] cursor-pointer bg-[rgba(8,18,37,0.48)] backdrop-blur-[2px]"
           onClick={() => setIsOpen(false)}
-          aria-hidden="true"
+          aria-label={closeLabel}
         />
       )}
 
@@ -80,7 +81,7 @@ export function MobileMenu({
         role="dialog"
         aria-modal="true"
         aria-label={menuLabel}
-        className={`fixed top-0 z-50 flex h-full w-[min(320px,90vw)] flex-col overflow-y-auto bg-[rgba(246,250,255,0.98)] shadow-[0_0_80px_rgba(13,28,69,0.22)] backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        className={`fixed top-0 z-[9999] flex h-screen w-[min(320px,90vw)] flex-col overflow-y-auto bg-[rgba(246,250,255,0.98)] shadow-[0_0_80px_rgba(13,28,69,0.22)] backdrop-blur-2xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] ${
           isRtl ? "left-0 border-e border-[var(--line)]" : "right-0 border-s border-[var(--line)]"
         } ${
           isOpen
