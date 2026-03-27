@@ -36,6 +36,8 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
     zones.find((zone) => zone.slug === values.zone)?.provinceSlug ??
     "";
   const [province, setProvince] = useState(defaultProvince);
+  const [provinceQuery, setProvinceQuery] = useState("");
+  const [zoneQuery, setZoneQuery] = useState("");
 
   const provinces = useMemo(
     () =>
@@ -49,8 +51,25 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
   );
 
   const filteredZones = useMemo(
-    () => zones.filter((zone) => !province || zone.provinceSlug === province),
-    [province, zones],
+    () =>
+      zones.filter((zone) => {
+        if (!province) return false;
+        if (zone.provinceSlug !== province) return false;
+        if (!zoneQuery.trim()) return true;
+        const name = getLocalizedValue(zone.name, locale).toLowerCase();
+        return name.includes(zoneQuery.trim().toLowerCase());
+      }),
+    [province, zones, zoneQuery, locale],
+  );
+
+  const filteredProvinces = useMemo(
+    () =>
+      provinces.filter((item) => {
+        if (!provinceQuery.trim()) return true;
+        const name = getLocalizedValue(item.name, locale).toLowerCase();
+        return name.includes(provinceQuery.trim().toLowerCase());
+      }),
+    [provinces, provinceQuery, locale],
   );
 
   return (
@@ -85,14 +104,24 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
 
       <label className="lg:w-52">
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.provinceLabel}</span>
+        <input
+          type="search"
+          value={provinceQuery}
+          onChange={(event) => setProvinceQuery(event.target.value)}
+          placeholder={locale === "ar" ? "ابحث عن ولاية" : "Chercher une wilaya"}
+          className="input-base mb-2 min-w-0 text-sm sm:text-base"
+        />
         <select
           name="province"
           value={province}
-          onChange={(event) => setProvince(event.target.value)}
+          onChange={(event) => {
+            setProvince(event.target.value);
+            setZoneQuery("");
+          }}
           className="input-base min-w-0 text-sm sm:text-base"
         >
           <option value="">{locale === "ar" ? "كل الولايات" : "Toutes les wilayas"}</option>
-          {provinces.map((item) => (
+          {filteredProvinces.map((item) => (
             <option key={item.slug} value={item.slug}>
               {getLocalizedValue(item.name, locale)}
             </option>
@@ -102,6 +131,14 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
 
       <label className="lg:w-56">
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.zoneLabel}</span>
+        <input
+          type="search"
+          value={zoneQuery}
+          onChange={(event) => setZoneQuery(event.target.value)}
+          placeholder={locale === "ar" ? "ابحث عن مدينة" : "Chercher une ville"}
+          className="input-base mb-2 min-w-0 text-sm sm:text-base"
+          disabled={!province}
+        />
         <select name="zone" defaultValue={values.zone ?? ""} className="input-base min-w-0 text-sm sm:text-base" disabled={!province}>
           <option value="">
             {province

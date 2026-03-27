@@ -238,6 +238,8 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
   const [result, setResult] = useState<SignupSubmissionResult | null>(null);
   const [profileType, setProfileType] = useState<ProfileType>("service_provider");
   const [provinceSlug, setProvinceSlug] = useState<string>(zones[0]?.provinceSlug ?? "");
+  const [provinceQuery, setProvinceQuery] = useState("");
+  const [zoneQuery, setZoneQuery] = useState("");
   const [isAgeConfirmed, setIsAgeConfirmed] = useState(false);
   const [hasAcceptedConduct, setHasAcceptedConduct] = useState(false);
   const [hasAcceptedPolicy, setHasAcceptedPolicy] = useState(false);
@@ -253,12 +255,30 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
       })),
     [zones],
   );
+  const filteredProvinceGroups = useMemo(
+    () =>
+      provinceGroups.filter((province) => {
+        if (!provinceQuery.trim()) return true;
+        const name = getLocalizedValue(province.name, locale).toLowerCase();
+        return name.includes(provinceQuery.trim().toLowerCase());
+      }),
+    [provinceGroups, provinceQuery, locale],
+  );
 
   const laneCategories = useMemo(
     () => categories.filter((category) => category.lane === profileType),
     [categories, profileType],
   );
   const provinceZones = provinceGroups.find((group) => group.slug === provinceSlug)?.zones ?? [];
+  const filteredProvinceZones = useMemo(
+    () =>
+      provinceZones.filter((zone) => {
+        if (!zoneQuery.trim()) return true;
+        const name = getLocalizedValue(zone.name, locale).toLowerCase();
+        return name.includes(zoneQuery.trim().toLowerCase());
+      }),
+    [provinceZones, zoneQuery, locale],
+  );
   const primaryCategorySlug = laneCategories[0]?.slug ?? "";
   const primaryZoneSlug = provinceZones[0]?.slug ?? "";
   const hasPasswordReady = password.trim().length >= 8 && password === passwordConfirmation;
@@ -406,8 +426,23 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
               {copy.province} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
-            <select value={provinceSlug} onChange={(event) => setProvinceSlug(event.target.value)} aria-label={copy.province} className="input-base">
-              {provinceGroups.map((province) => (
+            <input
+              type="search"
+              value={provinceQuery}
+              onChange={(event) => setProvinceQuery(event.target.value)}
+              placeholder={locale === "ar" ? "ابحث عن ولاية" : "Chercher une wilaya"}
+              className="input-base mb-2"
+            />
+            <select
+              value={provinceSlug}
+              onChange={(event) => {
+                setProvinceSlug(event.target.value);
+                setZoneQuery("");
+              }}
+              aria-label={copy.province}
+              className="input-base"
+            >
+              {filteredProvinceGroups.map((province) => (
                 <option key={province.slug} value={province.slug}>
                   {province.name[locale]}
                 </option>
@@ -419,9 +454,16 @@ export function ProviderSignupForm({ locale, categories, zones, labels }: Provid
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
               {copy.zone} <span className="text-[var(--navy)]">• {copy.required}</span>
             </span>
+            <input
+              type="search"
+              value={zoneQuery}
+              onChange={(event) => setZoneQuery(event.target.value)}
+              placeholder={locale === "ar" ? "ابحث عن مدينة" : "Chercher une ville"}
+              className="input-base mb-2"
+            />
             <select key={`zone-${provinceSlug}`} name="zones" required aria-required="true" defaultValue={primaryZoneSlug} className="input-base">
               {provinceZones.length === 0 ? <option value="">{copy.noZone}</option> : null}
-              {provinceZones.map((zone) => (
+              {filteredProvinceZones.map((zone) => (
                 <option key={zone.slug} value={zone.slug}>
                   {zone.name[locale]}
                 </option>

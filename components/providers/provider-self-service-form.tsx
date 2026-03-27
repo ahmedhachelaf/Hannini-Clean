@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Locale, Provider, Zone } from "@/lib/types";
 
 type ProviderSelfServiceFormProps = {
@@ -20,10 +20,46 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
   const [whatsappNumber, setWhatsappNumber] = useState(provider.whatsappNumber);
   const [shortDescription, setShortDescription] = useState(provider.bio[locale]);
   const [zoneSlug, setZoneSlug] = useState(provider.zones[0] ?? zones[0]?.slug ?? "");
+  const [provinceSlug, setProvinceSlug] = useState(
+    zones.find((zone) => zone.slug === (provider.zones[0] ?? ""))?.provinceSlug ?? zones[0]?.provinceSlug ?? "",
+  );
+  const [provinceQuery, setProvinceQuery] = useState("");
+  const [zoneQuery, setZoneQuery] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const canReactivate = provider.status === "deactivated_by_provider";
   const canRequestDeletion = provider.status !== "pending_deletion" && provider.status !== "deleted";
+
+  const provinces = useMemo(
+    () =>
+      Array.from(new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])).entries()).map(([slug, name]) => ({
+        slug,
+        name,
+      })),
+    [zones],
+  );
+  const filteredProvinces = useMemo(
+    () =>
+      provinces.filter((province) => {
+        if (!provinceQuery.trim()) return true;
+        const name = province.name[locale]?.toLowerCase() ?? "";
+        return name.includes(provinceQuery.trim().toLowerCase());
+      }),
+    [provinces, provinceQuery, locale],
+  );
+  const provinceZones = useMemo(
+    () => zones.filter((zone) => zone.provinceSlug === provinceSlug),
+    [zones, provinceSlug],
+  );
+  const filteredZones = useMemo(
+    () =>
+      provinceZones.filter((zone) => {
+        if (!zoneQuery.trim()) return true;
+        const name = zone.name[locale]?.toLowerCase() ?? "";
+        return name.includes(zoneQuery.trim().toLowerCase());
+      }),
+    [provinceZones, zoneQuery, locale],
+  );
 
   async function run(action: "update" | "deactivate" | "reactivate" | "request_deletion") {
     setPending(action);
@@ -131,10 +167,47 @@ export function ProviderSelfServiceForm({ locale, provider, token, zones }: Prov
         </label>
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+            {locale === "ar" ? "الولاية" : "Wilaya"}
+          </span>
+          <input
+            type="search"
+            value={provinceQuery}
+            onChange={(event) => setProvinceQuery(event.target.value)}
+            placeholder={locale === "ar" ? "ابحث عن ولاية" : "Chercher une wilaya"}
+            className="input-base mb-2"
+          />
+          <select
+            value={provinceSlug}
+            onChange={(event) => {
+              const next = event.target.value;
+              setProvinceSlug(next);
+              setZoneQuery("");
+              const firstZone = zones.find((zone) => zone.provinceSlug === next)?.slug;
+              if (firstZone) setZoneSlug(firstZone);
+            }}
+            className="input-base"
+          >
+            {filteredProvinces.map((province) => (
+              <option key={province.slug} value={province.slug}>
+                {province.name[locale]}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
             {locale === "ar" ? "المدينة أو المنطقة" : "Ville ou zone"}
           </span>
+          <input
+            type="search"
+            value={zoneQuery}
+            onChange={(event) => setZoneQuery(event.target.value)}
+            placeholder={locale === "ar" ? "ابحث عن مدينة" : "Chercher une ville"}
+            className="input-base mb-2"
+          />
           <select value={zoneSlug} onChange={(event) => setZoneSlug(event.target.value)} className="input-base">
-            {zones.map((zone) => (
+            {filteredZones.map((zone) => (
               <option key={zone.slug} value={zone.slug}>
                 {zone.name[locale]}
               </option>

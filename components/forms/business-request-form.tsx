@@ -39,6 +39,7 @@ export function BusinessRequestForm({ locale, categories, zones, labels }: Busin
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<BusinessRequestSubmissionResult | null>(null);
   const [consentAccepted, setConsentAccepted] = useState(false);
+  const [provinceQuery, setProvinceQuery] = useState("");
 
   const provinces = useMemo(
     () =>
@@ -47,6 +48,15 @@ export function BusinessRequestForm({ locale, categories, zones, labels }: Busin
         name,
       })),
     [zones],
+  );
+  const filteredProvinces = useMemo(
+    () =>
+      provinces.filter((province) => {
+        if (!provinceQuery.trim()) return true;
+        const name = province.name[locale]?.toLowerCase() ?? "";
+        return name.includes(provinceQuery.trim().toLowerCase());
+      }),
+    [provinces, provinceQuery, locale],
   );
 
   async function handleSubmit(formData: FormData) {
@@ -127,8 +137,15 @@ export function BusinessRequestForm({ locale, categories, zones, labels }: Busin
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
             {labels.wilaya} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
           </span>
+          <input
+            type="search"
+            value={provinceQuery}
+            onChange={(event) => setProvinceQuery(event.target.value)}
+            placeholder={locale === "ar" ? "ابحث عن ولاية" : "Chercher une wilaya"}
+            className="input-base mb-2"
+          />
           <select name="wilayaSlug" required className="input-base" defaultValue={provinces[0]?.slug ?? ""}>
-            {provinces.map((province) => (
+            {filteredProvinces.map((province) => (
               <option key={province.slug} value={province.slug}>
                 {province.name[locale]}
               </option>
