@@ -124,6 +124,12 @@ export function HomePageContent({
     trusted: locale === "ar" ? "موثوق ويتقدم" : "Fiable et en progression",
     thriving: locale === "ar" ? "موثوق ويزدهر" : "Trusted and thriving",
   };
+  const zoneBrowseHint =
+    locale === "ar"
+      ? "اختر البلدية أو المنطقة المناسبة للعثور على الحرفيين الأقرب إليك."
+      : "Choisissez la commune ou la zone qui vous convient pour trouver les prestataires les plus proches.";
+  const zoneCountLabel = (count: number) =>
+    locale === "ar" ? `${count} مناطق متاحة` : `${count} zones disponibles`;
 
   return (
     <>
@@ -137,10 +143,20 @@ export function HomePageContent({
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-[0.16] mix-blend-screen saturate-[0.8] scale-[1.08]"
+            className="object-cover object-center opacity-[0.28] saturate-[0.88] scale-[1.08]"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,28,25,0.78)_0%,rgba(18,42,38,0.62)_42%,rgba(25,73,65,0.38)_72%,rgba(203,107,68,0.28)_100%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,rgba(255,244,226,0.18),transparent_26%),linear-gradient(180deg,rgba(16,32,29,0.16),rgba(16,32,29,0.42))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,28,25,0.78)_0%,rgba(18,42,38,0.58)_38%,rgba(25,73,65,0.26)_70%,rgba(203,107,68,0.12)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,rgba(255,244,226,0.22),transparent_26%),linear-gradient(180deg,rgba(16,32,29,0.12),rgba(16,32,29,0.28))]" />
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 end-0 hidden w-[36%] overflow-hidden border-s border-white/10 bg-[rgba(255,255,255,0.06)] lg:block">
+          <Image
+            src="/brand/workshops-collage.jpg"
+            alt=""
+            fill
+            sizes="40vw"
+            className="object-cover object-center opacity-[0.42] saturate-[0.92]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,22,20,0.08),rgba(10,22,20,0.34))]" />
         </div>
         <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(244,208,161,0.24)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
         <div className="hero-orb right-2 top-4 h-24 w-24 bg-[rgba(255,255,255,0.12)] sm:right-10 sm:top-16 sm:h-40 sm:w-40" />
@@ -239,23 +255,29 @@ export function HomePageContent({
                   <div className="mt-2 text-2xl font-extrabold tracking-tight text-[var(--navy)]">
                     {locale === "ar" ? "اختر الولاية ثم المدينة الأقرب إليك" : "Choisissez la wilaya puis la ville la plus proche"}
                   </div>
+                  <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{zoneBrowseHint}</p>
                 </div>
 
                 <div className="grid gap-4">
                   {provinces.map((province) => (
                     <div key={province.slug} className="rounded-[1.5rem] border border-[rgba(24,59,54,0.08)] bg-[linear-gradient(180deg,rgba(245,236,220,0.88),rgba(255,255,255,0.9))] p-4 shadow-[0_10px_24px_rgba(36,81,75,0.08)]">
-                      <div className="text-base font-extrabold text-[var(--ink)]">{getLocalizedValue(province.name, locale)}</div>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-base font-extrabold text-[var(--ink)]">{getLocalizedValue(province.name, locale)}</div>
+                        <div className="rounded-full border border-[rgba(24,59,54,0.08)] bg-white px-3 py-1 text-[0.72rem] font-semibold text-[var(--muted)]">
+                          {zoneCountLabel(province.zones.length)}
+                        </div>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2.5">
                         {province.zones.map((zone) => (
                           <Link
                             key={zone.slug}
                             href={`/${locale}/providers?province=${province.slug}&zone=${zone.slug}`}
-                            className="rounded-[1.15rem] border border-[rgba(24,59,54,0.1)] bg-white px-4 py-4 shadow-[0_10px_24px_rgba(36,81,75,0.08)] transition hover:-translate-y-0.5 hover:border-[rgba(203,107,68,0.28)]"
+                            className="inline-flex items-center gap-2 rounded-full border border-[rgba(24,59,54,0.1)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--ink)] shadow-[0_10px_24px_rgba(36,81,75,0.08)] transition hover:-translate-y-0.5 hover:border-[rgba(203,107,68,0.28)] hover:text-[var(--navy)]"
                           >
-                            <div className="text-sm font-bold">{getLocalizedValue(zone.name, locale)}</div>
-                            <div className="mt-1 text-xs text-[var(--muted)]">
-                              {locale === "ar" ? "اعرض الحرفيين المتاحين" : "Voir les prestataires disponibles"}
-                            </div>
+                            <span>{getLocalizedValue(zone.name, locale)}</span>
+                            <span aria-hidden="true" className="text-[var(--accent)]">
+                              {locale === "ar" ? "↗" : "→"}
+                            </span>
                           </Link>
                         ))}
                       </div>
