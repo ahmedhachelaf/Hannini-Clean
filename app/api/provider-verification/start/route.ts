@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAppBaseUrl } from "@/lib/app-origin";
 import {
   createAnonSupabaseClient,
   getPendingProviderVerification,
@@ -58,6 +59,8 @@ export async function POST(request: Request) {
   }
 
   const supabase = createAnonSupabaseClient();
+  const callbackUrl = new URL("/auth/provider-verification", getAppBaseUrl());
+  callbackUrl.searchParams.set("locale", locale);
 
   if (!supabase) {
     if (process.env.NODE_ENV === "production") {
@@ -96,7 +99,10 @@ export async function POST(request: Request) {
         })
       : await supabase.auth.signInWithOtp({
           email: target,
-          options: { shouldCreateUser: true },
+          options: {
+            shouldCreateUser: true,
+            emailRedirectTo: callbackUrl.toString(),
+          },
         });
 
   if (startResult.error) {
@@ -127,8 +133,12 @@ export async function POST(request: Request) {
     retryAfterSeconds: constants.resendCooldownSeconds,
     expiresInSeconds: constants.ttlSeconds,
     message:
-      locale === "ar"
-        ? `تم إرسال رمز التحقق عبر ${getVerificationDeliveryLabel(method, locale)}.`
-        : `Un code de vérification a été envoyé par ${getVerificationDeliveryLabel(method, locale)}.`,
+      method === "phone"
+        ? locale === "ar"
+          ? `تم إرسال رمز التحقق عبر ${getVerificationDeliveryLabel(method, locale)}.`
+          : `Un code de vérification a été envoyé par ${getVerificationDeliveryLabel(method, locale)}.`
+        : locale === "ar"
+          ? "أرسلنا رسالة تحقق إلى بريدك الإلكتروني. إذا وصلتك رسالة تحتوي على رابط تأكيد فافتحه لإكمال التحقق، وإذا وصلك رمز فأدخله أدناه."
+          : "Nous avons envoyé un e-mail de vérification. Si vous recevez un lien de confirmation, ouvrez-le pour terminer la vérification. Si vous recevez un code, saisissez-le ci-dessous.",
   });
 }

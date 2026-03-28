@@ -11,6 +11,11 @@ type ProviderSignupFormProps = {
   locale: Locale;
   categories: Category[];
   zones: Zone[];
+  callbackState?: {
+    verification?: string;
+    verifiedMethod?: string;
+    verifiedTarget?: string;
+  };
   labels: {
     title: string;
     description: string;
@@ -45,6 +50,9 @@ type FormCopy = {
   verificationVerified: string;
   verificationUsePhone: string;
   verificationUseEmail: string;
+  verificationEmailLinkHint: string;
+  verificationEmailSuccess: string;
+  verificationEmailError: string;
   verificationPhoneUnavailable: string;
   verificationCodePrompt: string;
   verificationTimeout: string;
@@ -103,7 +111,10 @@ function getCopy(locale: Locale): FormCopy {
       verificationWaiting: "تم إرسال الرمز. أدخله هنا لإكمال التحقق.",
       verificationVerified: "تم التحقق بنجاح. يمكنك الآن إرسال الطلب.",
       verificationUsePhone: "سنرسل رمزاً إلى رقم الهاتف الذي أدخلته.",
-      verificationUseEmail: "سنرسل رمزاً إلى بريدك الإلكتروني لإتمام التحقق.",
+      verificationUseEmail: "سنرسل رسالة تحقق إلى بريدك الإلكتروني لإتمام التحقق.",
+      verificationEmailLinkHint: "قد يصلك رمز أو رابط تأكيد بحسب إعدادات البريد. إذا وصلك رابط، افتحه في المتصفح وسيتم إكمال التحقق تلقائياً.",
+      verificationEmailSuccess: "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن إرسال الطلب.",
+      verificationEmailError: "تعذر إكمال التحقق من رابط البريد الإلكتروني. اطلب رسالة جديدة ثم حاول مرة أخرى.",
       verificationPhoneUnavailable: "التحقق عبر الهاتف غير مفعّل حالياً، لذا سنستخدم البريد الإلكتروني كخيار آمن.",
       verificationCodePrompt: "أدخل الرمز المكوّن من 6 أرقام",
       verificationTimeout: "تنتهي صلاحية الرمز بعد",
@@ -161,7 +172,10 @@ function getCopy(locale: Locale): FormCopy {
     verificationWaiting: "Le code a été envoyé. Saisissez-le ici pour terminer la vérification.",
     verificationVerified: "Vérification réussie. Vous pouvez maintenant envoyer votre demande.",
     verificationUsePhone: "Nous enverrons un code au numéro saisi.",
-    verificationUseEmail: "Nous enverrons un code à votre e-mail pour confirmer le contact.",
+    verificationUseEmail: "Nous enverrons un e-mail de vérification pour confirmer ce contact.",
+    verificationEmailLinkHint: "Selon la configuration e-mail, vous pouvez recevoir un code ou un lien de confirmation. Si vous recevez un lien, ouvrez-le dans le navigateur et la vérification se terminera automatiquement.",
+    verificationEmailSuccess: "Votre e-mail a bien été confirmé. Vous pouvez maintenant envoyer la demande.",
+    verificationEmailError: "Le lien de vérification e-mail n'a pas pu être confirmé. Demandez un nouvel e-mail puis réessayez.",
     verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée pour le moment, l'e-mail sera donc utilisé.",
     verificationCodePrompt: "Entrez le code à 6 chiffres",
     verificationTimeout: "Le code expire dans",
@@ -206,7 +220,7 @@ function getCopy(locale: Locale): FormCopy {
   };
 }
 
-export function ProviderSignupForm({ locale, categories, labels }: ProviderSignupFormProps) {
+export function ProviderSignupForm({ locale, categories, labels, callbackState }: ProviderSignupFormProps) {
   const copy = getCopy(locale);
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
@@ -236,6 +250,9 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
   });
   const [otpResetKey, setOtpResetKey] = useState(0);
   const [clock, setClock] = useState(Date.now());
+  const callbackVerificationState = callbackState?.verification;
+  const callbackVerifiedMethod = callbackState?.verifiedMethod;
+  const callbackVerifiedTarget = callbackState?.verifiedTarget;
 
   const laneCategories = useMemo(
     () => categories.filter((category) => category.lane === profileType),
@@ -289,6 +306,19 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
     clearFieldError("verification");
     setResult(null);
   }, [phoneNumber, email, verificationMethod]);
+
+  useEffect(() => {
+    if (callbackVerifiedMethod === "email" && callbackVerifiedTarget && !email) {
+      setEmail(callbackVerifiedTarget);
+      setVerificationMethod("email");
+    }
+
+    if (callbackVerificationState === "email-success") {
+      setVerificationFeedback({ type: "success", message: copy.verificationEmailSuccess });
+    } else if (callbackVerificationState === "email-error") {
+      setVerificationFeedback({ type: "error", message: copy.verificationEmailError });
+    }
+  }, [callbackVerificationState, callbackVerifiedMethod, callbackVerifiedTarget, copy.verificationEmailError, copy.verificationEmailSuccess, email]);
 
   function setFieldError(field: string, message: string) {
     setErrors((prev) => ({ ...prev, [field]: message }));
@@ -761,7 +791,12 @@ export function ProviderSignupForm({ locale, categories, labels }: ProviderSignu
             <p className="text-sm text-[var(--muted)]">{copy.verificationUsePhone}</p>
           )}
 
-          {verificationMethod === "email" ? <p className="text-sm text-[var(--muted)]">{copy.verificationUseEmail}</p> : null}
+          {verificationMethod === "email" ? (
+            <div className="space-y-2">
+              <p className="text-sm text-[var(--muted)]">{copy.verificationUseEmail}</p>
+              <p className="text-sm text-[var(--muted)]">{copy.verificationEmailLinkHint}</p>
+            </div>
+          ) : null}
 
           <div className="flex flex-wrap gap-3">
             <button
