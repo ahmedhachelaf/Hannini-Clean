@@ -130,6 +130,18 @@ export function HomePageContent({
       <RoleBanner locale={locale} t={dictionary.roleBanner} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} />
     <div className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
       <section id="hero" className="surface-card hero-shell gradient-frame relative isolate w-full max-w-full overflow-hidden rounded-[2rem] p-4 text-white shadow-[0_36px_90px_rgba(21,36,33,0.24)] sm:p-7 lg:p-10">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Image
+            src="/brand/workshops-collage.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-[0.16] mix-blend-screen saturate-[0.8] scale-[1.08]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(14,28,25,0.78)_0%,rgba(18,42,38,0.62)_42%,rgba(25,73,65,0.38)_72%,rgba(203,107,68,0.28)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,rgba(255,244,226,0.18),transparent_26%),linear-gradient(180deg,rgba(16,32,29,0.16),rgba(16,32,29,0.42))]" />
+        </div>
         <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(244,208,161,0.24)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
         <div className="hero-orb right-2 top-4 h-24 w-24 bg-[rgba(255,255,255,0.12)] sm:right-10 sm:top-16 sm:h-40 sm:w-40" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(9,20,18,0.2))]" />
