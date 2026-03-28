@@ -136,34 +136,18 @@ export function HomePageContent({
       <RoleBanner locale={locale} t={dictionary.roleBanner} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} />
     <div className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-14 px-4 py-8 sm:px-6 lg:gap-16 lg:px-8 lg:py-10">
       <section id="hero" className="surface-card hero-shell gradient-frame relative isolate w-full max-w-full overflow-hidden rounded-[2rem] p-4 text-white shadow-[0_36px_90px_rgba(21,36,33,0.24)] sm:p-7 lg:p-10">
-        <div
-          className="pointer-events-none absolute inset-y-0 start-0 hidden overflow-hidden lg:block"
-          style={{ width: "42%" }}
-        >
-          <Image
-            src="/brand/workshops-collage.jpg"
-            alt=""
-            fill
-            priority
-            sizes="40vw"
-            className="object-cover object-center opacity-[0.72]"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,24,45,0.14),rgba(10,24,45,0.24))]" />
-        </div>
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.18)_0%,rgba(255,255,255,0.08)_22%,rgba(18,44,83,0.48)_44%,rgba(16,63,101,0.86)_68%,rgba(222,122,77,0.8)_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_30%,rgba(255,255,255,0.18),transparent_20%),radial-gradient(circle_at_78%_18%,rgba(255,241,229,0.18),transparent_18%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent,rgba(10,24,45,0.14))]" />
-        <div className="pointer-events-none absolute start-[38%] top-0 hidden h-full w-px bg-white/20 lg:block" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-full lg:hidden">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <Image
             src="/brand/workshops-collage.jpg"
             alt=""
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center opacity-[0.24]"
+            className="object-cover object-center opacity-[0.44] saturate-[0.95]"
           />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,40,72,0.62),rgba(22,64,101,0.78))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,250,255,0.18)_0%,rgba(214,236,246,0.08)_18%,rgba(18,52,96,0.38)_42%,rgba(20,91,125,0.72)_72%,rgba(222,122,77,0.74)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,34,60,0.08),rgba(16,34,60,0.24))]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.26),transparent_18%),radial-gradient(circle_at_76%_20%,rgba(255,243,229,0.18),transparent_20%)]" />
         </div>
         <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(222,122,77,0.18)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
         <div className="hero-orb right-2 top-4 h-24 w-24 bg-[rgba(255,255,255,0.12)] sm:right-10 sm:top-16 sm:h-40 sm:w-40" />
@@ -240,21 +224,21 @@ export function HomePageContent({
 
           <div className="grid min-w-0 gap-4">
             <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
-              <div className="rounded-[1.5rem] border border-white/10 bg-[rgba(255,255,255,0.11)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
+              <div className="rounded-[1.5rem] border border-white/14 bg-[rgba(255,255,255,0.16)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
                 <div className="text-sm text-white/82">{dictionary.home.statsProviders}</div>
                 <div className="mt-2 text-3xl font-extrabold text-white">{summary.providersCount}</div>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-[rgba(255,255,255,0.11)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
+              <div className="rounded-[1.5rem] border border-white/14 bg-[rgba(255,255,255,0.16)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
                 <div className="text-sm text-white/82">{dictionary.home.statsZones}</div>
                 <div className="mt-2 text-3xl font-extrabold text-white">{summary.zonesCount}</div>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-[rgba(255,255,255,0.11)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
+              <div className="rounded-[1.5rem] border border-white/14 bg-[rgba(255,255,255,0.16)] p-5 shadow-[0_18px_34px_rgba(8,18,37,0.18)] backdrop-blur">
                 <div className="text-sm text-white/82">{dictionary.home.statsCategories}</div>
                 <div className="mt-2 text-3xl font-extrabold text-white">{summary.categoriesCount}</div>
               </div>
             </div>
 
-            <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,241,229,0.92))] p-5 sm:p-6">
+            <div className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,250,255,0.94))] p-5 shadow-[0_24px_48px_rgba(18,46,88,0.16)] sm:p-6">
               <div className="flex flex-col gap-5">
                 <div>
                   <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.provinceLabel}</div>
