@@ -27,10 +27,12 @@ type ProviderSignupFormProps = {
 type FormErrors = Partial<Record<string, string>>;
 
 type VerificationMethod = "phone" | "email";
+type PhoneVerificationChannel = "sms" | "whatsapp";
 
 type VerificationCookieState = {
   method: VerificationMethod;
   target: string;
+  channel?: PhoneVerificationChannel;
   expiresAt: string;
   resendAvailableAt?: string;
   verifiedAt?: string;
@@ -42,6 +44,8 @@ type FormCopy = {
   verificationTitle: string;
   verificationDescription: string;
   verificationPhoneOption: string;
+  verificationSmsOption: string;
+  verificationWhatsappOption: string;
   verificationEmailOption: string;
   verificationEmailLabel: string;
   verificationStart: string;
@@ -50,10 +54,10 @@ type FormCopy = {
   verificationVerified: string;
   verificationUsePhone: string;
   verificationUseEmail: string;
-  verificationEmailLinkHint: string;
   verificationEmailSuccess: string;
   verificationEmailError: string;
   verificationPhoneUnavailable: string;
+  verificationWhatsappUnavailable: string;
   verificationCodePrompt: string;
   verificationTimeout: string;
   verificationAttempts: string;
@@ -104,18 +108,20 @@ function getCopy(locale: Locale): FormCopy {
       verificationTitle: "خطوة التحقق قبل الإرسال",
       verificationDescription: "أكمل التحقق من الهاتف أو البريد الإلكتروني أولاً قبل إرسال الطلب.",
       verificationPhoneOption: "تحقق عبر الهاتف",
+      verificationSmsOption: "رسالة نصية",
+      verificationWhatsappOption: "واتساب",
       verificationEmailOption: "تحقق عبر البريد الإلكتروني",
       verificationEmailLabel: "البريد الإلكتروني للتحقق",
       verificationStart: "إرسال رمز التحقق",
       verificationResend: "إعادة إرسال الرمز",
       verificationWaiting: "تم إرسال الرمز. أدخله هنا لإكمال التحقق.",
       verificationVerified: "تم التحقق بنجاح. يمكنك الآن إرسال الطلب.",
-      verificationUsePhone: "سنرسل رمزاً إلى رقم الهاتف الذي أدخلته.",
-      verificationUseEmail: "سنرسل رسالة تحقق إلى بريدك الإلكتروني لإتمام التحقق.",
-      verificationEmailLinkHint: "قد يصلك رمز أو رابط تأكيد بحسب إعدادات البريد. إذا وصلك رابط، افتحه في المتصفح وسيتم إكمال التحقق تلقائياً.",
+      verificationUsePhone: "سنرسل رمز تحقق من 6 أرقام إلى رقم الهاتف الذي أدخلته.",
+      verificationUseEmail: "سنرسل رمز تحقق من 6 أرقام إلى بريدك الإلكتروني.",
       verificationEmailSuccess: "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن إرسال الطلب.",
-      verificationEmailError: "تعذر إكمال التحقق من رابط البريد الإلكتروني. اطلب رسالة جديدة ثم حاول مرة أخرى.",
-      verificationPhoneUnavailable: "التحقق عبر الهاتف غير مفعّل حالياً، لذا سنستخدم البريد الإلكتروني كخيار آمن.",
+      verificationEmailError: "تعذر التحقق من الرمز الإلكتروني. اطلب رمزاً جديداً ثم حاول مرة أخرى.",
+      verificationPhoneUnavailable: "التحقق عبر الهاتف غير مفعّل حالياً لأن مزود الرسائل غير مضبوط بعد.",
+      verificationWhatsappUnavailable: "واتساب غير متاح حالياً لأن قناة واتساب لم تُضبط بعد لدى مزود الرسائل.",
       verificationCodePrompt: "أدخل الرمز المكوّن من 6 أرقام",
       verificationTimeout: "تنتهي صلاحية الرمز بعد",
       verificationAttempts: "عدد المحاولات المتبقية",
@@ -165,18 +171,20 @@ function getCopy(locale: Locale): FormCopy {
     verificationTitle: "Étape de vérification avant l'envoi",
     verificationDescription: "Vérifiez d'abord votre téléphone ou votre e-mail avant d'envoyer la candidature.",
     verificationPhoneOption: "Vérifier par téléphone",
+    verificationSmsOption: "SMS",
+    verificationWhatsappOption: "WhatsApp",
     verificationEmailOption: "Vérifier par e-mail",
     verificationEmailLabel: "E-mail de vérification",
     verificationStart: "Envoyer le code",
     verificationResend: "Renvoyer le code",
     verificationWaiting: "Le code a été envoyé. Saisissez-le ici pour terminer la vérification.",
     verificationVerified: "Vérification réussie. Vous pouvez maintenant envoyer votre demande.",
-    verificationUsePhone: "Nous enverrons un code au numéro saisi.",
-    verificationUseEmail: "Nous enverrons un e-mail de vérification pour confirmer ce contact.",
-    verificationEmailLinkHint: "Selon la configuration e-mail, vous pouvez recevoir un code ou un lien de confirmation. Si vous recevez un lien, ouvrez-le dans le navigateur et la vérification se terminera automatiquement.",
+    verificationUsePhone: "Nous enverrons un code à 6 chiffres au numéro saisi.",
+    verificationUseEmail: "Nous enverrons un code à 6 chiffres à votre e-mail.",
     verificationEmailSuccess: "Votre e-mail a bien été confirmé. Vous pouvez maintenant envoyer la demande.",
-    verificationEmailError: "Le lien de vérification e-mail n'a pas pu être confirmé. Demandez un nouvel e-mail puis réessayez.",
-    verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée pour le moment, l'e-mail sera donc utilisé.",
+    verificationEmailError: "La vérification du code e-mail a échoué. Demandez un nouveau code puis réessayez.",
+    verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée car le fournisseur SMS n'est pas encore configuré.",
+    verificationWhatsappUnavailable: "WhatsApp n'est pas disponible car le canal WhatsApp n'est pas encore configuré chez le fournisseur de messages.",
     verificationCodePrompt: "Entrez le code à 6 chiffres",
     verificationTimeout: "Le code expire dans",
     verificationAttempts: "Essais restants",
@@ -236,6 +244,8 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("phone");
   const [phoneOtpEnabled, setPhoneOtpEnabled] = useState(false);
+  const [enabledPhoneChannels, setEnabledPhoneChannels] = useState<PhoneVerificationChannel[]>([]);
+  const [phoneVerificationChannel, setPhoneVerificationChannel] = useState<PhoneVerificationChannel>("sms");
   const [verificationPending, setVerificationPending] = useState(false);
   const [verificationChecking, setVerificationChecking] = useState(false);
   const [verificationFeedback, setVerificationFeedback] = useState<{ type: "error" | "success" | "info"; message: string } | null>(null);
@@ -269,6 +279,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
           | {
               ok?: boolean;
               phoneOtpEnabled?: boolean;
+              enabledPhoneChannels?: PhoneVerificationChannel[];
               pending?: VerificationCookieState | null;
               verified?: VerificationCookieState | null;
             }
@@ -276,6 +287,9 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
 
         if (!cancelled && data?.ok) {
           setPhoneOtpEnabled(Boolean(data.phoneOtpEnabled));
+          const nextChannels = data.enabledPhoneChannels?.length ? data.enabledPhoneChannels : [];
+          setEnabledPhoneChannels(nextChannels);
+          setPhoneVerificationChannel(nextChannels.includes("sms") ? "sms" : (nextChannels[0] ?? "sms"));
           setVerificationState((current) => ({
             ...current,
             pending: data.pending ?? null,
@@ -353,6 +367,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
     verificationState.pending &&
     verificationState.pending.method === verificationMethod &&
     verificationState.pending.target === activeVerificationTarget &&
+    (verificationMethod !== "phone" || !verificationState.pending.channel || verificationState.pending.channel === phoneVerificationChannel) &&
     Date.parse(verificationState.pending.expiresAt) > clock
       ? verificationState.pending
       : null;
@@ -360,6 +375,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
     verificationState.verified &&
     verificationState.verified.method === verificationMethod &&
     verificationState.verified.target === activeVerificationTarget &&
+    (verificationMethod !== "phone" || !verificationState.verified.channel || verificationState.verified.channel === phoneVerificationChannel) &&
     Date.parse(verificationState.verified.expiresAt) > clock
       ? verificationState.verified
       : null;
@@ -395,6 +411,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
         body: JSON.stringify({
           locale,
           method: verificationMethod,
+          channel: verificationMethod === "phone" ? phoneVerificationChannel : undefined,
           target,
           resend,
         }),
@@ -405,6 +422,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
             ok?: boolean;
             message?: string;
             retryAfterSeconds?: number;
+            enabledPhoneChannels?: PhoneVerificationChannel[];
             pending?: VerificationCookieState | null;
           }
         | null;
@@ -423,6 +441,9 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
         verified: null,
         attemptsRemaining: 5,
       }));
+      if (data?.enabledPhoneChannels?.length) {
+        setEnabledPhoneChannels(data.enabledPhoneChannels);
+      }
       clearFieldError("verification");
       clearFieldError("email");
       setOtpResetKey((value) => value + 1);
@@ -788,14 +809,42 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
               {errors.email ? <p className="mt-1 text-xs text-rose-600">{errors.email}</p> : null}
             </label>
           ) : (
-            <p className="text-sm text-[var(--muted)]">{copy.verificationUsePhone}</p>
+            <div className="space-y-3">
+              <p className="text-sm text-[var(--muted)]">{copy.verificationUsePhone}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  disabled={!enabledPhoneChannels.includes("sms")}
+                  onClick={() => setPhoneVerificationChannel("sms")}
+                  className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
+                    phoneVerificationChannel === "sms"
+                      ? "border-terracotta bg-terracotta-pale text-terracotta"
+                      : "border-[var(--line)] bg-white text-[var(--muted)]"
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {copy.verificationSmsOption}
+                </button>
+                <button
+                  type="button"
+                  disabled={!enabledPhoneChannels.includes("whatsapp")}
+                  onClick={() => setPhoneVerificationChannel("whatsapp")}
+                  className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
+                    phoneVerificationChannel === "whatsapp"
+                      ? "border-terracotta bg-terracotta-pale text-terracotta"
+                      : "border-[var(--line)] bg-white text-[var(--muted)]"
+                  } disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {copy.verificationWhatsappOption}
+                </button>
+              </div>
+              {!enabledPhoneChannels.includes("whatsapp") ? (
+                <p className="text-xs text-[var(--muted)]">{copy.verificationWhatsappUnavailable}</p>
+              ) : null}
+            </div>
           )}
 
           {verificationMethod === "email" ? (
-            <div className="space-y-2">
-              <p className="text-sm text-[var(--muted)]">{copy.verificationUseEmail}</p>
-              <p className="text-sm text-[var(--muted)]">{copy.verificationEmailLinkHint}</p>
-            </div>
+            <p className="text-sm text-[var(--muted)]">{copy.verificationUseEmail}</p>
           ) : null}
 
           <div className="flex flex-wrap gap-3">

@@ -12,10 +12,12 @@ const RESEND_COOLDOWN_SECONDS = 60;
 const MAX_VERIFY_ATTEMPTS = 5;
 
 export type ProviderVerificationMethod = "phone" | "email";
+export type ProviderPhoneVerificationChannel = "sms" | "whatsapp";
 
 export type PendingProviderVerification = {
   method: ProviderVerificationMethod;
   target: string;
+  channel?: ProviderPhoneVerificationChannel;
   startedAt: string;
   expiresAt: string;
   resendAvailableAt: string;
@@ -25,6 +27,7 @@ export type PendingProviderVerification = {
 export type VerifiedProviderContact = {
   method: ProviderVerificationMethod;
   target: string;
+  channel?: ProviderPhoneVerificationChannel;
   authUserId: string;
   verifiedAt: string;
   expiresAt: string;
@@ -88,6 +91,28 @@ export function isPhoneVerificationEnabled() {
   return process.env.PROVIDER_PHONE_OTP_ENABLED === "true" || process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_ENABLED === "true";
 }
 
+export function getEnabledPhoneVerificationChannels(): ProviderPhoneVerificationChannel[] {
+  if (!isPhoneVerificationEnabled()) {
+    return [];
+  }
+
+  const raw = process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_CHANNELS ?? process.env.PROVIDER_PHONE_OTP_CHANNELS ?? "sms";
+  const channels = raw
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .filter((value): value is ProviderPhoneVerificationChannel => value === "sms" || value === "whatsapp");
+
+  return channels.length > 0 ? Array.from(new Set(channels)) : ["sms"];
+}
+
+export function getDefaultPhoneVerificationChannel(): ProviderPhoneVerificationChannel {
+  return getEnabledPhoneVerificationChannels()[0] ?? "sms";
+}
+
+export function isPhoneVerificationChannelEnabled(channel: ProviderPhoneVerificationChannel) {
+  return getEnabledPhoneVerificationChannels().includes(channel);
+}
+
 export function validateVerificationTarget(method: ProviderVerificationMethod, value: string) {
   const normalized = normalizeVerificationTarget(method, value);
 
@@ -139,12 +164,14 @@ export async function getVerifiedProviderContact() {
 export async function setPendingProviderVerification(input: {
   method: ProviderVerificationMethod;
   target: string;
+  channel?: ProviderPhoneVerificationChannel;
   attempts?: number;
 }) {
   const now = Date.now();
   const payload: PendingProviderVerification = {
     method: input.method,
     target: normalizeVerificationTarget(input.method, input.target),
+    channel: input.method === "phone" ? input.channel ?? "sms" : undefined,
     startedAt: new Date(now).toISOString(),
     expiresAt: new Date(now + VERIFICATION_TTL_SECONDS * 1000).toISOString(),
     resendAvailableAt: new Date(now + RESEND_COOLDOWN_SECONDS * 1000).toISOString(),
@@ -188,12 +215,14 @@ export async function updatePendingProviderVerificationAttempts(attempts: number
 export async function setVerifiedProviderContact(input: {
   method: ProviderVerificationMethod;
   target: string;
+  channel?: ProviderPhoneVerificationChannel;
   authUserId: string;
 }) {
   const now = Date.now();
   const payload: VerifiedProviderContact = {
     method: input.method,
     target: normalizeVerificationTarget(input.method, input.target),
+    channel: input.method === "phone" ? input.channel ?? "sms" : undefined,
     authUserId: input.authUserId,
     verifiedAt: new Date(now).toISOString(),
     expiresAt: new Date(now + VERIFIED_TTL_SECONDS * 1000).toISOString(),
@@ -235,8 +264,16 @@ export function getVerificationConstants() {
   };
 }
 
-export function getVerificationDeliveryLabel(method: ProviderVerificationMethod, locale: "ar" | "fr") {
+export function getVerificationDeliveryLabel(
+  method: ProviderVerificationMethod,
+  locale: "ar" | "fr",
+  channel: ProviderPhoneVerificationChannel = "sms",
+) {
   if (method === "phone") {
+    if (channel === "whatsapp") {
+      return locale === "ar" ? "واتساب" : "WhatsApp";
+    }
+
     return locale === "ar" ? "رسالة نصية" : "SMS";
   }
 

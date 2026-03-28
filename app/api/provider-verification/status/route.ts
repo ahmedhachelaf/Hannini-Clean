@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  getEnabledPhoneVerificationChannels,
   getPendingProviderVerification,
   getVerifiedProviderContact,
   isPhoneVerificationEnabled,
@@ -16,6 +17,6 @@ export async function GET() {
     pending,
     verified,
     phoneOtpEnabled: isPhoneVerificationEnabled(),
+    enabledPhoneChannels: getEnabledPhoneVerificationChannels(),
   });
 }
-

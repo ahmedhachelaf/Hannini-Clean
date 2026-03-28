@@ -96,6 +96,7 @@ export async function POST(request: Request) {
     const verified = await setVerifiedProviderContact({
       method,
       target,
+      channel: pending.channel,
       authUserId: `demo-${method}-${target}`,
     });
 
@@ -157,6 +158,7 @@ export async function POST(request: Request) {
   const verified = await setVerifiedProviderContact({
     method,
     target,
+    channel: pending.channel,
     authUserId: verifyResult.data.user.id,
   });
 

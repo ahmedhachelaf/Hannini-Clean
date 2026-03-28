@@ -2,20 +2,25 @@ import { NextResponse } from "next/server";
 import { getAppBaseUrl } from "@/lib/app-origin";
 import {
   createAnonSupabaseClient,
+  getDefaultPhoneVerificationChannel,
+  getEnabledPhoneVerificationChannels,
   getPendingProviderVerification,
   getVerificationConstants,
   getVerificationDeliveryLabel,
   getVerificationErrorMessage,
   isPhoneVerificationEnabled,
+  isPhoneVerificationChannelEnabled,
   normalizeVerificationTarget,
   setPendingProviderVerification,
   validateVerificationTarget,
+  type ProviderPhoneVerificationChannel,
   type ProviderVerificationMethod,
 } from "@/lib/provider-contact-verification";
 
 type StartVerificationPayload = {
   locale?: string;
   method?: ProviderVerificationMethod;
+  channel?: ProviderPhoneVerificationChannel;
   target?: string;
 };
 
@@ -23,11 +28,20 @@ export async function POST(request: Request) {
   const payload = (await request.json().catch(() => null)) as StartVerificationPayload | null;
   const locale = payload?.locale === "fr" ? "fr" : "ar";
   const method = payload?.method === "phone" ? "phone" : "email";
+  const requestedChannel = payload?.channel === "whatsapp" ? "whatsapp" : "sms";
   const rawTarget = String(payload?.target ?? "");
   const target = normalizeVerificationTarget(method, rawTarget);
   const constants = getVerificationConstants();
+  const phoneChannel = method === "phone" ? requestedChannel ?? getDefaultPhoneVerificationChannel() : undefined;
 
   if (method === "phone" && !isPhoneVerificationEnabled()) {
+    return NextResponse.json(
+      { ok: false, message: getVerificationErrorMessage("unsupported_phone", locale) },
+      { status: 400 },
+    );
+  }
+
+  if (method === "phone" && phoneChannel && !isPhoneVerificationChannelEnabled(phoneChannel)) {
     return NextResponse.json(
       { ok: false, message: getVerificationErrorMessage("unsupported_phone", locale) },
       { status: 400 },
@@ -53,6 +67,7 @@ export async function POST(request: Request) {
         ok: false,
         message: getVerificationErrorMessage("cooldown", locale),
         retryAfterSeconds: Math.max(1, Math.ceil((Date.parse(existingPending.resendAvailableAt) - Date.now()) / 1000)),
+        enabledPhoneChannels: getEnabledPhoneVerificationChannels(),
       },
       { status: 429 },
     );
@@ -76,14 +91,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const pending = await setPendingProviderVerification({ method, target });
+    const pending = await setPendingProviderVerification({ method, target, channel: phoneChannel });
     return NextResponse.json({
       ok: true,
       demoMode: true,
       pending,
-      delivery: getVerificationDeliveryLabel(method, locale),
+      delivery: getVerificationDeliveryLabel(method, locale, phoneChannel),
       retryAfterSeconds: constants.resendCooldownSeconds,
       expiresInSeconds: constants.ttlSeconds,
+      enabledPhoneChannels: getEnabledPhoneVerificationChannels(),
       message:
         locale === "ar"
           ? "وضع تجريبي: استخدم الرمز 111111 لإكمال التحقق."
@@ -95,7 +111,7 @@ export async function POST(request: Request) {
     method === "phone"
       ? await supabase.auth.signInWithOtp({
           phone: target,
-          options: { shouldCreateUser: true },
+          options: { shouldCreateUser: true, channel: phoneChannel },
         })
       : await supabase.auth.signInWithOtp({
           email: target,
@@ -124,21 +140,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const pending = await setPendingProviderVerification({ method, target });
+  const pendingWithChannel = await setPendingProviderVerification({ method, target, channel: phoneChannel });
 
   return NextResponse.json({
     ok: true,
-    pending,
-    delivery: getVerificationDeliveryLabel(method, locale),
+    pending: pendingWithChannel,
+    delivery: getVerificationDeliveryLabel(method, locale, phoneChannel),
     retryAfterSeconds: constants.resendCooldownSeconds,
     expiresInSeconds: constants.ttlSeconds,
+    enabledPhoneChannels: getEnabledPhoneVerificationChannels(),
     message:
       method === "phone"
         ? locale === "ar"
-          ? `تم إرسال رمز التحقق عبر ${getVerificationDeliveryLabel(method, locale)}.`
-          : `Un code de vérification a été envoyé par ${getVerificationDeliveryLabel(method, locale)}.`
+          ? `تم إرسال رمز التحقق عبر ${getVerificationDeliveryLabel(method, locale, phoneChannel)}.`
+          : `Un code de vérification a été envoyé par ${getVerificationDeliveryLabel(method, locale, phoneChannel)}.`
         : locale === "ar"
-          ? "أرسلنا رسالة تحقق إلى بريدك الإلكتروني. إذا وصلتك رسالة تحتوي على رابط تأكيد فافتحه لإكمال التحقق، وإذا وصلك رمز فأدخله أدناه."
-          : "Nous avons envoyé un e-mail de vérification. Si vous recevez un lien de confirmation, ouvrez-le pour terminer la vérification. Si vous recevez un code, saisissez-le ci-dessous.",
+          ? "أرسلنا رمز تحقق من 6 أرقام إلى بريدك الإلكتروني. إذا استمر البريد في إرسال رابط سحري بدل الرمز، فغيّر قالب Magic Link في Supabase ليستخدم الرمز."
+          : "Nous avons envoyé un code de vérification à 6 chiffres à votre e-mail. Si Supabase envoie encore un magic link, remplacez le modèle Magic Link par un modèle OTP dans Supabase.",
   });
 }
