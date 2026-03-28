@@ -73,7 +73,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       action={actionPath}
       role="search"
       aria-label={locale === "ar" ? "تصفية والبحث عن المزودين" : "Filtrer et rechercher des prestataires"}
-      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(8,23,69,0.98),rgba(14,67,191,0.94)_62%,rgba(48,114,255,0.88))] p-5 text-white shadow-[0_28px_60px_rgba(8,34,99,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
+      className="surface-card flex flex-col gap-4 rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(18,42,38,0.98),rgba(34,81,73,0.95)_58%,rgba(203,107,68,0.86))] p-5 text-white shadow-[0_28px_60px_rgba(24,40,36,0.24)] lg:flex-row lg:flex-wrap lg:items-end"
     >
       <label className="min-w-0 flex-1">
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.searchLabel}</span>
@@ -157,7 +157,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         </select>
       </label>
 
-      <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(8,34,99,0.16)] lg:w-auto">
+      <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,40,36,0.16)] lg:w-auto">
         <input type="hidden" name="verifiedOnly" value="1" />
         <input
           type="checkbox"
@@ -169,7 +169,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         <span>{labels.verifiedOnlyLabel}</span>
       </label>
 
-      <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(8,34,99,0.16)] lg:w-auto">
+      <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(24,40,36,0.16)] lg:w-auto">
         <input
           type="checkbox"
           name="womenSafe"
@@ -189,12 +189,12 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         </a>
       </div>
 
-      <div className="w-full rounded-[1.25rem] border border-white/12 bg-white/8 p-3">
+      <div className="w-full rounded-[1.25rem] border border-white/12 bg-[rgba(255,255,255,0.08)] p-3 backdrop-blur">
         <div className="mb-2 text-sm font-semibold text-white/90">{labels.categoryBrowseLabel}</div>
         <div className="flex gap-2 overflow-x-auto pb-1">
           <a
             href={actionPath}
-            className={`chip-button min-h-0 shrink-0 px-3 py-2 text-xs ${!values.category ? "bg-white text-[var(--navy)]" : "bg-white/10 text-white"}`}
+            className={`chip-button min-h-0 shrink-0 px-3 py-2 text-xs ${!values.category ? "bg-[var(--soft)] text-[var(--navy)]" : "bg-white/10 text-white"}`}
           >
             {locale === "ar" ? "كل الفئات" : "Toutes"}
           </a>
@@ -213,7 +213,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
                 key={category.slug}
                 href={`${actionPath}?${params.toString()}`}
                 className={`chip-button min-h-0 shrink-0 px-3 py-2 text-xs ${
-                  values.category === category.slug ? "bg-white text-[var(--navy)]" : "bg-white/10 text-white"
+                  values.category === category.slug ? "bg-[var(--soft)] text-[var(--navy)]" : "bg-white/10 text-white"
                 }`}
               >
                 {category.name[locale]}

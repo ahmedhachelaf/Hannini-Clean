@@ -19,7 +19,7 @@ type ProviderCardProps = {
 // Minimal SVG placeholder for category when no gallery photos exist
 function CategoryPlaceholder({ icon, label }: { icon: ReturnType<typeof getCategoryIcon>; label: string }) {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-[rgba(20,92,255,0.08)] to-[rgba(13,28,69,0.12)]">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-[rgba(245,227,206,0.8)] to-[rgba(33,64,58,0.15)]">
       <IconBadge icon={icon} size={22} className="h-12 w-12" />
       <span className="text-xs font-semibold text-[var(--muted)] opacity-70">{label}</span>
     </div>
@@ -75,8 +75,8 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
 
   return (
     <article
-      className={`surface-card gradient-frame flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all ${
-        highlighted ? "ring-2 ring-[rgba(20,92,255,0.45)] shadow-[0_30px_70px_rgba(12,40,104,0.2)]" : ""
+      className={`group surface-card gradient-frame flex h-full flex-col overflow-hidden rounded-[1.75rem] transition-all duration-300 ${
+        highlighted ? "ring-2 ring-[rgba(203,107,68,0.32)] shadow-[0_30px_70px_rgba(31,52,47,0.18)]" : "hover:-translate-y-1 hover:shadow-[0_28px_64px_rgba(31,52,47,0.16)]"
       }`}
     >
       {/* ── Cover photo (200 px tall) ── */}
@@ -91,8 +91,8 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             {/* Hover overlay */}
-            <div className="absolute inset-0 flex items-center justify-center bg-[rgba(13,28,69,0.52)] opacity-0 transition-opacity duration-200 hover:opacity-100">
-              <span className="rounded-full bg-white/90 px-4 py-2 text-sm font-bold text-[var(--navy)]">
+            <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(180deg,rgba(20,34,31,0.08),rgba(20,34,31,0.58))] opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className="rounded-full bg-white/92 px-4 py-2 text-sm font-bold text-[var(--navy)] shadow-[0_12px_24px_rgba(17,30,28,0.18)]">
                 {viewPortfolioLabel}
               </span>
             </div>
@@ -113,12 +113,12 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
             </span>
           )}
           {provider.featured ? (
-            <span className="rounded-full border border-white/50 bg-white/80 px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--ink)] backdrop-blur-sm">
+            <span className="rounded-full border border-white/50 bg-white/84 px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--ink)] backdrop-blur-sm">
               {locale === "ar" ? "مقترح" : "Recommandé"}
             </span>
           ) : null}
           {provider.womenSafe ? (
-            <span className="rounded-full border border-[rgba(20,92,255,0.18)] bg-[rgba(20,92,255,0.12)] px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--navy)] backdrop-blur-sm">
+            <span className="rounded-full border border-[rgba(47,115,89,0.24)] bg-[rgba(47,115,89,0.14)] px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--navy)] backdrop-blur-sm">
               {locale === "ar" ? "آمن للنساء" : "Safe pour femmes"}
             </span>
           ) : null}
@@ -127,7 +127,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
 
       {/* ── Thumbnail strip (up to 3 additional photos) ── */}
       {thumbPhotos.length > 0 ? (
-        <div className="flex gap-1 border-b border-[var(--line)] bg-[var(--soft)]">
+        <div className="flex gap-1 border-b border-[var(--line)] bg-[linear-gradient(180deg,rgba(245,236,220,0.78),rgba(255,255,255,0.88))]">
           {thumbPhotos.map((src, i) => (
             <div key={i} className="relative h-[60px] flex-1 overflow-hidden">
               <Image
@@ -141,7 +141,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
           ))}
           {/* Remaining count badge */}
           {provider.gallery.length > 4 ? (
-            <div className="flex h-[60px] min-w-[60px] flex-col items-center justify-center bg-[rgba(13,28,69,0.08)] text-xs font-bold text-[var(--muted)]">
+            <div className="flex h-[60px] min-w-[60px] flex-col items-center justify-center bg-[rgba(24,59,54,0.08)] text-xs font-bold text-[var(--muted)]">
               +{provider.gallery.length - 4}
             </div>
           ) : null}
@@ -152,7 +152,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
       <div className="flex flex-1 flex-col gap-4 p-5">
         {/* Provider identity */}
         <div className="flex items-start gap-3">
-          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[var(--soft)] ring-1 ring-[rgba(15,95,255,0.1)]">
+          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[var(--soft)] ring-1 ring-[rgba(24,59,54,0.12)] shadow-[0_10px_24px_rgba(24,59,54,0.12)]">
             <Image
               src={provider.profilePhotoUrl}
               alt={provider.displayName}
@@ -166,7 +166,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
               {provider.displayName}
             </h3>
             <p className="mt-0.5 flex items-center gap-2 text-sm font-medium text-[var(--muted)]">
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(15,95,255,0.16)] bg-white shadow-[0_8px_18px_rgba(12,40,104,0.12)]">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(24,59,54,0.12)] bg-[rgba(245,236,220,0.72)] shadow-[0_8px_18px_rgba(24,59,54,0.1)]">
                 {(() => {
                   const Icon = categoryIcon;
                   return <Icon size={14} strokeWidth={2.2} className="text-[var(--navy)]" />;
@@ -201,7 +201,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
         </dl>
 
         {/* Location row */}
-        <div className="rounded-xl border border-[rgba(15,95,255,0.1)] bg-white/70 px-3.5 py-3 text-[0.875rem] leading-6 text-[var(--muted)]">
+        <div className="rounded-xl border border-[rgba(24,59,54,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(247,240,229,0.78))] px-3.5 py-3 text-[0.875rem] leading-6 text-[var(--muted)]">
           <span className="font-semibold text-[var(--ink)]">{provinceName}</span>
           {zoneNames ? <span className="before:mx-1.5 before:content-['•']">{zoneNames}</span> : null}
           {distanceKm !== null ? (
@@ -220,11 +220,11 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
             </span>
           ) : null}
           {provider.rating >= 4.7 && provider.completedJobs >= 10 ? (
-            <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+            <span className="chip-button min-h-0 border-[rgba(203,107,68,0.18)] bg-[rgba(243,215,202,0.6)] px-2.5 py-1 text-xs">
               {locale === "ar" ? "الأعلى تقييماً" : "Top rated"}
             </span>
           ) : null}
-          <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+          <span className="chip-button min-h-0 border-[rgba(24,59,54,0.12)] bg-[rgba(245,236,220,0.65)] px-2.5 py-1 text-xs">
             {locale === "ar" ? `قوة الملف ${readiness.score}%` : `Profil ${readiness.score}%`}
           </span>
           {provider.womenSafe ? (
