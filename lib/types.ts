@@ -111,6 +111,7 @@ export type Provider = {
   completedJobs: number;
   responseTimeMinutes: number;
   isVerified: boolean;
+  womenSafe?: boolean;
   status: ProviderStatus;
   featured: boolean;
   yearsExperience: number;
@@ -138,6 +139,7 @@ export type Provider = {
     emailVerified?: boolean;
     verificationMethod?: "phone" | "email" | null;
     contactVerifiedAt?: string | null;
+    womenSafe?: boolean;
     authUserId?: string | null;
     ageConfirmed?: boolean;
     conductAccepted?: boolean;
@@ -414,6 +416,7 @@ export type Filters = {
   category?: string;
   province?: string;
   zone?: string;
+  womenSafe?: boolean;
   query?: string;
   sort?: SortOption;
 };

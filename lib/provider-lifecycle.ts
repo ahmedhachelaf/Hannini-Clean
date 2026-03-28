@@ -10,6 +10,7 @@ type ProviderLifecycleMeta = {
   policyAccepted: boolean;
   phoneVerified?: boolean;
   emailVerified?: boolean;
+  womenSafe?: boolean;
   verificationMethod?: "phone" | "email" | null;
   contactVerifiedAt?: string | null;
   verifiedAuthUserId?: string | null;
@@ -54,6 +55,7 @@ export function parseProviderLifecycleMeta(notes: string | null | undefined): Pr
     policyAccepted: value.includes("[policy_accepted]"),
     phoneVerified: value.includes("[phone_verified]"),
     emailVerified: value.includes("[email_verified]"),
+    womenSafe: value.includes("[women_safe]"),
     verificationMethod: readTag(value, TAG_PATTERNS.verificationMethod) as "phone" | "email" | null,
     contactVerifiedAt: readTag(value, TAG_PATTERNS.contactVerifiedAt),
     verifiedAuthUserId: readTag(value, TAG_PATTERNS.verifiedAuthUserId),
@@ -127,6 +129,7 @@ export function mergeProviderLifecycleNotes(
     merged.policyAccepted ? "[policy_accepted]" : "",
     merged.phoneVerified ? "[phone_verified]" : "",
     merged.emailVerified ? "[email_verified]" : "",
+    merged.womenSafe ? "[women_safe]" : "",
     merged.accountEmail ? `[account_email:${merged.accountEmail}]` : "",
     merged.verificationMethod ? `[verification_method:${merged.verificationMethod}]` : "",
     merged.contactVerifiedAt ? `[contact_verified_at:${merged.contactVerifiedAt}]` : "",

@@ -184,6 +184,7 @@ export const fr = {
     categoryLabel: "Catégorie",
     provinceLabel: "Wilaya",
     zoneLabel: "Ville ou zone",
+    womenSafeLabel: "Safe pour femmes",
     sortLabel: "Tri",
     sortTop: "Meilleur score",
     sortRating: "Meilleure note",

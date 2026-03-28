@@ -260,6 +260,7 @@ function parseVerificationNotes(notes: string | null | undefined) {
     accountEmail: value.accountEmail,
     phoneVerified: value.phoneVerified,
     emailVerified: value.emailVerified,
+    womenSafe: value.womenSafe,
     verificationMethod: value.verificationMethod,
     contactVerifiedAt: value.contactVerifiedAt,
     verifiedAuthUserId: value.verifiedAuthUserId,
@@ -323,6 +324,10 @@ function applyProviderFilters(providers: Provider[], filters: Filters = {}) {
       return false;
     }
 
+    if (filters.womenSafe && !provider.womenSafe) {
+      return false;
+    }
+
     if (!query) {
       return true;
     }
@@ -368,6 +373,7 @@ function mapProviderRow(row: ProviderRow): Provider {
     completedJobs: row.completed_jobs_count ?? 0,
     responseTimeMinutes: row.response_time_minutes ?? 60,
     isVerified: verificationStatus === "verified" || Boolean(row.is_verified),
+    womenSafe: Boolean(verificationFlags.womenSafe),
     status: derivedStatus,
     featured: Boolean(row.featured),
     yearsExperience: row.years_experience ?? 0,
@@ -414,6 +420,7 @@ function mapProviderRow(row: ProviderRow): Provider {
       notes: stripProviderLifecycleTags(verification?.notes),
       phoneVerified: row.phone_verified ?? verificationFlags.phoneVerified,
       emailVerified: row.email_verified ?? verificationFlags.emailVerified,
+      womenSafe: verificationFlags.womenSafe,
       verificationMethod: row.verification_method ?? verificationFlags.verificationMethod ?? null,
       contactVerifiedAt: row.contact_verified_at ?? verificationFlags.contactVerifiedAt ?? null,
       authUserId: row.auth_user_id ?? verificationFlags.verifiedAuthUserId ?? null,

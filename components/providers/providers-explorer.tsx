@@ -17,6 +17,7 @@ type ProvidersExplorerProps = {
     category?: string;
     province?: string;
     zone?: string;
+    womenSafe?: boolean;
     sort?: SortOption;
   };
   labels: {
@@ -24,6 +25,7 @@ type ProvidersExplorerProps = {
     categoryLabel: string;
     provinceLabel: string;
     zoneLabel: string;
+    womenSafeLabel: string;
     sortLabel: string;
     sortTop: string;
     sortRating: string;
@@ -240,6 +242,11 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
           <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
             {locale === "ar" ? `${orderedProviders.length} مزود ظاهر` : `${orderedProviders.length} prestataires visibles`}
           </span>
+          {values.womenSafe ? (
+            <span className="status-pill border border-[rgba(15,95,255,0.14)] bg-[rgba(20,92,255,0.08)] text-[var(--navy)]">
+              {locale === "ar" ? "تصفية المزوّدات والمزوّدين الآمنين للنساء" : "Filtre sûreté femmes actif"}
+            </span>
+          ) : null}
           <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
             {locale === "ar" ? "خريطة وقائمة مترابطتان" : "Carte et liste synchronisees"}
           </span>

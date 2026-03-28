@@ -116,6 +116,11 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
               {locale === "ar" ? "مقترح" : "Recommandé"}
             </span>
           ) : null}
+          {provider.womenSafe ? (
+            <span className="rounded-full border border-[rgba(20,92,255,0.18)] bg-[rgba(20,92,255,0.12)] px-2.5 py-0.5 text-[0.78rem] font-bold text-[var(--navy)] backdrop-blur-sm">
+              {locale === "ar" ? "آمن للنساء" : "Safe pour femmes"}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -216,6 +221,11 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
           {provider.rating >= 4.7 && provider.completedJobs >= 10 ? (
             <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
               {locale === "ar" ? "الأعلى تقييماً" : "Top rated"}
+            </span>
+          ) : null}
+          {provider.womenSafe ? (
+            <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+              {locale === "ar" ? "اختيار أكثر أماناً" : "Choix plus sûr"}
             </span>
           ) : null}
           {provider.profileType === "home_business" && provider.bulkOrders?.available ? (

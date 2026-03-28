@@ -27,6 +27,7 @@ export default async function ProvidersPage({ params, searchParams }: ProvidersP
     category: readSearchValue(query.category),
     province: readSearchValue(query.province),
     zone: readSearchValue(query.zone),
+    womenSafe: readSearchValue(query.womenSafe) === "1",
     sort: (readSearchValue(query.sort) as SortOption | undefined) ?? "top",
   };
 

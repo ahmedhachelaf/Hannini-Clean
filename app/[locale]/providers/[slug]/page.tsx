@@ -167,6 +167,11 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                   {locale === "ar" ? "⏳ قيد التحقق" : "⏳ En vérification"}
                 </span>
               )}
+              {provider.womenSafe ? (
+                <span className="rounded-full border border-[rgba(20,92,255,0.16)] bg-[rgba(20,92,255,0.08)] px-2.5 py-0.5 text-xs font-bold text-[var(--navy)]">
+                  {locale === "ar" ? "آمن للنساء" : "Safe pour femmes"}
+                </span>
+              ) : null}
             </div>
             <div>
               <h1 className={`text-4xl font-extrabold tracking-[-0.05em] ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h1>

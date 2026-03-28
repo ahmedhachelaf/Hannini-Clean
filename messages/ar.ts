@@ -183,6 +183,7 @@ export const ar = {
     categoryLabel: "الفئة",
     provinceLabel: "الولاية",
     zoneLabel: "المدينة أو المنطقة",
+    womenSafeLabel: "آمن للنساء",
     sortLabel: "الترتيب",
     sortTop: "الأفضل",
     sortRating: "أعلى تقييم",

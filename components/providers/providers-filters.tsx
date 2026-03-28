@@ -14,6 +14,7 @@ type ProvidersFiltersProps = {
     category?: string;
     province?: string;
     zone?: string;
+    womenSafe?: boolean;
     sort?: SortOption;
   };
   labels: {
@@ -21,6 +22,7 @@ type ProvidersFiltersProps = {
     categoryLabel: string;
     provinceLabel: string;
     zoneLabel: string;
+    womenSafeLabel: string;
     sortLabel: string;
     sortTop: string;
     sortRating: string;
@@ -165,6 +167,17 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
           <option value="response">{labels.sortResponse}</option>
           <option value="jobs">{labels.sortJobs}</option>
         </select>
+      </label>
+
+      <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(8,34,99,0.16)] lg:w-auto">
+        <input
+          type="checkbox"
+          name="womenSafe"
+          value="1"
+          defaultChecked={Boolean(values.womenSafe)}
+          className="h-4 w-4 rounded border-white/40 text-[var(--accent)] focus:ring-white/60"
+        />
+        <span>{labels.womenSafeLabel}</span>
       </label>
 
       <div className="flex flex-wrap gap-3">
