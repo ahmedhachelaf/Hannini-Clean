@@ -11,6 +11,8 @@ export function revalidateMarketplacePaths(providerSlug?: string) {
     revalidatePath(`/${locale}/businesses`);
     revalidatePath(`/${locale}/join`);
     revalidatePath(`/${locale}/admin`);
+    revalidatePath(`/${locale}/admin/providers`);
+    revalidatePath(`/${locale}/provider`);
 
     if (providerSlug) {
       revalidatePath(`/${locale}/providers/${providerSlug}`);

@@ -56,6 +56,12 @@ export async function updateProviderModeration({
     .single();
 
   if (providerLookupError || !providerRow) {
+    console.error("provider-moderation:provider_lookup_failed", {
+      providerId,
+      approvalStatus,
+      verificationStatus: verification?.status,
+      error: providerLookupError,
+    });
     return { ok: false as const, message: providerLookupError?.message ?? "Provider not found." };
   }
 
@@ -68,6 +74,12 @@ export async function updateProviderModeration({
   );
 
   if (verification?.status === "verified" && !isContactVerified) {
+    console.error("provider-moderation:contact_not_verified", {
+      providerId,
+      approvalStatus,
+      phoneVerified: providerRow.phone_verified,
+      emailVerified: providerRow.email_verified,
+    });
     return {
       ok: false as const,
       message: "Provider contact must be verified before admin approval.",
@@ -104,6 +116,13 @@ export async function updateProviderModeration({
     const providerUpdate = await supabase.from("providers").update(providerPatch).eq("id", providerId);
 
     if (providerUpdate.error) {
+      console.error("provider-moderation:provider_update_failed", {
+        providerId,
+        approvalStatus,
+        verificationStatus: verification?.status,
+        patch: providerPatch,
+        error: providerUpdate.error,
+      });
       return { ok: false as const, message: providerUpdate.error.message };
     }
   }
@@ -149,6 +168,12 @@ export async function updateProviderModeration({
     );
 
     if (verificationUpdate.error) {
+      console.error("provider-moderation:verification_upsert_failed", {
+        providerId,
+        approvalStatus,
+        verificationStatus: verification.status,
+        error: verificationUpdate.error,
+      });
       return { ok: false as const, message: verificationUpdate.error.message };
     }
 
@@ -156,10 +181,10 @@ export async function updateProviderModeration({
       const notificationInsert = await supabase.from("notifications").insert({
         provider_id: providerId,
         type: "verification_approved",
-        title_ar: "تم التحقق من حسابك! ✓",
-        body_ar: "مبروك! تم التحقق من ملفك على منصة هَنّيني. يمكنك الآن الاستفادة من جميع مزايا المنصة.",
-        title_fr: "Votre compte est vérifié! ✓",
-        body_fr: "Félicitations! Votre profil Hannini a été vérifié.",
+        title_ar: "تم قبول طلبك",
+        body_ar: "تم قبول طلبك ويمكنك الآن استقبال الطلبات",
+        title_fr: "Votre demande a été acceptée",
+        body_fr: "Votre demande a été acceptée et vous pouvez maintenant recevoir des demandes.",
       });
 
       if (notificationInsert.error) {
@@ -228,6 +253,11 @@ export async function updateProviderModeration({
     );
 
     if (verificationUpdate.error) {
+      console.error("provider-moderation:verification_note_upsert_failed", {
+        providerId,
+        approvalStatus,
+        error: verificationUpdate.error,
+      });
       return { ok: false as const, message: verificationUpdate.error.message };
     }
   }

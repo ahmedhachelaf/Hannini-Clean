@@ -213,14 +213,54 @@ export default async function AdminPage({ params }: AdminPageProps) {
                       </span>
                     </div>
                     <div className="mt-3 font-semibold">{review.customerName}</div>
-                    <div className="mt-2 text-sm text-[var(--muted)]">
-                      {review.rating}/5 • {formatDate(review.createdAt, locale)}
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[var(--muted)]">
+                      <span>{review.rating}/5 • {formatDate(review.createdAt, locale)}</span>
+                      <span className="status-pill border border-[var(--line)] bg-white text-[var(--ink)]">
+                        {locale === "ar" ? "الحجز" : "Booking"}: {review.bookingId}
+                      </span>
+                      <span className={`status-pill ${review.interactionVerified ? "status-pill--verified" : "status-pill border border-amber-200 bg-amber-50 text-amber-700"}`}>
+                        {review.interactionVerified ? (locale === "ar" ? "✓ تفاعل موثّق" : "✓ Interaction vérifiée") : (locale === "ar" ? "غير موثّق" : "Non vérifiée")}
+                      </span>
                     </div>
+                    {review.reviewerPhone ? (
+                      <div className="mt-2 text-sm text-[var(--muted)]">
+                        {locale === "ar" ? "هاتف المراجع:" : "Téléphone du client :"} {review.reviewerPhone}
+                      </div>
+                    ) : null}
                     <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{review.comment}</p>
+                    {review.providerReply ? (
+                      <div className="mt-3 rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] px-3 py-3 text-xs leading-6 text-[var(--muted)]">
+                        <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "رد المزود" : "Réponse du prestataire"}</div>
+                        <p className="mt-1">{review.providerReply}</p>
+                        <div className="mt-2">
+                          {locale === "ar" ? "حالة الرد:" : "Statut de la réponse :"}{" "}
+                          {review.providerReplyStatus === "approved"
+                            ? locale === "ar" ? "منشور" : "Publié"
+                            : review.providerReplyStatus === "rejected"
+                              ? locale === "ar" ? "مخفي" : "Masqué"
+                              : review.providerReplyStatus === "pending"
+                                ? locale === "ar" ? "بانتظار المراجعة" : "En attente"
+                                : locale === "ar" ? "بدون رد" : "Sans réponse"}
+                        </div>
+                      </div>
+                    ) : null}
+                    {review.moderationReason ? <p className="mt-2 text-xs leading-6 text-[var(--muted)]">{review.moderationReason}</p> : null}
                     {review.adminNote ? <p className="mt-2 text-xs leading-6 text-[var(--muted)]">{review.adminNote}</p> : null}
                   </div>
 
-                  <ReviewActions locale={locale} review={review} labels={dictionary.admin} />
+                  <ReviewActions
+                    locale={locale}
+                    review={review}
+                    labels={{
+                      ...dictionary.admin,
+                      replyStatus: locale === "ar" ? "حالة رد المزود" : "Statut de la réponse",
+                      replyNone: locale === "ar" ? "بدون رد" : "Sans réponse",
+                      replyPending: locale === "ar" ? "قيد المراجعة" : "En revue",
+                      replyApproved: locale === "ar" ? "نشر الرد" : "Publier la réponse",
+                      replyRejected: locale === "ar" ? "إخفاء الرد" : "Masquer la réponse",
+                      moderationReason: locale === "ar" ? "سبب القرار" : "Motif de modération",
+                    }}
+                  />
                 </div>
               </article>
             ))}

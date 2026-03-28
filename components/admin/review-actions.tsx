@@ -13,6 +13,12 @@ type ReviewActionsProps = {
     reviewPending: string;
     reviewApproved: string;
     reviewRejected: string;
+    replyStatus?: string;
+    replyNone?: string;
+    replyPending?: string;
+    replyApproved?: string;
+    replyRejected?: string;
+    moderationReason?: string;
     approve: string;
     reject: string;
     save: string;
@@ -28,6 +34,8 @@ export function ReviewActions({ locale, review, labels }: ReviewActionsProps) {
   const [isError, setIsError] = useState(false);
   const [status, setStatus] = useState<Review["status"]>(review.status);
   const [adminNote, setAdminNote] = useState(review.adminNote ?? "");
+  const [moderationReason, setModerationReason] = useState(review.moderationReason ?? "");
+  const [providerReplyStatus, setProviderReplyStatus] = useState<Review["providerReplyStatus"]>(review.providerReplyStatus ?? "none");
 
   const statusLabels: Record<Review["status"], string> = {
     pending_review: labels.reviewPending,
@@ -49,6 +57,8 @@ export function ReviewActions({ locale, review, labels }: ReviewActionsProps) {
         body: JSON.stringify({
           status: nextStatus,
           adminNote,
+          moderationReason,
+          providerReplyStatus,
         }),
       });
 
@@ -61,6 +71,7 @@ export function ReviewActions({ locale, review, labels }: ReviewActionsProps) {
       }
 
       setStatus(nextStatus);
+      setProviderReplyStatus(providerReplyStatus);
       setMessage(data.message ?? (locale === "ar" ? "تم تحديث التقييم." : "Avis mis à jour."));
       router.refresh();
     } finally {
@@ -101,6 +112,63 @@ export function ReviewActions({ locale, review, labels }: ReviewActionsProps) {
           placeholder={locale === "ar" ? "ملاحظة داخلية أو سبب الإخفاء (اختياري)" : "Note interne ou motif de masquage (optionnel)"}
         />
       </label>
+
+      <label className="mt-4 block">
+        <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+          {labels.moderationReason ?? (locale === "ar" ? "سبب القرار" : "Motif de modération")}
+        </span>
+        <textarea
+          value={moderationReason}
+          onChange={(event) => setModerationReason(event.target.value)}
+          rows={2}
+          className="input-base min-h-16 resize-y text-sm"
+          placeholder={locale === "ar" ? "مثال: تعليق غير دقيق أو مسيء" : "Ex. commentaire inexact ou abusif"}
+        />
+      </label>
+
+      {review.providerReply ? (
+        <div className="mt-4 rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] p-3">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+            {labels.replyStatus ?? (locale === "ar" ? "رد المزود" : "Réponse du prestataire")}
+          </div>
+          <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{review.providerReply}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(["none", "pending", "approved", "rejected"] as const).map((option) => {
+              const optionLabel =
+                option === "approved"
+                  ? labels.replyApproved
+                  : option === "rejected"
+                    ? labels.replyRejected
+                    : option === "pending"
+                      ? labels.replyPending
+                      : labels.replyNone;
+
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setProviderReplyStatus(option)}
+                  disabled={pending !== null}
+                  className={`rounded-full border px-3 py-2 text-xs font-semibold ${
+                    providerReplyStatus === option
+                      ? "border-[var(--navy)] bg-[var(--navy)] text-white"
+                      : "border-[var(--line)] bg-white text-[var(--ink)]"
+                  }`}
+                >
+                  {optionLabel ??
+                    (option === "approved"
+                      ? locale === "ar" ? "نشر الرد" : "Publier"
+                      : option === "rejected"
+                        ? locale === "ar" ? "إخفاء الرد" : "Masquer"
+                        : option === "pending"
+                          ? locale === "ar" ? "قيد المراجعة" : "En revue"
+                          : locale === "ar" ? "بدون رد" : "Sans réponse")}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <button type="button" onClick={() => save(status, "save")} disabled={pending !== null} className="button-primary mt-4 w-full">
         {pending === "save" ? "..." : labels.save}

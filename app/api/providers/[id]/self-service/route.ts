@@ -4,6 +4,7 @@ import { getProviderById } from "@/lib/repository";
 import { mergeProviderLifecycleNotes, parseProviderLifecycleMeta } from "@/lib/provider-lifecycle";
 import { createProviderPasswordSecret } from "@/lib/provider-password";
 import { updateDemoProviderSelfService } from "@/lib/provider-store";
+import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 import { revalidateMarketplacePaths } from "@/lib/revalidation";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 
@@ -98,12 +99,24 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   if (body.action === "update") {
+    const normalizedPhone = body.phoneNumber?.trim() ? normalizeAlgerianPhone(body.phoneNumber) : provider.phoneNumber;
+    const normalizedWhatsapp = body.whatsappNumber?.trim()
+      ? normalizeAlgerianPhone(body.whatsappNumber)
+      : provider.whatsappNumber;
+
+    if (!isValidAlgerianPhone(normalizedWhatsapp)) {
+      return NextResponse.json(
+        { ok: false, message: "A valid Algerian WhatsApp number is required." },
+        { status: 400 },
+      );
+    }
+
     const providerUpdate = await supabase
       .from("providers")
       .update({
         workshop_name: body.workshopName?.trim() || provider.workshopName || null,
-        phone_number: body.phoneNumber?.trim() || provider.phoneNumber,
-        whatsapp_number: body.whatsappNumber?.trim() || provider.whatsappNumber,
+        phone_number: normalizedPhone,
+        whatsapp_number: normalizedWhatsapp,
         bio_ar: body.shortDescription?.trim() || provider.bio.ar,
         bio_fr: body.shortDescription?.trim() || provider.bio.fr,
       })

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   clearPendingProviderVerification,
   createAnonSupabaseClient,
+  getEmailVerificationMode,
   getPendingProviderVerification,
   getVerificationConstants,
   getVerificationErrorMessage,
@@ -27,6 +28,20 @@ export async function POST(request: Request) {
   const target = normalizeVerificationTarget(method, rawTarget);
   const code = String(payload?.code ?? "").trim();
   const constants = getVerificationConstants();
+  const emailVerificationMode = getEmailVerificationMode();
+
+  if (method === "email" && emailVerificationMode === "magic_link") {
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          locale === "ar"
+            ? "التحقق عبر البريد الإلكتروني يتم حالياً من خلال رابط داخل الرسالة، وليس عبر رمز. افتح الرسالة واضغط على الرابط."
+            : "La vérification par e-mail se fait actuellement via un lien dans le message, pas via un code. Ouvrez l'e-mail puis cliquez sur le lien.",
+      },
+      { status: 400 },
+    );
+  }
 
   if (!validateVerificationTarget(method, rawTarget) || !/^\d{6}$/.test(code)) {
     return NextResponse.json(

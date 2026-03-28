@@ -88,7 +88,12 @@ export async function POST(request: Request) {
     }
 
     const primaryPhone = normalizedPhone;
-    const primaryWhatsapp = payload.whatsappNumber || normalizedPhone;
+    const primaryWhatsapp = normalizeAlgerianPhone(payload.whatsappNumber);
+
+    if (!isValidAlgerianPhone(primaryWhatsapp)) {
+      throw new Error(locale === "ar" ? "يرجى إدخال رقم واتساب جزائري صالح." : "Veuillez saisir un numéro WhatsApp algérien valide.");
+    }
+
     const profileEmail = payload.email || (verifiedContact.method === "email" ? verifiedContact.target : "");
     const generatedSlug = `${slugify(payload.workshopName || payload.fullName)}-${Date.now().toString(36).slice(-5)}`;
     const zoneSlug = getZoneSlugForCommune(payload.wilayaCode, payload.commune);
@@ -478,6 +483,18 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
       return locale === "ar"
         ? "تأكيد كلمة المرور غير مطابق."
         : "La confirmation du mot de passe ne correspond pas.";
+    }
+
+    if (issue.message === "whatsapp_required") {
+      return locale === "ar"
+        ? "رقم واتساب مطلوب حتى يتمكن الزبائن من التواصل معك بسرعة."
+        : "Le numéro WhatsApp est requis pour que les clients puissent vous contacter rapidement.";
+    }
+
+    if (issue.message === "whatsapp_invalid" || issue.path[0] === "whatsappNumber") {
+      return locale === "ar"
+        ? "يرجى إدخال رقم واتساب جزائري صالح."
+        : "Veuillez saisir un numéro WhatsApp algérien valide.";
     }
 
     if (issue.path[0] === "password") {

@@ -15,10 +15,11 @@ export async function POST(_request: Request, context: RouteContext) {
 
   const result = await updateProviderModeration({
     providerId: id,
+    approvalStatus: "under_review",
     isVerified: false,
     verification: {
       status: "pending",
-      notes: "Verification badge removed by admin.",
+      notes: "Verification badge removed by admin. Provider moved back to pending review.",
     },
   });
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildBookingDescription, createCustomerBookingAccessToken, stripBookingLifecycleTags } from "@/lib/booking-lifecycle";
+import { buildWhatsAppUrl } from "@/lib/phone";
 import { createDemoBooking } from "@/lib/booking-store";
 import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { getProviderById } from "@/lib/repository";
@@ -25,15 +26,15 @@ export async function POST(request: Request) {
     const issueSummary = buildBookingDescription(payload, locale, customerAccessToken);
     const whatsappIssueSummary = stripBookingLifecycleTags(issueSummary);
 
-    const whatsappMessage = encodeURIComponent(
+    const whatsappMessage =
       `Bonjour / السلام عليكم. Booking via Hannini:\n` +
         `Client: ${payload.customerName}\n` +
         `Phone: ${payload.phoneNumber}\n` +
         `Date: ${payload.date} ${payload.time}\n` +
         `Address: ${payload.address}\n` +
         `Maps: ${payload.googleMapsUrl}\n` +
-        `Issue: ${whatsappIssueSummary}`,
-    );
+        `Issue: ${whatsappIssueSummary}`;
+    const whatsappUrl = buildWhatsAppUrl(provider.whatsappNumber, whatsappMessage);
 
     if (!hasSupabaseServerEnv()) {
       const booking = createDemoBooking(payload, {
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
           locale === "ar"
             ? "تم حفظ الطلب داخلياً، ويمكن لمزوّد الخدمة والإدارة متابعته الآن."
             : "La demande a bien été enregistrée en interne et peut maintenant être suivie par le prestataire et l’admin.",
-        whatsappUrl: `https://wa.me/${provider.whatsappNumber}?text=${whatsappMessage}`,
+        whatsappUrl: whatsappUrl ?? undefined,
       });
     }
 
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
         locale === "ar"
           ? "تم حفظ الطلب داخلياً، ويمكن متابعته من صفحة الحالة مع استمرار خيار واتساب للتأكيد."
           : "La demande est bien enregistrée en interne. Vous pouvez suivre son statut, et WhatsApp reste disponible pour confirmation.",
-      whatsappUrl: `https://wa.me/${provider.whatsappNumber}?text=${whatsappMessage}`,
+      whatsappUrl: whatsappUrl ?? undefined,
     });
   } catch (error) {
     return NextResponse.json(

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 
 export const bookingSchema = z.object({
   providerId: z.string().min(1),
@@ -120,7 +121,7 @@ export const providerSignupSchema = z.object({
   policyAccepted: z.boolean().default(false),
   workshopName: z.string().optional().default(""),
   email: z.string().optional().or(z.literal("")).default(""),
-  whatsappNumber: z.string().optional().or(z.literal("")).default(""),
+  whatsappNumber: z.string().min(8),
   shortDescription: z.string().optional().or(z.literal("")).default(""),
   yearsExperience: z.number().min(0).optional().default(0),
   googleMapsUrl: z.string().optional().or(z.literal("")).default(""),
@@ -163,6 +164,20 @@ export const providerSignupSchema = z.object({
       code: z.ZodIssueCode.custom,
       path: ["passwordConfirmation"],
       message: "password_confirmation_mismatch",
+    });
+  }
+
+  if (!value.whatsappNumber.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["whatsappNumber"],
+      message: "whatsapp_required",
+    });
+  } else if (!isValidAlgerianPhone(normalizeAlgerianPhone(value.whatsappNumber))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["whatsappNumber"],
+      message: "whatsapp_invalid",
     });
   }
 });

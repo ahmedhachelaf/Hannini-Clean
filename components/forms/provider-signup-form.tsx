@@ -28,6 +28,7 @@ type FormErrors = Partial<Record<string, string>>;
 
 type VerificationMethod = "phone" | "email";
 type PhoneVerificationChannel = "sms" | "whatsapp";
+type EmailVerificationMode = "magic_link" | "otp";
 
 type VerificationCookieState = {
   method: VerificationMethod;
@@ -50,12 +51,18 @@ type FormCopy = {
   verificationEmailLabel: string;
   verificationStart: string;
   verificationResend: string;
+  verificationStartLink: string;
+  verificationResendLink: string;
   verificationWaiting: string;
   verificationVerified: string;
   verificationUsePhone: string;
-  verificationUseEmail: string;
+  verificationUseEmailOtp: string;
+  verificationUseEmailLink: string;
   verificationEmailSuccess: string;
   verificationEmailError: string;
+  verificationEmailLinkSent: string;
+  verificationEmailCheckInbox: string;
+  verificationLinkWaiting: string;
   verificationPhoneUnavailable: string;
   verificationWhatsappUnavailable: string;
   verificationCodePrompt: string;
@@ -114,12 +121,18 @@ function getCopy(locale: Locale): FormCopy {
       verificationEmailLabel: "البريد الإلكتروني للتحقق",
       verificationStart: "إرسال رمز التحقق",
       verificationResend: "إعادة إرسال الرمز",
+      verificationStartLink: "إرسال رابط التحقق",
+      verificationResendLink: "إعادة إرسال الرابط",
       verificationWaiting: "تم إرسال الرمز. أدخله هنا لإكمال التحقق.",
       verificationVerified: "تم التحقق بنجاح. يمكنك الآن إرسال الطلب.",
       verificationUsePhone: "سنرسل رمز تحقق من 6 أرقام إلى رقم الهاتف الذي أدخلته.",
-      verificationUseEmail: "سنرسل رمز تحقق من 6 أرقام إلى بريدك الإلكتروني.",
+      verificationUseEmailOtp: "سنرسل رمز تحقق من 6 أرقام إلى بريدك الإلكتروني.",
+      verificationUseEmailLink: "سنرسل رسالة إلى بريدك الإلكتروني تحتوي على رابط تحقق لإكمال العملية.",
       verificationEmailSuccess: "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن إرسال الطلب.",
       verificationEmailError: "تعذر التحقق من الرمز الإلكتروني. اطلب رمزاً جديداً ثم حاول مرة أخرى.",
+      verificationEmailLinkSent: "تم إرسال رابط التحقق إلى بريدك الإلكتروني.",
+      verificationEmailCheckInbox: "إذا لم تجد الرسالة، افحص البريد غير المرغوب فيه أو أعد الإرسال بعد انتهاء المهلة.",
+      verificationLinkWaiting: "افتح رسالة البريد الإلكتروني واضغط على رابط التحقق ثم ارجع إلى هَنّيني.",
       verificationPhoneUnavailable: "التحقق عبر الهاتف غير مفعّل حالياً لأن مزود الرسائل غير مضبوط بعد.",
       verificationWhatsappUnavailable: "واتساب غير متاح حالياً لأن قناة واتساب لم تُضبط بعد لدى مزود الرسائل.",
       verificationCodePrompt: "أدخل الرمز المكوّن من 6 أرقام",
@@ -146,7 +159,7 @@ function getCopy(locale: Locale): FormCopy {
       optionalToggle: "أضف تفاصيل إضافية لتعزيز ملفك (اختياري) ▾",
       workshopName: "اسم النشاط أو الورشة (اختياري)",
       email: "البريد الإلكتروني (اختياري)",
-      whatsapp: "رقم واتساب (اختياري)",
+      whatsapp: "رقم واتساب",
       shortDescription: "نبذة مختصرة (اختياري)",
       yearsExperience: "سنوات الخبرة (اختياري)",
       maps: "رابط خرائط غوغل (اختياري)",
@@ -177,12 +190,18 @@ function getCopy(locale: Locale): FormCopy {
     verificationEmailLabel: "E-mail de vérification",
     verificationStart: "Envoyer le code",
     verificationResend: "Renvoyer le code",
+    verificationStartLink: "Envoyer le lien",
+    verificationResendLink: "Renvoyer le lien",
     verificationWaiting: "Le code a été envoyé. Saisissez-le ici pour terminer la vérification.",
     verificationVerified: "Vérification réussie. Vous pouvez maintenant envoyer votre demande.",
     verificationUsePhone: "Nous enverrons un code à 6 chiffres au numéro saisi.",
-    verificationUseEmail: "Nous enverrons un code à 6 chiffres à votre e-mail.",
+    verificationUseEmailOtp: "Nous enverrons un code à 6 chiffres à votre e-mail.",
+    verificationUseEmailLink: "Nous enverrons un e-mail contenant un lien de vérification pour terminer l'étape.",
     verificationEmailSuccess: "Votre e-mail a bien été confirmé. Vous pouvez maintenant envoyer la demande.",
     verificationEmailError: "La vérification du code e-mail a échoué. Demandez un nouveau code puis réessayez.",
+    verificationEmailLinkSent: "Le lien de vérification a été envoyé à votre e-mail.",
+    verificationEmailCheckInbox: "Si vous ne voyez pas le message, vérifiez les spams puis renvoyez-le après le délai.",
+    verificationLinkWaiting: "Ouvrez l'e-mail puis cliquez sur le lien de vérification avant de revenir sur Hannini.",
     verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée car le fournisseur SMS n'est pas encore configuré.",
     verificationWhatsappUnavailable: "WhatsApp n'est pas disponible car le canal WhatsApp n'est pas encore configuré chez le fournisseur de messages.",
     verificationCodePrompt: "Entrez le code à 6 chiffres",
@@ -209,7 +228,7 @@ function getCopy(locale: Locale): FormCopy {
     optionalToggle: "Ajouter des détails pour renforcer le profil (optionnel) ▾",
     workshopName: "Nom d’activité ou atelier (optionnel)",
     email: "E-mail (optionnel)",
-    whatsapp: "WhatsApp (optionnel)",
+    whatsapp: "WhatsApp",
     shortDescription: "Courte description (optionnel)",
     yearsExperience: "Années d’expérience (optionnel)",
     maps: "Lien Google Maps (optionnel)",
@@ -242,7 +261,9 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("phone");
+  const [emailVerificationMode, setEmailVerificationMode] = useState<EmailVerificationMode>("magic_link");
   const [phoneOtpEnabled, setPhoneOtpEnabled] = useState(false);
   const [enabledPhoneChannels, setEnabledPhoneChannels] = useState<PhoneVerificationChannel[]>([]);
   const [phoneVerificationChannel, setPhoneVerificationChannel] = useState<PhoneVerificationChannel>("sms");
@@ -280,6 +301,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
               ok?: boolean;
               phoneOtpEnabled?: boolean;
               enabledPhoneChannels?: PhoneVerificationChannel[];
+              emailVerificationMode?: EmailVerificationMode;
               pending?: VerificationCookieState | null;
               verified?: VerificationCookieState | null;
             }
@@ -287,6 +309,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
 
         if (!cancelled && data?.ok) {
           setPhoneOtpEnabled(Boolean(data.phoneOtpEnabled));
+          setEmailVerificationMode(data.emailVerificationMode === "otp" ? "otp" : "magic_link");
           const nextChannels = data.enabledPhoneChannels?.length ? data.enabledPhoneChannels : [];
           setEnabledPhoneChannels(nextChannels);
           setPhoneVerificationChannel(nextChannels.includes("sms") ? "sms" : (nextChannels[0] ?? "sms"));
@@ -418,11 +441,12 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
       });
 
       const data = (await response.json().catch(() => null)) as
-        | {
+          | {
             ok?: boolean;
             message?: string;
             retryAfterSeconds?: number;
             enabledPhoneChannels?: PhoneVerificationChannel[];
+            emailVerificationMode?: EmailVerificationMode;
             pending?: VerificationCookieState | null;
           }
         | null;
@@ -444,13 +468,13 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
       if (data?.enabledPhoneChannels?.length) {
         setEnabledPhoneChannels(data.enabledPhoneChannels);
       }
+      if (data?.emailVerificationMode) {
+        setEmailVerificationMode(data.emailVerificationMode);
+      }
       clearFieldError("verification");
       clearFieldError("email");
       setOtpResetKey((value) => value + 1);
-      setVerificationFeedback({
-        type: "info",
-        message: data.message ?? copy.verificationWaiting,
-      });
+      setVerificationFeedback(null);
     } catch (error) {
       console.error("provider-signup:verification_start_failed", error);
       setVerificationFeedback({ type: "error", message: copy.verificationSendFailed });
@@ -547,6 +571,11 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
         locale === "ar" ? "يرجى إدخال بريد إلكتروني صالح لإتمام التحقق." : "Merci de saisir un e-mail valide pour la vérification.";
     }
 
+    if (!whatsappNumber || !isValidAlgerianPhone(whatsappNumber)) {
+      nextErrors.whatsappNumber =
+        locale === "ar" ? "يرجى إدخال رقم واتساب جزائري صالح." : "Veuillez saisir un numéro WhatsApp algérien valide.";
+    }
+
     if (!verifiedForCurrentTarget) {
       nextErrors.verification = copy.verificationRequired;
     }
@@ -595,6 +624,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
     formData.set("wilayaCode", wilayaCode);
     formData.set("commune", commune);
     formData.set("phoneNumber", normalizeAlgerianPhone(phoneNumber));
+    formData.set("whatsappNumber", normalizeAlgerianPhone(whatsappNumber));
     formData.set("email", email.trim().toLowerCase());
 
     const nextErrors = validate(formData);
@@ -708,6 +738,23 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
               }}
             />
             {errors.phoneNumber ? <p className="mt-1 text-xs text-rose-600">{errors.phoneNumber}</p> : null}
+          </label>
+          <label data-field="whatsappNumber">
+            <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
+              {copy.whatsapp} <span className="text-terracotta">• {copy.required}</span>
+            </span>
+            <input
+              name="whatsappNumber"
+              type="tel"
+              value={whatsappNumber}
+              className={`input-base ${errors.whatsappNumber ? "border-rose-300" : ""}`}
+              placeholder="05XXXXXXXX"
+              onChange={(event) => {
+                setWhatsappNumber(event.target.value);
+                clearFieldError("whatsappNumber");
+              }}
+            />
+            {errors.whatsappNumber ? <p className="mt-1 text-xs text-rose-600">{errors.whatsappNumber}</p> : null}
           </label>
           <label data-field="password">
             <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
@@ -844,7 +891,9 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
           )}
 
           {verificationMethod === "email" ? (
-            <p className="text-sm text-[var(--muted)]">{copy.verificationUseEmail}</p>
+            <p className="text-sm text-[var(--muted)]">
+              {emailVerificationMode === "otp" ? copy.verificationUseEmailOtp : copy.verificationUseEmailLink}
+            </p>
           ) : null}
 
           <div className="flex flex-wrap gap-3">
@@ -854,7 +903,11 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
               onClick={() => void startVerification(false)}
               className="button-primary w-full sm:w-auto disabled:opacity-60"
             >
-              {verificationPending ? "..." : copy.verificationStart}
+              {verificationPending
+                ? "..."
+                : verificationMethod === "email" && emailVerificationMode === "magic_link"
+                  ? copy.verificationStartLink
+                  : copy.verificationStart}
             </button>
             {pendingForCurrentTarget ? (
               <button
@@ -863,13 +916,15 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
                 onClick={() => void startVerification(true)}
                 className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--ink)] disabled:opacity-50"
               >
-                {copy.verificationResend}
+                {verificationMethod === "email" && emailVerificationMode === "magic_link"
+                  ? copy.verificationResendLink
+                  : copy.verificationResend}
                 {resendSecondsRemaining > 0 ? ` (${resendSecondsRemaining}s)` : ""}
               </button>
             ) : null}
           </div>
 
-          {pendingForCurrentTarget ? (
+          {pendingForCurrentTarget && (verificationMethod !== "email" || emailVerificationMode === "otp") ? (
             <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] p-4">
               <p className="text-sm font-semibold text-[var(--ink)]">{copy.verificationWaiting}</p>
               <p className="mt-1 text-xs text-[var(--muted)]">
@@ -884,6 +939,17 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
               <div className="mt-3">
                 <OTPInput key={otpResetKey} onComplete={(code) => void handleOtpComplete(code)} />
               </div>
+            </div>
+          ) : null}
+
+          {pendingForCurrentTarget && verificationMethod === "email" && emailVerificationMode === "magic_link" ? (
+            <div className="rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] p-4">
+              <p className="text-sm font-semibold text-[var(--ink)]">{copy.verificationEmailLinkSent}</p>
+              <p className="mt-1 text-xs text-[var(--muted)]">{copy.verificationLinkWaiting}</p>
+              <p className="mt-2 text-xs text-[var(--muted)]">{copy.verificationEmailCheckInbox}</p>
+              <p className="mt-2 text-xs text-[var(--muted)]">
+                {copy.verificationTimeout} {verificationSecondsRemaining}s
+              </p>
             </div>
           ) : null}
 
@@ -1010,10 +1076,6 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
                   : "L’e-mail utilisé pour la vérification sera aussi conservé dans votre profil pour les notifications."}
               </div>
             )}
-            <label>
-              <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.whatsapp}</span>
-              <input name="whatsappNumber" type="tel" className="input-base" placeholder="05XXXXXXXX" />
-            </label>
             <label className="sm:col-span-2">
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{copy.shortDescription}</span>
               <textarea name="shortDescription" rows={4} className="input-base min-h-28 resize-y" />

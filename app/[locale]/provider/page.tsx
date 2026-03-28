@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ProviderReviewReplyForm } from "@/components/providers/provider-review-reply-form";
 import { ProviderLogoutButton } from "@/components/providers/provider-logout-button";
 import { formatDate } from "@/lib/format";
 import { getAuthenticatedProvider } from "@/lib/provider-auth";
@@ -306,7 +307,27 @@ export default async function ProviderDashboardPage({ params }: ProviderDashboar
                       <div className="font-semibold text-[var(--ink)]">{review.customerName}</div>
                       <div className="text-[var(--muted)]">{review.rating}/5</div>
                     </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
+                      <span>{review.interactionVerified ? (locale === "ar" ? "✓ خدمة مكتملة موثقة" : "✓ Service complété vérifié") : (locale === "ar" ? "تقييم غير موثّق" : "Avis non vérifié")}</span>
+                    </div>
                     <p className="mt-2 leading-7 text-[var(--muted)]">{review.comment}</p>
+                    {review.providerReply && review.providerReplyStatus === "approved" ? (
+                      <div className="mt-3 rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] px-3 py-3 text-xs leading-6 text-[var(--muted)]">
+                        <div className="font-semibold text-[var(--ink)]">{locale === "ar" ? "ردك المنشور" : "Votre réponse publiée"}</div>
+                        <p className="mt-1">{review.providerReply}</p>
+                      </div>
+                    ) : null}
+                    {review.providerReply && review.providerReplyStatus !== "approved" ? (
+                      <div className="mt-3 rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] px-3 py-3 text-xs leading-6 text-[var(--muted)]">
+                        <div className="font-semibold text-[var(--ink)]">
+                          {review.providerReplyStatus === "rejected"
+                            ? locale === "ar" ? "تم إخفاء الرد من الإدارة" : "Réponse masquée par l'admin"
+                            : locale === "ar" ? "ردك بانتظار المراجعة" : "Réponse en attente de revue"}
+                        </div>
+                        <p className="mt-1">{review.providerReply}</p>
+                      </div>
+                    ) : null}
+                    {!review.providerReply ? <ProviderReviewReplyForm locale={locale} reviewId={review.id} /> : null}
                   </article>
                 ))
               )}

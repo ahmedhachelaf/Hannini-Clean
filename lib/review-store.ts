@@ -37,10 +37,16 @@ export function createDemoReview(input: ReviewInput) {
     providerId: input.providerId,
     bookingId: input.bookingId,
     customerName: input.customerName.trim(),
+    reviewerPhone: null,
     rating: input.rating,
     comment: input.comment.trim(),
     status: "pending_review",
+    interactionVerified: true,
     adminNote: null,
+    moderationReason: null,
+    providerReply: null,
+    providerReplyStatus: "none",
+    providerReplyCreatedAt: null,
     createdAt: new Date().toISOString(),
   };
 
@@ -71,5 +77,28 @@ export function updateDemoReviewStatus(
   };
 
   syncProviderMetrics(current.providerId);
+  return demoReviews[index];
+}
+
+export function saveDemoProviderReply(reviewId: string, providerId: string, reply: string) {
+  const index = findReviewIndex(reviewId);
+
+  if (index < 0) {
+    return null;
+  }
+
+  const current = demoReviews[index];
+
+  if (current.providerId !== providerId || current.status !== "approved") {
+    return null;
+  }
+
+  demoReviews[index] = {
+    ...current,
+    providerReply: reply.trim(),
+    providerReplyStatus: "pending",
+    providerReplyCreatedAt: new Date().toISOString(),
+  };
+
   return demoReviews[index];
 }

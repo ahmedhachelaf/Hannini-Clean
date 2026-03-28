@@ -15,6 +15,7 @@ type ProvidersFiltersProps = {
     province?: string;
     zone?: string;
     womenSafe?: boolean;
+    verifiedOnly?: boolean;
     sort?: SortOption;
   };
   labels: {
@@ -23,12 +24,15 @@ type ProvidersFiltersProps = {
     provinceLabel: string;
     zoneLabel: string;
     womenSafeLabel: string;
+    verifiedOnlyLabel: string;
     sortLabel: string;
     sortTop: string;
+    sortNearest: string;
     sortRating: string;
     sortResponse: string;
     sortJobs: string;
     reset: string;
+    categoryBrowseLabel: string;
   };
 };
 
@@ -38,7 +42,6 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
     zones.find((zone) => zone.slug === values.zone)?.provinceSlug ??
     "";
   const [province, setProvince] = useState(defaultProvince);
-  const [provinceQuery, setProvinceQuery] = useState("");
   const [zoneQuery, setZoneQuery] = useState("");
 
   const provinces = useMemo(
@@ -63,16 +66,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
       }),
     [province, zones, zoneQuery, locale],
   );
-
-  const filteredProvinces = useMemo(
-    () =>
-      provinces.filter((item) => {
-        if (!provinceQuery.trim()) return true;
-        const name = getLocalizedValue(item.name, locale).toLowerCase();
-        return name.includes(provinceQuery.trim().toLowerCase());
-      }),
-    [provinces, provinceQuery, locale],
-  );
+  const featuredCategories = categories.slice(0, 8);
 
   return (
     <form
@@ -106,13 +100,6 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
 
       <label className="lg:w-52">
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.provinceLabel}</span>
-        <input
-          type="search"
-          value={provinceQuery}
-          onChange={(event) => setProvinceQuery(event.target.value)}
-          placeholder={locale === "ar" ? "ابحث عن ولاية" : "Chercher une wilaya"}
-          className="input-base mb-2 min-w-0 text-sm sm:text-base"
-        />
         <select
           name="province"
           value={province}
@@ -123,7 +110,7 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
           className="input-base min-w-0 text-sm sm:text-base"
         >
           <option value="">{locale === "ar" ? "كل الولايات" : "Toutes les wilayas"}</option>
-          {filteredProvinces.map((item) => (
+          {provinces.map((item) => (
             <option key={item.slug} value={item.slug}>
               {getLocalizedValue(item.name, locale)}
             </option>
@@ -163,10 +150,23 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         <span className="mb-2 block text-[0.98rem] font-semibold text-white/90">{labels.sortLabel}</span>
         <select name="sort" defaultValue={values.sort ?? "top"} className="input-base">
           <option value="top">{labels.sortTop}</option>
+          <option value="nearest">{labels.sortNearest}</option>
           <option value="rating">{labels.sortRating}</option>
           <option value="response">{labels.sortResponse}</option>
           <option value="jobs">{labels.sortJobs}</option>
         </select>
+      </label>
+
+      <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(8,34,99,0.16)] lg:w-auto">
+        <input type="hidden" name="verifiedOnly" value="1" />
+        <input
+          type="checkbox"
+          checked
+          disabled
+          readOnly
+          className="h-4 w-4 rounded border-white/40 text-[var(--accent)] focus:ring-white/60"
+        />
+        <span>{labels.verifiedOnlyLabel}</span>
       </label>
 
       <label className="flex min-h-11 items-center gap-3 rounded-[1.1rem] border border-white/16 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(8,34,99,0.16)] lg:w-auto">
@@ -187,6 +187,40 @@ export function ProvidersFilters({ locale, actionPath, categories, zones, values
         <a href={actionPath} className="button-secondary w-full sm:w-auto">
           {labels.reset}
         </a>
+      </div>
+
+      <div className="w-full rounded-[1.25rem] border border-white/12 bg-white/8 p-3">
+        <div className="mb-2 text-sm font-semibold text-white/90">{labels.categoryBrowseLabel}</div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <a
+            href={actionPath}
+            className={`chip-button min-h-0 shrink-0 px-3 py-2 text-xs ${!values.category ? "bg-white text-[var(--navy)]" : "bg-white/10 text-white"}`}
+          >
+            {locale === "ar" ? "كل الفئات" : "Toutes"}
+          </a>
+          {featuredCategories.map((category) => {
+            const params = new URLSearchParams();
+            if (values.query) params.set("q", values.query);
+            params.set("category", category.slug);
+            if (values.province) params.set("province", values.province);
+            if (values.zone) params.set("zone", values.zone);
+            if (values.womenSafe) params.set("womenSafe", "1");
+            params.set("verifiedOnly", "1");
+            if (values.sort) params.set("sort", values.sort);
+
+            return (
+              <a
+                key={category.slug}
+                href={`${actionPath}?${params.toString()}`}
+                className={`chip-button min-h-0 shrink-0 px-3 py-2 text-xs ${
+                  values.category === category.slug ? "bg-white text-[var(--navy)]" : "bg-white/10 text-white"
+                }`}
+              >
+                {category.name[locale]}
+              </a>
+            );
+          })}
+        </div>
       </div>
     </form>
   );

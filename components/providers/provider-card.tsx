@@ -3,7 +3,7 @@ import Link from "next/link";
 import { formatCurrency, formatNumber, formatResponseTime } from "@/lib/format";
 import { getLocalizedValue } from "@/lib/i18n";
 import { getCategoryIcon } from "@/lib/icon-map";
-import { getGrowthStage, getOpportunityTypes } from "@/lib/provider-growth";
+import { getGrowthStage, getOpportunityTypes, getProviderReadiness } from "@/lib/provider-growth";
 import { IconBadge } from "@/components/ui/icon-badge";
 import type { Category, Locale, Provider, Zone } from "@/lib/types";
 
@@ -47,6 +47,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
       ? locale === "ar" ? "اطلب الآن" : "Commander"
       : locale === "ar" ? "احجز الآن" : "Réserver";
   const growthStage = getGrowthStage(provider);
+  const readiness = getProviderReadiness(provider);
   const opportunities = getOpportunityTypes(provider).slice(0, 3);
   const stageLabels = {
     starting: locale === "ar" ? "بداية المسار" : "Début",
@@ -223,6 +224,9 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
               {locale === "ar" ? "الأعلى تقييماً" : "Top rated"}
             </span>
           ) : null}
+          <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+            {locale === "ar" ? `قوة الملف ${readiness.score}%` : `Profil ${readiness.score}%`}
+          </span>
           {provider.womenSafe ? (
             <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
               {locale === "ar" ? "اختيار أكثر أماناً" : "Choix plus sûr"}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAppBaseUrl } from "@/lib/app-origin";
 import {
   createAnonSupabaseClient,
+  getEmailVerificationMode,
   getDefaultPhoneVerificationChannel,
   getEnabledPhoneVerificationChannels,
   getPendingProviderVerification,
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
   const rawTarget = String(payload?.target ?? "");
   const target = normalizeVerificationTarget(method, rawTarget);
   const constants = getVerificationConstants();
+  const emailVerificationMode = getEmailVerificationMode();
   const phoneChannel = method === "phone" ? requestedChannel ?? getDefaultPhoneVerificationChannel() : undefined;
 
   if (method === "phone" && !isPhoneVerificationEnabled()) {
@@ -100,6 +102,7 @@ export async function POST(request: Request) {
       retryAfterSeconds: constants.resendCooldownSeconds,
       expiresInSeconds: constants.ttlSeconds,
       enabledPhoneChannels: getEnabledPhoneVerificationChannels(),
+      emailVerificationMode,
       message:
         locale === "ar"
           ? "وضع تجريبي: استخدم الرمز 111111 لإكمال التحقق."
@@ -149,13 +152,18 @@ export async function POST(request: Request) {
     retryAfterSeconds: constants.resendCooldownSeconds,
     expiresInSeconds: constants.ttlSeconds,
     enabledPhoneChannels: getEnabledPhoneVerificationChannels(),
+    emailVerificationMode,
     message:
       method === "phone"
         ? locale === "ar"
           ? `تم إرسال رمز التحقق عبر ${getVerificationDeliveryLabel(method, locale, phoneChannel)}.`
           : `Un code de vérification a été envoyé par ${getVerificationDeliveryLabel(method, locale, phoneChannel)}.`
-        : locale === "ar"
-          ? "أرسلنا رمز تحقق من 6 أرقام إلى بريدك الإلكتروني. إذا استمر البريد في إرسال رابط سحري بدل الرمز، فغيّر قالب Magic Link في Supabase ليستخدم الرمز."
-          : "Nous avons envoyé un code de vérification à 6 chiffres à votre e-mail. Si Supabase envoie encore un magic link, remplacez le modèle Magic Link par un modèle OTP dans Supabase.",
+        : emailVerificationMode === "otp"
+          ? locale === "ar"
+            ? "أرسلنا رمز تحقق من 6 أرقام إلى بريدك الإلكتروني."
+            : "Nous avons envoyé un code de vérification à 6 chiffres à votre e-mail."
+          : locale === "ar"
+            ? "أرسلنا رابط تحقق إلى بريدك الإلكتروني. افتح الرسالة واضغط على الرابط لإكمال التحقق."
+            : "Nous avons envoyé un lien de vérification à votre e-mail. Ouvrez le message puis cliquez sur le lien pour terminer la vérification.",
   });
 }

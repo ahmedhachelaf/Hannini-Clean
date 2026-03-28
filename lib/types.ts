@@ -1,6 +1,6 @@
 export type Locale = "ar" | "fr";
 
-export type SortOption = "top" | "rating" | "response" | "jobs";
+export type SortOption = "top" | "rating" | "response" | "jobs" | "nearest";
 
 export type ProviderStatus =
   | "draft"
@@ -91,10 +91,16 @@ export type Review = {
   providerId: string;
   bookingId: string;
   customerName: string;
+  reviewerPhone?: string | null;
   rating: number;
   comment: string;
   status: "pending_review" | "approved" | "rejected";
+  interactionVerified?: boolean;
   adminNote?: string | null;
+  moderationReason?: string | null;
+  providerReply?: string | null;
+  providerReplyStatus?: "none" | "pending" | "approved" | "rejected";
+  providerReplyCreatedAt?: string | null;
   createdAt: string;
 };
 
@@ -417,6 +423,7 @@ export type Filters = {
   province?: string;
   zone?: string;
   womenSafe?: boolean;
+  verifiedOnly?: boolean;
   query?: string;
   sort?: SortOption;
 };

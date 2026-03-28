@@ -17,6 +17,11 @@ export async function POST(request: Request, context: RouteContext) {
   const result = await updateProviderModeration({
     providerId: id,
     approvalStatus: "approved",
+    isVerified: true,
+    verification: {
+      status: "verified",
+      notes: "Provider approved and published by admin.",
+    },
     adminNote: typeof body.note === "string" ? body.note : undefined,
   });
 

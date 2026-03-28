@@ -13,6 +13,7 @@ const MAX_VERIFY_ATTEMPTS = 5;
 
 export type ProviderVerificationMethod = "phone" | "email";
 export type ProviderPhoneVerificationChannel = "sms" | "whatsapp";
+export type ProviderEmailVerificationMode = "magic_link" | "otp";
 
 export type PendingProviderVerification = {
   method: ProviderVerificationMethod;
@@ -85,6 +86,14 @@ export function normalizeVerificationTarget(method: ProviderVerificationMethod, 
 
 export function isEmailVerificationAvailable() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) || !process.env.NODE_ENV || process.env.NODE_ENV !== "production";
+}
+
+export function getEmailVerificationMode(): ProviderEmailVerificationMode {
+  const raw = (process.env.NEXT_PUBLIC_PROVIDER_EMAIL_VERIFICATION_MODE ?? process.env.PROVIDER_EMAIL_VERIFICATION_MODE ?? "magic_link")
+    .trim()
+    .toLowerCase();
+
+  return raw === "otp" ? "otp" : "magic_link";
 }
 
 export function isPhoneVerificationEnabled() {

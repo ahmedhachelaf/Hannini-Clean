@@ -4,6 +4,7 @@ import { PhotoGallery } from "@/components/providers/photo-gallery";
 import { formatCurrency, formatDate, formatNumber, formatResponseTime } from "@/lib/format";
 import { getDictionary, getLocalizedValue, isLocale } from "@/lib/i18n";
 import { getCategoryIcon } from "@/lib/icon-map";
+import { buildWhatsAppUrl } from "@/lib/phone";
 import { getGrowthStage, getOpportunityTypes, getProviderJourney, getProviderReadiness, isMentorReady } from "@/lib/provider-growth";
 import { getCategories, getProviderBySlug, getReviews, getZones } from "@/lib/repository";
 import { notFound } from "next/navigation";
@@ -74,7 +75,8 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
     .map((zoneSlug) => zones.find((zone) => zone.slug === zoneSlug))
     .filter((zone): zone is NonNullable<typeof zone> => Boolean(zone));
   const primaryZone = providerZones[0] ?? null;
-  const whatsappMessage = encodeURIComponent(
+  const whatsappUrl = buildWhatsAppUrl(
+    provider.whatsappNumber,
     locale === "ar"
       ? `السلام عليكم، أريد تأكيد حجز مع ${provider.displayName} عبر هَنّيني.`
       : `Bonjour, je souhaite confirmer une réservation avec ${provider.displayName} via Hannini.`,
@@ -172,6 +174,14 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                   {locale === "ar" ? "آمن للنساء" : "Safe pour femmes"}
                 </span>
               ) : null}
+              {provider.rating >= 4.7 && provider.completedJobs >= 10 ? (
+                <span className="rounded-full border border-[rgba(20,92,255,0.16)] bg-white px-2.5 py-0.5 text-xs font-bold text-[var(--navy)]">
+                  {locale === "ar" ? "الأعلى تقييماً" : "Top rated"}
+                </span>
+              ) : null}
+              <span className="rounded-full border border-[var(--line)] bg-white px-2.5 py-0.5 text-xs font-bold text-[var(--ink)]">
+                {locale === "ar" ? `قوة الملف ${readiness.score}%` : `Profil ${readiness.score}%`}
+              </span>
             </div>
             <div>
               <h1 className={`text-4xl font-extrabold tracking-[-0.05em] ${locale === "ar" ? "arabic-display" : ""}`}>{provider.displayName}</h1>
@@ -365,14 +375,11 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
               <Link href={`/${locale}/book/${provider.slug}`} className="button-primary">
                 {primaryActionLabel}
               </Link>
-              <a
-                href={`https://wa.me/${provider.whatsappNumber}?text=${whatsappMessage}`}
-                target="_blank"
-                rel="noreferrer"
-                className="button-secondary"
-              >
-                {dictionary.common.whatsapp}
-              </a>
+              {whatsappUrl ? (
+                <a href={whatsappUrl} target="_blank" rel="noreferrer" className="button-secondary">
+                  {locale === "ar" ? "تواصل عبر واتساب" : "Contacter via WhatsApp"}
+                </a>
+              ) : null}
               {provider.profileType === "service_provider" ? (
                 <a href={provider.googleMapsUrl} target="_blank" rel="noreferrer" className="button-secondary">
                   {dictionary.common.googleMaps}
@@ -469,7 +476,26 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
                         {review.rating}/5 • {formatDate(review.createdAt, locale)}
                       </div>
                     </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
+                      {review.interactionVerified ? (
+                        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+                          {locale === "ar" ? "✓ تجربة موثقة" : "✓ Avis vérifié"}
+                        </span>
+                      ) : (
+                        <span className="rounded-full border border-[var(--line)] bg-[var(--soft)] px-2.5 py-1 font-semibold text-[var(--muted)]">
+                          {locale === "ar" ? "غير موثّق" : "Non vérifié"}
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{review.comment}</p>
+                    {review.providerReply && review.providerReplyStatus === "approved" ? (
+                      <div className="mt-4 rounded-[1rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+                        <div className="font-semibold text-[var(--ink)]">
+                          {locale === "ar" ? "رد المزود" : "Réponse du prestataire"}
+                        </div>
+                        <p className="mt-2">{review.providerReply}</p>
+                      </div>
+                    ) : null}
                   </article>
                 ))
               )}
@@ -507,6 +533,18 @@ export default async function ProviderProfilePage({ params }: ProviderProfilePag
             <p>
               <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "عدد التقييمات:" : "Nombre d'avis :"}</span>{" "}
               {provider.reviewCount}
+            </p>
+            <p>
+              <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "قوة الملف:" : "Force du profil :"}</span>{" "}
+              {readiness.score}% {locale === "ar" ? "مكتمل" : "complété"}
+            </p>
+            <p>
+              <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "الأعمال المكتملة:" : "Missions terminées :"}</span>{" "}
+              {formatNumber(provider.completedJobs, locale)}
+            </p>
+            <p>
+              <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "سرعة الرد:" : "Temps de réponse :"}</span>{" "}
+              {formatResponseTime(provider.responseTimeMinutes, locale)}
             </p>
             {providerZones.length > 0 ? (
               <p>

@@ -24,6 +24,7 @@ type ReviewFormProps = {
 export function ReviewForm({ locale, provider, bookingId, customerAccessToken, labels }: ReviewFormProps) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<ReviewSubmissionResult | null>(null);
+  const [selectedRating, setSelectedRating] = useState(5);
 
   async function handleSubmit(formData: FormData) {
     setPending(true);
@@ -34,7 +35,7 @@ export function ReviewForm({ locale, provider, bookingId, customerAccessToken, l
       providerId: provider.id,
       customerAccessToken,
       customerName: String(formData.get("customerName") ?? ""),
-      rating: Number(formData.get("rating") ?? 0),
+      rating: Number(formData.get("rating") ?? selectedRating),
       comment: String(formData.get("comment") ?? ""),
     };
 
@@ -73,13 +74,35 @@ export function ReviewForm({ locale, provider, bookingId, customerAccessToken, l
 
       <label>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.fields.rating}</span>
-        <select name="rating" required className="input-base">
-          <option value="5">5</option>
-          <option value="4">4</option>
-          <option value="3">3</option>
-          <option value="2">2</option>
-          <option value="1">1</option>
-        </select>
+        <input type="hidden" name="rating" value={selectedRating} />
+        <div className="rounded-[1.5rem] border border-[var(--line)] bg-[var(--soft)] p-4">
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((value) => {
+              const active = value <= selectedRating;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedRating(value)}
+                  className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl border text-xl transition ${
+                    active
+                      ? "border-amber-300 bg-amber-50 text-amber-500"
+                      : "border-[var(--line)] bg-white text-[var(--muted)]"
+                  }`}
+                  aria-pressed={selectedRating === value}
+                  aria-label={`${value} ${locale === "ar" ? "نجوم" : "stars"}`}
+                >
+                  ★
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-xs leading-6 text-[var(--muted)]">
+            {locale === "ar"
+              ? "التقييم يظهر بعد مراجعة الإدارة لأنه مرتبط بخدمة مكتملة."
+              : "L'avis sera publié après revue admin car il est lié à un service complété."}
+          </p>
+        </div>
       </label>
 
       <label>

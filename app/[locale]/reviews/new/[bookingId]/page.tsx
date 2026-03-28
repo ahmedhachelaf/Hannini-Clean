@@ -43,6 +43,9 @@ export default async function ReviewPage({ params, searchParams }: ReviewPagePro
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
           {locale === "ar" ? "التقييم مرتبط بهذا الحجز فقط." : "Cet avis reste lié à cette réservation uniquement."}
         </p>
+        <div className="mt-3 rounded-[1rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {locale === "ar" ? "سيتم وسم هذا التقييم كتجربة موثقة لأنه مرتبط بحجز مكتمل." : "Cet avis sera marqué comme vérifié car il est lié à une réservation complétée."}
+        </div>
         <div className="mt-6 space-y-2 text-sm text-[var(--muted)]">
           <div>
             <span className="font-semibold text-[var(--ink)]">{locale === "ar" ? "رقم الحجز:" : "Réservation :"}</span> {booking.id}

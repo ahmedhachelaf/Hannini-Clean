@@ -106,10 +106,16 @@ type ReviewRow = {
   provider_id: string;
   booking_id: string;
   customer_name: string;
+  reviewer_phone?: string | null;
   rating: number;
   review_text: string;
   status?: Review["status"] | null;
   admin_note?: string | null;
+  interaction_verified?: boolean | null;
+  moderation_reason?: string | null;
+  provider_reply?: string | null;
+  provider_reply_status?: Review["providerReplyStatus"] | null;
+  provider_reply_created_at?: string | null;
   created_at: string;
 };
 
@@ -450,16 +456,26 @@ function mapProviderRow(row: ProviderRow): Provider {
   };
 }
 
+function isProviderPubliclyVisible(provider: Provider) {
+  return provider.status === "approved" && provider.verification.status === "verified" && provider.isVerified;
+}
+
 function mapReviewRow(row: ReviewRow): Review {
   return {
     id: row.id,
     providerId: row.provider_id,
     bookingId: row.booking_id,
     customerName: row.customer_name,
+    reviewerPhone: row.reviewer_phone ?? null,
     rating: row.rating,
     comment: row.review_text,
     status: row.status ?? "approved",
+    interactionVerified: row.interaction_verified ?? false,
     adminNote: row.admin_note ?? null,
+    moderationReason: row.moderation_reason ?? null,
+    providerReply: row.provider_reply ?? null,
+    providerReplyStatus: row.provider_reply_status ?? "none",
+    providerReplyCreatedAt: row.provider_reply_created_at ?? null,
     createdAt: row.created_at,
   };
 }
@@ -697,13 +713,13 @@ async function fetchSupabaseReviews() {
 
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, provider_id, booking_id, customer_name, rating, review_text, status, admin_note, created_at")
+    .select("id, provider_id, booking_id, customer_name, reviewer_phone, rating, review_text, status, admin_note, interaction_verified, moderation_reason, provider_reply, provider_reply_status, provider_reply_created_at, created_at")
     .order("created_at", { ascending: false });
 
   if (error) {
     const { data: fallbackData, error: fallbackError } = await supabase
       .from("reviews")
-      .select("id, provider_id, booking_id, customer_name, rating, review_text, created_at")
+      .select("id, provider_id, booking_id, customer_name, rating, review_text, status, admin_note, created_at")
       .order("created_at", { ascending: false });
 
     if (fallbackError) {
@@ -1011,7 +1027,7 @@ export async function getProviders(filters: Filters = {}, includeAllStatuses = f
     : resolvedProviders;
   const visibleProviders = includeAllStatuses
     ? mergedProviders
-    : mergedProviders.filter((provider) => ["approved", "submitted", "under_review", "needs_more_info"].includes(provider.status));
+    : mergedProviders.filter((provider) => isProviderPubliclyVisible(provider));
   return applyProviderFilters(visibleProviders, filters);
 }
 
@@ -1032,6 +1048,10 @@ export async function getProviderBySlug(slug: string, includePending = false) {
       return null;
     }
 
+    if (!includePending && !isProviderPubliclyVisible(provider)) {
+      return null;
+    }
+
     return provider;
   }
 
@@ -1048,6 +1068,10 @@ export async function getProviderById(id: string, includePending = false) {
     }
 
     if (!includePending && provider.status !== "approved") {
+      return null;
+    }
+
+    if (!includePending && !isProviderPubliclyVisible(provider)) {
       return null;
     }
 

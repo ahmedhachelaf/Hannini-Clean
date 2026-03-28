@@ -55,15 +55,18 @@ export async function POST(request: Request) {
       booking_id: payload.bookingId,
       provider_id: payload.providerId,
       customer_name: payload.customerName,
+      reviewer_phone: booking.phoneNumber,
       rating: payload.rating,
       review_text: payload.comment,
       status: "pending_review",
       admin_note: null,
+      interaction_verified: true,
+      moderation_reason: null,
     };
 
     let { error } = await supabase.from("reviews").insert(reviewInsertPayload);
 
-    if (error && /status|admin_note/i.test(error.message)) {
+    if (error && /status|admin_note|reviewer_phone|interaction_verified|moderation_reason/i.test(error.message)) {
       const fallbackInsert = await supabase.from("reviews").insert({
         booking_id: payload.bookingId,
         provider_id: payload.providerId,
@@ -76,6 +79,7 @@ export async function POST(request: Request) {
     }
 
     if (error) {
+      console.error("reviews:create_failed", error);
       throw error;
     }
 
@@ -92,6 +96,7 @@ export async function POST(request: Request) {
         .eq("provider_id", payload.providerId);
 
       if (fallbackRatings.error) {
+        console.error("reviews:rating_lookup_failed", ratingsError);
         throw ratingsError;
       }
 
@@ -127,9 +132,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "Review received and queued for moderation.",
+      message: "Review received for a verified completed service and queued for moderation.",
     });
   } catch (error) {
+    console.error("reviews:unexpected_error", error);
     return NextResponse.json(
       {
         ok: false,

@@ -145,10 +145,16 @@ create table if not exists public.reviews (
   provider_id uuid not null references public.providers(id) on delete cascade,
   booking_id uuid not null unique references public.bookings(id) on delete cascade,
   customer_name text not null,
+  reviewer_phone text,
   rating integer not null check (rating between 1 and 5),
   review_text text not null,
   status public.review_status not null default 'pending_review',
   admin_note text,
+  interaction_verified boolean not null default false,
+  moderation_reason text,
+  provider_reply text,
+  provider_reply_status text not null default 'none' check (provider_reply_status in ('none', 'pending', 'approved', 'rejected')),
+  provider_reply_created_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -229,6 +235,8 @@ create index if not exists service_areas_zone_idx on public.service_areas (zone_
 create index if not exists bookings_provider_idx on public.bookings (provider_id);
 create index if not exists reviews_provider_idx on public.reviews (provider_id);
 create index if not exists reviews_status_idx on public.reviews (status);
+create index if not exists reviews_interaction_verified_idx on public.reviews (interaction_verified);
+create index if not exists reviews_provider_reply_status_idx on public.reviews (provider_reply_status);
 create index if not exists support_cases_status_idx on public.support_cases (status);
 create index if not exists support_cases_provider_idx on public.support_cases (provider_id);
 create index if not exists support_messages_case_idx on public.support_messages (support_case_id);

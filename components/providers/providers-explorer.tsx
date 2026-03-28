@@ -18,6 +18,7 @@ type ProvidersExplorerProps = {
     province?: string;
     zone?: string;
     womenSafe?: boolean;
+    verifiedOnly?: boolean;
     sort?: SortOption;
   };
   labels: {
@@ -26,8 +27,10 @@ type ProvidersExplorerProps = {
     provinceLabel: string;
     zoneLabel: string;
     womenSafeLabel: string;
+    verifiedOnlyLabel: string;
     sortLabel: string;
     sortTop: string;
+    sortNearest: string;
     sortRating: string;
     sortResponse: string;
     sortJobs: string;
@@ -36,6 +39,7 @@ type ProvidersExplorerProps = {
     description: string;
     emptyTitle: string;
     emptyDescription: string;
+    categoryBrowseLabel: string;
   };
 };
 
@@ -90,12 +94,26 @@ function getDistanceKm(a: UserLocation, b: UserLocation) {
   return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
+function getProvinceCenter(zones: Zone[], provinceSlug: string) {
+  const provinceZones = zones.filter((zone) => zone.provinceSlug === provinceSlug);
+
+  if (provinceZones.length === 0) {
+    return null;
+  }
+
+  return {
+    latitude: provinceZones.reduce((sum, zone) => sum + zone.coordinates.latitude, 0) / provinceZones.length,
+    longitude: provinceZones.reduce((sum, zone) => sum + zone.coordinates.longitude, 0) / provinceZones.length,
+  };
+}
+
 export function ProvidersExplorer({ locale, actionPath, categories, zones, providers, values, labels }: ProvidersExplorerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(providers[0]?.id ?? null);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locationState, setLocationState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [locationError, setLocationError] = useState<string | null>(null);
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"split" | "map" | "list">("split");
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const zoneMap = useMemo(() => new Map(zones.map((zone) => [zone.slug, zone])), [zones]);
@@ -105,20 +123,24 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
     [zones],
   );
   const providerDistances = useMemo(() => {
-    if (!userLocation) {
+    const zoneLocation = values.zone ? zoneMap.get(values.zone)?.coordinates : null;
+    const provinceLocation = values.province ? getProvinceCenter(zones, values.province) : null;
+    const referenceLocation = userLocation ?? zoneLocation ?? provinceLocation;
+
+    if (!referenceLocation) {
       return new Map<string, number>();
     }
 
     return new Map(
       providers.map((provider) => [
         provider.id,
-        getDistanceKm(userLocation, {
+        getDistanceKm(referenceLocation, {
           latitude: provider.coordinates.latitude,
           longitude: provider.coordinates.longitude,
         }),
       ]),
     );
-  }, [providers, userLocation]);
+  }, [providers, userLocation, values.zone, values.province, zoneMap, zones]);
 
   const visibleProviders = useMemo(() => {
     const withDistance = providers.map((provider) => ({
@@ -130,7 +152,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
       ? withDistance.filter((item) => item.distanceKm !== null && item.distanceKm <= radiusKm)
       : withDistance;
 
-    if (userLocation) {
+    if (values.sort === "nearest" || userLocation) {
       return [...filtered].sort((a, b) => {
         if (a.distanceKm === null && b.distanceKm === null) return 0;
         if (a.distanceKm === null) return 1;
@@ -242,6 +264,9 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
           <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
             {locale === "ar" ? `${orderedProviders.length} مزود ظاهر` : `${orderedProviders.length} prestataires visibles`}
           </span>
+          <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
+            {labels.verifiedOnlyLabel}
+          </span>
           {values.womenSafe ? (
             <span className="status-pill border border-[rgba(15,95,255,0.14)] bg-[rgba(20,92,255,0.08)] text-[var(--navy)]">
               {locale === "ar" ? "تصفية المزوّدات والمزوّدين الآمنين للنساء" : "Filtre sûreté femmes actif"}
@@ -268,6 +293,30 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
         </section>
       ) : (
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
+          <div className="xl:col-span-2 flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-[rgba(20,92,255,0.12)] bg-white px-4 py-3 shadow-[0_18px_36px_rgba(12,40,104,0.08)]">
+            <div className="text-sm font-semibold text-[var(--ink)]">
+              {locale === "ar" ? "طريقة العرض" : "Mode d’affichage"}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "split", label: locale === "ar" ? "الخريطة والقائمة" : "Carte + liste" },
+                { key: "map", label: locale === "ar" ? "الخريطة" : "Carte" },
+                { key: "list", label: locale === "ar" ? "القائمة" : "Liste" },
+              ].map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => setViewMode(option.key as "split" | "map" | "list")}
+                  className={`chip-button min-h-0 px-3 py-2 text-xs ${
+                    viewMode === option.key ? "bg-[var(--accent)] text-white" : ""
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {viewMode !== "list" ? (
           <div className="map-panel overflow-hidden rounded-[2rem] bg-white shadow-[0_24px_56px_rgba(12,40,104,0.12)] xl:sticky xl:top-28">
             <div className="border-b border-[rgba(20,92,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(236,244,255,0.96))] p-4 text-[var(--ink)] sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -331,6 +380,12 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                   {locale === "ar"
                     ? "تم تفعيل الفرز حسب القرب من موقعك الحالي."
                     : "Le tri par proximité de votre position est activé."}
+                </p>
+              ) : values.sort === "nearest" && (values.zone || values.province) ? (
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                  {locale === "ar"
+                    ? "نعرض الأقرب تقريبياً إلى البلدية أو الولاية التي اخترتها إلى أن تسمح بالموقع الحالي."
+                    : "Nous classons les profils au plus proche de votre commune ou wilaya sélectionnée jusqu’à activation de la géolocalisation."}
                 </p>
               ) : null}
               {locationError ? <p className="mt-3 text-sm text-rose-600">{locationError}</p> : null}
@@ -434,7 +489,9 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
               ))}
             </div>
           </div>
+          ) : null}
 
+          {viewMode !== "map" ? (
           <div className="grid gap-5">
             {orderedProviders.map((provider) => (
               <div
@@ -457,6 +514,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
               </div>
             ))}
           </div>
+          ) : null}
         </section>
       )}
     </>

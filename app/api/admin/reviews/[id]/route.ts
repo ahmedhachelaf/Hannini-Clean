@@ -8,6 +8,8 @@ import { createServerSupabaseClient, hasSupabaseServerEnv } from "@/lib/supabase
 const reviewModerationSchema = z.object({
   status: z.enum(["pending_review", "approved", "rejected"]),
   adminNote: z.string().optional().default(""),
+  moderationReason: z.string().optional().default(""),
+  providerReplyStatus: z.enum(["none", "pending", "approved", "rejected"]).optional(),
 });
 
 type RouteContext = {
@@ -47,6 +49,7 @@ export async function POST(request: Request, context: RouteContext) {
       .maybeSingle();
 
     if (reviewError) {
+      console.error("admin-review-moderation:review_lookup_failed", reviewError);
       throw reviewError;
     }
 
@@ -62,19 +65,27 @@ export async function POST(request: Request, context: RouteContext) {
       return NextResponse.json({ ok: true, demoMode: true, message: "Review moderation updated in demo mode." });
     }
 
+    const reviewPatch: Record<string, string | null> = {
+      status: payload.status,
+      admin_note: payload.adminNote.trim() || null,
+      moderation_reason: payload.moderationReason.trim() || null,
+    };
+
+    if (payload.providerReplyStatus) {
+      reviewPatch.provider_reply_status = payload.providerReplyStatus;
+    }
+
     let updateResult = await supabase
       .from("reviews")
-      .update({
-        status: payload.status,
-        admin_note: payload.adminNote.trim() || null,
-      })
+      .update(reviewPatch)
       .eq("id", id);
 
-    if (updateResult.error && /status|admin_note/i.test(updateResult.error.message)) {
+    if (updateResult.error && /status|admin_note|moderation_reason|provider_reply_status/i.test(updateResult.error.message)) {
       throw new Error("Review moderation columns are missing. Run the latest Supabase migration.");
     }
 
     if (updateResult.error) {
+      console.error("admin-review-moderation:update_failed", updateResult.error);
       throw updateResult.error;
     }
 
@@ -93,6 +104,7 @@ export async function POST(request: Request, context: RouteContext) {
         .eq("provider_id", existingReview.provider_id);
 
       if (fallbackRatings.error) {
+        console.error("admin-review-moderation:rating_lookup_failed", approvedRatings.error);
         throw approvedRatings.error;
       }
 
@@ -111,12 +123,14 @@ export async function POST(request: Request, context: RouteContext) {
       .eq("id", existingReview.provider_id);
 
     if (providerUpdate.error) {
+      console.error("admin-review-moderation:provider_metrics_failed", providerUpdate.error);
       throw providerUpdate.error;
     }
 
     revalidateMarketplacePaths();
     return NextResponse.json({ ok: true, message: "Review moderation updated." });
   } catch (error) {
+    console.error("admin-review-moderation:unexpected_error", error);
     return NextResponse.json(
       {
         ok: false,
