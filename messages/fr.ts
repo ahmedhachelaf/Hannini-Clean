@@ -337,7 +337,7 @@ export const fr = {
   join: {
     title: "Rejoindre Hannini",
     description:
-      "Vous pouvez rejoindre Hannini comme prestataire de service ou activité à domicile. Le formulaire reste volontairement simple pour ce MVP, puis l'équipe effectue une revue avant publication. Aucun email automatique n'est encore envoyé.",
+      "Vous pouvez rejoindre Hannini comme prestataire de service ou activité à domicile. Le formulaire reste simple, puis l'équipe effectue une revue avant publication. Une vraie étape de vérification vous sera demandée avant l'envoi selon le mode actuellement actif.",
     successTitle: "Votre demande a bien ete recue",
     successDescription: "Votre candidature a ete enregistree et reste maintenant en attente de revue.",
   },

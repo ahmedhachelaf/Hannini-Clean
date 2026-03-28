@@ -64,6 +64,7 @@ type FormCopy = {
   verificationEmailCheckInbox: string;
   verificationLinkWaiting: string;
   verificationPhoneUnavailable: string;
+  verificationEmailOnlyMode: string;
   verificationWhatsappUnavailable: string;
   verificationCodePrompt: string;
   verificationTimeout: string;
@@ -134,6 +135,7 @@ function getCopy(locale: Locale): FormCopy {
       verificationEmailCheckInbox: "إذا لم تجد الرسالة، افحص البريد غير المرغوب فيه أو أعد الإرسال بعد انتهاء المهلة.",
       verificationLinkWaiting: "افتح رسالة البريد الإلكتروني واضغط على رابط التحقق ثم ارجع إلى هَنّيني.",
       verificationPhoneUnavailable: "التحقق عبر الهاتف غير مفعّل حالياً لأن مزود الرسائل غير مضبوط بعد.",
+      verificationEmailOnlyMode: "التحقق المتاح حالياً يتم عبر البريد الإلكتروني فقط. سنُظهر التحقق عبر الهاتف هنا عندما يصبح مفعلًا فعلاً.",
       verificationWhatsappUnavailable: "واتساب غير متاح حالياً لأن قناة واتساب لم تُضبط بعد لدى مزود الرسائل.",
       verificationCodePrompt: "أدخل الرمز المكوّن من 6 أرقام",
       verificationTimeout: "تنتهي صلاحية الرمز بعد",
@@ -202,8 +204,9 @@ function getCopy(locale: Locale): FormCopy {
     verificationEmailLinkSent: "Le lien de vérification a été envoyé à votre e-mail.",
     verificationEmailCheckInbox: "Si vous ne voyez pas le message, vérifiez les spams puis renvoyez-le après le délai.",
     verificationLinkWaiting: "Ouvrez l'e-mail puis cliquez sur le lien de vérification avant de revenir sur Hannini.",
-    verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée car le fournisseur SMS n'est pas encore configuré.",
-    verificationWhatsappUnavailable: "WhatsApp n'est pas disponible car le canal WhatsApp n'est pas encore configuré chez le fournisseur de messages.",
+      verificationPhoneUnavailable: "La vérification par téléphone n'est pas activée car le fournisseur SMS n'est pas encore configuré.",
+      verificationEmailOnlyMode: "La vérification disponible pour le moment passe uniquement par e-mail. La vérification par téléphone n'apparaîtra ici que lorsqu'elle sera réellement active.",
+      verificationWhatsappUnavailable: "WhatsApp n'est pas disponible car le canal WhatsApp n'est pas encore configuré chez le fournisseur de messages.",
     verificationCodePrompt: "Entrez le code à 6 chiffres",
     verificationTimeout: "Le code expire dans",
     verificationAttempts: "Essais restants",
@@ -262,7 +265,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("phone");
+  const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("email");
   const [emailVerificationMode, setEmailVerificationMode] = useState<EmailVerificationMode>("magic_link");
   const [phoneOtpEnabled, setPhoneOtpEnabled] = useState(false);
   const [enabledPhoneChannels, setEnabledPhoneChannels] = useState<PhoneVerificationChannel[]>([]);
@@ -345,6 +348,13 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
   }, [phoneNumber, email, verificationMethod]);
 
   useEffect(() => {
+    if (!phoneOtpEnabled && verificationMethod === "phone") {
+      setVerificationMethod("email");
+      setVerificationFeedback(null);
+    }
+  }, [phoneOtpEnabled, verificationMethod]);
+
+  useEffect(() => {
     if (callbackVerifiedMethod === "email" && callbackVerifiedTarget && !email) {
       setEmail(callbackVerifiedTarget);
       setVerificationMethod("email");
@@ -419,7 +429,16 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
     }
 
     if (verificationMethod === "email" && !isEmailCandidateValid(target)) {
-      setFieldError("email", locale === "ar" ? "أدخل بريداً إلكترونياً صالحاً لإرسال الرمز." : "Saisissez un e-mail valide pour recevoir le code.");
+      setFieldError(
+        "email",
+        emailVerificationMode === "magic_link"
+          ? locale === "ar"
+            ? "أدخل بريداً إلكترونياً صالحاً لإرسال رابط التحقق."
+            : "Saisissez un e-mail valide pour recevoir le lien de vérification."
+          : locale === "ar"
+            ? "أدخل بريداً إلكترونياً صالحاً لإرسال الرمز."
+            : "Saisissez un e-mail valide pour recevoir le code.",
+      );
       scrollToField("verification");
       return;
     }
@@ -798,43 +817,42 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
           {copy.verificationTitle}
         </div>
         <p className="text-sm leading-7 text-[var(--muted)]">{copy.verificationDescription}</p>
-        {!phoneOtpEnabled ? (
-          <div className="mt-3 rounded-[1rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            {copy.verificationPhoneUnavailable}
+        {phoneOtpEnabled ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setVerificationMethod("phone");
+                setVerificationFeedback(null);
+              }}
+              className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
+                verificationMethod === "phone"
+                  ? "border-terracotta bg-terracotta-pale text-terracotta"
+                  : "border-[var(--line)] bg-white text-[var(--muted)]"
+              }`}
+            >
+              {copy.verificationPhoneOption}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setVerificationMethod("email");
+                setVerificationFeedback(null);
+              }}
+              className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
+                verificationMethod === "email"
+                  ? "border-terracotta bg-terracotta-pale text-terracotta"
+                  : "border-[var(--line)] bg-white text-[var(--muted)]"
+              }`}
+            >
+              {copy.verificationEmailOption}
+            </button>
           </div>
-        ) : null}
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            disabled={!phoneOtpEnabled}
-            onClick={() => {
-              setVerificationMethod("phone");
-              setVerificationFeedback(null);
-            }}
-            className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
-              verificationMethod === "phone"
-                ? "border-terracotta bg-terracotta-pale text-terracotta"
-                : "border-[var(--line)] bg-white text-[var(--muted)]"
-            } disabled:cursor-not-allowed disabled:opacity-50`}
-          >
-            {copy.verificationPhoneOption}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setVerificationMethod("email");
-              setVerificationFeedback(null);
-            }}
-            className={`rounded-[1rem] border px-4 py-3 text-sm font-semibold transition ${
-              verificationMethod === "email"
-                ? "border-terracotta bg-terracotta-pale text-terracotta"
-                : "border-[var(--line)] bg-white text-[var(--muted)]"
-            }`}
-          >
-            {copy.verificationEmailOption}
-          </button>
-        </div>
+        ) : (
+          <div className="mt-3 rounded-[1rem] border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            {copy.verificationEmailOnlyMode}
+          </div>
+        )}
 
         <div className="mt-4 space-y-4">
           {verificationMethod === "email" ? (
