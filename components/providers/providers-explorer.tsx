@@ -68,8 +68,32 @@ function getMarkerLabel(zone: Zone | undefined, locale: Locale) {
   return label.length > 18 ? `${label.slice(0, 18)}…` : label;
 }
 
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+};
+
+function getDistanceKm(a: UserLocation, b: UserLocation) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const deltaLat = toRad(b.latitude - a.latitude);
+  const deltaLng = toRad(b.longitude - a.longitude);
+  const startLat = toRad(a.latitude);
+  const endLat = toRad(b.latitude);
+
+  const haversine =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(startLat) * Math.cos(endLat) * Math.sin(deltaLng / 2) ** 2;
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
 export function ProvidersExplorer({ locale, actionPath, categories, zones, providers, values, labels }: ProvidersExplorerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(providers[0]?.id ?? null);
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [locationState, setLocationState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const zoneMap = useMemo(() => new Map(zones.map((zone) => [zone.slug, zone])), [zones]);
@@ -78,8 +102,47 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
     () => new Map(zones.map((zone) => [zone.provinceSlug, zone.provinceName])),
     [zones],
   );
-  const bounds = useMemo(() => (providers.length > 0 ? getPaddedBounds(providers) : null), [providers]);
-  const selectedProvider = providers.find((provider) => provider.id === selectedId) ?? providers[0] ?? null;
+  const providerDistances = useMemo(() => {
+    if (!userLocation) {
+      return new Map<string, number>();
+    }
+
+    return new Map(
+      providers.map((provider) => [
+        provider.id,
+        getDistanceKm(userLocation, {
+          latitude: provider.coordinates.latitude,
+          longitude: provider.coordinates.longitude,
+        }),
+      ]),
+    );
+  }, [providers, userLocation]);
+
+  const visibleProviders = useMemo(() => {
+    const withDistance = providers.map((provider) => ({
+      provider,
+      distanceKm: providerDistances.get(provider.id) ?? null,
+    }));
+
+    const filtered = radiusKm
+      ? withDistance.filter((item) => item.distanceKm !== null && item.distanceKm <= radiusKm)
+      : withDistance;
+
+    if (userLocation) {
+      return [...filtered].sort((a, b) => {
+        if (a.distanceKm === null && b.distanceKm === null) return 0;
+        if (a.distanceKm === null) return 1;
+        if (b.distanceKm === null) return -1;
+        return a.distanceKm - b.distanceKm;
+      });
+    }
+
+    return filtered;
+  }, [providerDistances, providers, radiusKm, userLocation]);
+
+  const orderedProviders = useMemo(() => visibleProviders.map((item) => item.provider), [visibleProviders]);
+  const bounds = useMemo(() => (orderedProviders.length > 0 ? getPaddedBounds(orderedProviders) : null), [orderedProviders]);
+  const selectedProvider = orderedProviders.find((provider) => provider.id === selectedId) ?? orderedProviders[0] ?? null;
   const activeProvinceName = values.province
     ? getLocalizedValue(provinceMap.get(values.province) ?? { ar: "غير محدد", fr: "Non defini" }, locale)
     : locale === "ar"
@@ -87,10 +150,40 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
       : "Toutes les wilayas";
 
   useEffect(() => {
-    if (!providers.some((provider) => provider.id === selectedId)) {
-      setSelectedId(providers[0]?.id ?? null);
+    if (!orderedProviders.some((provider) => provider.id === selectedId)) {
+      setSelectedId(orderedProviders[0]?.id ?? null);
     }
-  }, [providers, selectedId]);
+  }, [orderedProviders, selectedId]);
+
+  function requestLocation() {
+    if (typeof window === "undefined" || !("geolocation" in navigator)) {
+      setLocationState("error");
+      setLocationError(locale === "ar" ? "الموقع غير مدعوم في هذا المتصفح." : "La géolocalisation n'est pas prise en charge dans ce navigateur.");
+      return;
+    }
+
+    setLocationState("loading");
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationState("ready");
+      },
+      () => {
+        setLocationState("error");
+        setLocationError(
+          locale === "ar"
+            ? "تعذر تحديد موقعك الحالي. اسمح بالوصول إلى الموقع ثم حاول مرة أخرى."
+            : "Impossible de détecter votre position actuelle. Autorisez la localisation puis réessayez.",
+        );
+      },
+      { enableHighAccuracy: true, maximumAge: 60_000, timeout: 10_000 },
+    );
+  }
 
   function getMarkerPosition(provider: Provider, index: number) {
     if (!bounds) {
@@ -100,7 +193,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
     const latSpan = Math.max(bounds.maxLat - bounds.minLat, 0.1);
     const lngSpan = Math.max(bounds.maxLng - bounds.minLng, 0.1);
 
-    const duplicateIndex = providers
+    const duplicateIndex = orderedProviders
       .slice(0, index)
       .filter(
         (item) =>
@@ -145,7 +238,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
         <p className="max-w-2xl text-sm leading-7 text-[var(--ink)]">{labels.description}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
-            {locale === "ar" ? `${providers.length} مزود ظاهر` : `${providers.length} prestataires visibles`}
+            {locale === "ar" ? `${orderedProviders.length} مزود ظاهر` : `${orderedProviders.length} prestataires visibles`}
           </span>
           <span className="status-pill border border-[rgba(15,95,255,0.12)] bg-white text-[var(--ink)]">
             {locale === "ar" ? "خريطة وقائمة مترابطتان" : "Carte et liste synchronisees"}
@@ -155,10 +248,16 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
 
       <ProvidersFilters locale={locale} actionPath={actionPath} categories={categories} zones={zones} values={values} labels={labels} />
 
-      {providers.length === 0 ? (
+      {orderedProviders.length === 0 ? (
         <section className="surface-card rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(236,244,255,0.9))] p-10 text-center">
           <h2 className={`text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{labels.emptyTitle}</h2>
-          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{labels.emptyDescription}</p>
+          <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+            {userLocation && radiusKm
+              ? locale === "ar"
+                ? "لا توجد نتائج داخل هذا النطاق حول موقعك الحالي. جرّب توسيع المسافة."
+                : "Aucun résultat dans ce rayon autour de votre position. Essayez d'élargir la distance."
+              : labels.emptyDescription}
+          </p>
         </section>
       ) : (
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
@@ -182,6 +281,52 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                   ? "المؤشرات مبنية على مراكز مناطق تقريبية لشرح الانتشار، وليس على عناوين منزلية دقيقة."
                   : "Les repères s'appuient sur des centres de zones approximatifs pour montrer la couverture, pas des adresses personnelles précises."}
               </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={requestLocation}
+                  className="button-secondary"
+                >
+                  {locationState === "loading"
+                    ? locale === "ar"
+                      ? "جارٍ تحديد الموقع..."
+                      : "Localisation en cours..."
+                    : locale === "ar"
+                      ? "استخدم موقعي الحالي"
+                      : "Utiliser ma position"}
+                </button>
+                {userLocation ? (
+                  <>
+                    {[1, 5, 10].map((distance) => (
+                      <button
+                        key={distance}
+                        type="button"
+                        onClick={() => setRadiusKm((current) => (current === distance ? null : distance))}
+                        className={`chip-button min-h-0 px-3 py-2 text-xs ${
+                          radiusKm === distance ? "bg-[var(--accent)] text-white" : ""
+                        }`}
+                      >
+                        {locale === "ar" ? `${distance} كم` : `${distance} km`}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setRadiusKm(null)}
+                      className={`chip-button min-h-0 px-3 py-2 text-xs ${radiusKm === null ? "bg-[var(--navy)] text-white" : ""}`}
+                    >
+                      {locale === "ar" ? "كل المسافات" : "Toutes distances"}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+              {userLocation ? (
+                <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                  {locale === "ar"
+                    ? "تم تفعيل الفرز حسب القرب من موقعك الحالي."
+                    : "Le tri par proximité de votre position est activé."}
+                </p>
+              ) : null}
+              {locationError ? <p className="mt-3 text-sm text-rose-600">{locationError}</p> : null}
             </div>
 
             <div className="relative min-h-[420px] overflow-hidden bg-[linear-gradient(180deg,rgba(226,236,255,0.9),rgba(248,251,255,0.98))] sm:min-h-[500px]">
@@ -194,7 +339,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
               />
               <div className="absolute inset-0 z-10">
                 <div className="absolute inset-0">
-                  {providers.map((provider, index) => {
+                  {orderedProviders.map((provider, index) => {
                     const position = getMarkerPosition(provider, index);
                     const selected = provider.id === selectedId;
                     const zone = zoneMap.get(provider.zones[0]);
@@ -253,7 +398,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                   </a>
                 ) : null}
               </div>
-              {providers.slice(0, 5).map((provider, index) => (
+              {orderedProviders.slice(0, 5).map((provider, index) => (
                 <button
                   key={provider.id}
                   type="button"
@@ -276,6 +421,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                   </div>
                   <div className="mt-1 text-xs text-[var(--muted)]">
                     {categoryMap.get(provider.categorySlug)?.name[locale]} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.provinceName ?? { ar: "غير محدد", fr: "Non defini" }, locale)} • {getLocalizedValue(zoneMap.get(provider.zones[0])?.name ?? { ar: "غير محدد", fr: "Non defini" }, locale)}
+                    {providerDistances.get(provider.id) !== undefined ? ` • ${providerDistances.get(provider.id)?.toFixed(1)} ${locale === "ar" ? "كم" : "km"}` : ""}
                   </div>
                 </button>
               ))}
@@ -283,7 +429,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
           </div>
 
           <div className="grid gap-5">
-            {providers.map((provider) => (
+            {orderedProviders.map((provider) => (
               <div
                 key={provider.id}
                 ref={(node) => {
@@ -299,6 +445,7 @@ export function ProvidersExplorer({ locale, actionPath, categories, zones, provi
                     .map((slug) => zoneMap.get(slug))
                     .filter((zone): zone is Zone => Boolean(zone))}
                   highlighted={provider.id === selectedId}
+                  distanceKm={providerDistances.get(provider.id) ?? null}
                 />
               </div>
             ))}

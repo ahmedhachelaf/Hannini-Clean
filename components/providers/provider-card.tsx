@@ -13,6 +13,7 @@ type ProviderCardProps = {
   category: Category | null;
   zones: Zone[];
   highlighted?: boolean;
+  distanceKm?: number | null;
 };
 
 // Minimal SVG placeholder for category when no gallery photos exist
@@ -25,7 +26,16 @@ function CategoryPlaceholder({ icon, label }: { icon: ReturnType<typeof getCateg
   );
 }
 
-export function ProviderCard({ locale, provider, category, zones, highlighted = false }: ProviderCardProps) {
+function formatDistance(distanceKm: number, locale: Locale) {
+  if (distanceKm < 1) {
+    const meters = Math.max(50, Math.round(distanceKm * 1000));
+    return locale === "ar" ? `${meters} م` : `${meters} m`;
+  }
+
+  return locale === "ar" ? `${distanceKm.toFixed(1)} كم` : `${distanceKm.toFixed(1)} km`;
+}
+
+export function ProviderCard({ locale, provider, category, zones, highlighted = false, distanceKm = null }: ProviderCardProps) {
   const zoneNames = zones.map((zone) => getLocalizedValue(zone.name, locale)).join(" • ");
   const provinceName = zones[0] ? getLocalizedValue(zones[0].provinceName, locale) : locale === "ar" ? "غير محدد" : "Non defini";
   const priceLabel =
@@ -188,11 +198,26 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
         <div className="rounded-xl border border-[rgba(15,95,255,0.1)] bg-white/70 px-3.5 py-3 text-[0.875rem] leading-6 text-[var(--muted)]">
           <span className="font-semibold text-[var(--ink)]">{provinceName}</span>
           {zoneNames ? <span className="before:mx-1.5 before:content-['•']">{zoneNames}</span> : null}
+          {distanceKm !== null ? (
+            <span className="before:mx-1.5 before:content-['•']">
+              {locale === "ar" ? "يبعد" : "À"} {formatDistance(distanceKm, locale)}
+            </span>
+          ) : null}
         </div>
 
         {/* Chips */}
         <div className="flex flex-wrap gap-1.5">
           <span className="chip-button min-h-0 px-2.5 py-1 text-xs">{stageLabels[growthStage]}</span>
+          {distanceKm !== null ? (
+            <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+              {locale === "ar" ? "قريب منك" : "Proche de vous"}
+            </span>
+          ) : null}
+          {provider.rating >= 4.7 && provider.completedJobs >= 10 ? (
+            <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
+              {locale === "ar" ? "الأعلى تقييماً" : "Top rated"}
+            </span>
+          ) : null}
           {provider.profileType === "home_business" && provider.bulkOrders?.available ? (
             <span className="chip-button min-h-0 px-2.5 py-1 text-xs">
               {locale === "ar" ? "جاهز لطلبات كبيرة" : "Prêt pour le volume"}
