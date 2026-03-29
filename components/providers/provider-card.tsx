@@ -26,6 +26,28 @@ function CategoryPlaceholder({ icon, label }: { icon: ReturnType<typeof getCateg
   );
 }
 
+function LanePlaceholder({
+  imageSrc,
+  icon,
+  label,
+}: {
+  imageSrc: string;
+  icon: ReturnType<typeof getCategoryIcon>;
+  label: string;
+}) {
+  return (
+    <div className="relative h-full w-full overflow-hidden">
+      <Image src={imageSrc} alt="" fill sizes="33vw" className="object-cover object-center" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,18,38,0.12),rgba(9,18,38,0.54))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.2),transparent_26%),linear-gradient(135deg,rgba(246,226,213,0.18),transparent_60%)]" />
+      <div className="absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-[1.1rem] border border-white/14 bg-[rgba(255,255,255,0.12)] px-3 py-3 text-white shadow-[0_10px_24px_rgba(8,18,37,0.18)] backdrop-blur-sm">
+        <IconBadge icon={icon} size={18} className="h-10 w-10 border-white/15 bg-white/90 text-[var(--navy)]" />
+        <span className="text-sm font-bold">{label}</span>
+      </div>
+    </div>
+  );
+}
+
 function formatDistance(distanceKm: number, locale: Locale) {
   if (distanceKm < 1) {
     const meters = Math.max(50, Math.round(distanceKm * 1000));
@@ -72,6 +94,10 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
   const portfolioLabel = locale === "ar" ? "معرض الأعمال" : "Portfolio";
   const viewPortfolioLabel = locale === "ar" ? "عرض المعرض" : "Voir le portfolio";
   const verificationStatus = provider.verification.status;
+  const laneImageSrc =
+    provider.profileType === "home_business"
+      ? "/category-assets/home-based.png"
+      : "/category-assets/vocational.png";
 
   return (
     <article
@@ -98,7 +124,7 @@ export function ProviderCard({ locale, provider, category, zones, highlighted = 
             </div>
           </>
         ) : (
-          <CategoryPlaceholder icon={categoryIcon} label={categoryLabel} />
+          <LanePlaceholder imageSrc={laneImageSrc} icon={categoryIcon} label={categoryLabel} />
         )}
 
         {/* Verification badge overlay */}

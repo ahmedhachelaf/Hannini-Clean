@@ -130,6 +130,26 @@ export function HomePageContent({
       : "Choisissez la commune ou la zone qui vous convient pour trouver les prestataires les plus proches.";
   const zoneCountLabel = (count: number) =>
     locale === "ar" ? `${count} مناطق متاحة` : `${count} zones disponibles`;
+  const laneCards = [
+    {
+      key: "service_provider",
+      title: dictionary.home.servicesLaneTitle,
+      description: dictionary.home.servicesLaneDescription,
+      cta: dictionary.home.servicesLaneCta,
+      href: `/${locale}/providers`,
+      image: "/category-assets/vocational.png",
+      tint: "bg-[linear-gradient(135deg,rgba(19,64,91,0.9),rgba(19,64,91,0.42))]",
+    },
+    {
+      key: "home_business",
+      title: dictionary.home.businessesLaneTitle,
+      description: dictionary.home.businessesLaneDescription,
+      cta: dictionary.home.businessesLaneCta,
+      href: `/${locale}/businesses`,
+      image: "/category-assets/home-based.png",
+      tint: "bg-[linear-gradient(135deg,rgba(152,82,43,0.9),rgba(152,82,43,0.38))]",
+    },
+  ] as const;
 
   return (
     <>
@@ -148,6 +168,9 @@ export function HomePageContent({
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,250,255,0.18)_0%,rgba(214,236,246,0.08)_18%,rgba(18,52,96,0.38)_42%,rgba(20,91,125,0.72)_72%,rgba(222,122,77,0.74)_100%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,34,60,0.08),rgba(16,34,60,0.24))]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.26),transparent_18%),radial-gradient(circle_at_76%_20%,rgba(255,243,229,0.18),transparent_20%)]" />
+          <div className="absolute -left-10 bottom-0 h-40 w-40 opacity-[0.1] blur-[1px]">
+            <Image src="/category-assets/background-1.png" alt="" fill sizes="160px" className="object-cover object-center [mask-image:radial-gradient(circle_at_center,black_42%,transparent_76%)]" />
+          </div>
         </div>
         <div className="hero-orb -left-6 top-4 h-28 w-28 bg-[rgba(222,122,77,0.18)] sm:-left-10 sm:top-8 sm:h-44 sm:w-44" />
         <div className="hero-orb right-2 top-4 h-24 w-24 bg-[rgba(255,255,255,0.12)] sm:right-10 sm:top-16 sm:h-40 sm:w-40" />
@@ -308,6 +331,32 @@ export function HomePageContent({
         </article>
 
         <article className="surface-card rounded-[2rem] p-6 sm:p-7">
+          <div className="mb-5">
+            <div className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">{dictionary.home.lanesTitle}</div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {laneCards.map((lane) => (
+                <Link
+                  key={lane.key}
+                  href={lane.href}
+                  className="group relative overflow-hidden rounded-[1.6rem] border border-[rgba(15,95,255,0.12)] bg-white p-4 shadow-[0_16px_36px_rgba(15,95,255,0.08)]"
+                >
+                  <div className="pointer-events-none absolute inset-y-0 end-0 w-[45%]">
+                    <Image src={lane.image} alt="" fill sizes="260px" className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]" />
+                    <div className={`absolute inset-0 ${lane.tint}`} />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,1)_0%,rgba(255,255,255,0.94)_42%,rgba(255,255,255,0.16)_100%)]" />
+                  </div>
+                  <div className="relative max-w-[62%]">
+                    <h3 className={`text-lg font-extrabold text-[var(--ink)] ${locale === "ar" ? "arabic-display" : ""}`}>{lane.title}</h3>
+                    <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{lane.description}</p>
+                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[var(--accent)]">
+                      {lane.cta}
+                      <span aria-hidden="true">{locale === "ar" ? "↗" : "→"}</span>
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
           <div className="grid gap-5 lg:grid-cols-2">
             <div className="rounded-[1.6rem] border border-[rgba(15,95,255,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(232,242,255,0.9))] p-5 shadow-[0_14px_32px_rgba(15,95,255,0.08)]">
               <div className="text-sm font-semibold text-[var(--muted)]">{dictionary.home.howTitle}</div>
@@ -662,6 +711,11 @@ export function HomePageContent({
 
       <JourneySection locale={locale} t={dictionary.journey} providerHref={`/${locale}/join`} seekerHref={`/${locale}/providers`} conductHref={`/${locale}/conduct`} privacyHref={`/${locale}/safety`} termsHref={`/${locale}/conduct`} />
       <section id="join-henini" className="surface-card rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] sm:p-8">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem]">
+          <div className="absolute end-0 top-6 h-44 w-44 opacity-[0.1]">
+            <Image src="/category-assets/background-3.png" alt="" fill sizes="176px" className="object-cover object-center [mask-image:radial-gradient(circle_at_center,black_44%,transparent_78%)]" />
+          </div>
+        </div>
         <div className="mb-6 rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(238,245,255,0.96))] p-5 shadow-[0_14px_30px_rgba(15,95,255,0.08)] backdrop-blur">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -690,13 +744,21 @@ export function HomePageContent({
             <p className="mt-4 max-w-2xl text-sm leading-8 text-[var(--ink)]">
               {dictionary.home.joinDescription}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-[rgba(15,95,255,0.14)] bg-white px-4 py-2 text-sm font-semibold text-[var(--navy)] shadow-[0_10px_20px_rgba(15,95,255,0.05)]">
-                {dictionary.grow.laneService}
-              </span>
-              <span className="rounded-full border border-[rgba(15,95,255,0.14)] bg-white px-4 py-2 text-sm font-semibold text-[var(--navy)] shadow-[0_10px_20px_rgba(15,95,255,0.05)]">
-                {dictionary.grow.laneBusiness}
-              </span>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-white px-4 py-3 shadow-[0_10px_20px_rgba(15,95,255,0.05)]">
+                <div className="pointer-events-none absolute inset-y-0 end-0 w-[36%] opacity-[0.72]">
+                  <Image src="/category-assets/vocational.png" alt="" fill sizes="150px" className="object-cover object-center" />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,1)_0%,rgba(255,255,255,0.92)_46%,rgba(255,255,255,0.12)_100%)]" />
+                </div>
+                <span className="relative text-sm font-semibold text-[var(--navy)]">{dictionary.grow.laneService}</span>
+              </div>
+              <div className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(15,95,255,0.14)] bg-white px-4 py-3 shadow-[0_10px_20px_rgba(15,95,255,0.05)]">
+                <div className="pointer-events-none absolute inset-y-0 end-0 w-[36%] opacity-[0.72]">
+                  <Image src="/category-assets/home-based.png" alt="" fill sizes="150px" className="object-cover object-center" />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,1)_0%,rgba(255,255,255,0.92)_46%,rgba(255,255,255,0.12)_100%)]" />
+                </div>
+                <span className="relative text-sm font-semibold text-[var(--navy)]">{dictionary.grow.laneBusiness}</span>
+              </div>
             </div>
           </div>
           <Link href={`/${locale}/join`} className="button-secondary">

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ProviderSignupForm } from "@/components/forms/provider-signup-form";
 import { getDictionary, isLocale } from "@/lib/i18n";
@@ -30,16 +31,29 @@ export default async function JoinPage({ params, searchParams }: JoinPageProps) 
         <ProviderSignupForm locale={locale} categories={categories} zones={zones} callbackState={callbackState} labels={dictionary.join} />
 
         <aside className="surface-card sticky top-28 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(13,28,69,0.98),rgba(20,92,255,0.9)_75%,rgba(96,165,250,0.78))] p-6 text-white shadow-[0_26px_60px_rgba(12,40,104,0.18)]">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[1.75rem]">
+            <div className="absolute -top-8 end-0 h-40 w-40 opacity-[0.16]">
+              <Image src="/category-assets/background-3.png" alt="" fill sizes="160px" className="object-cover object-center [mask-image:radial-gradient(circle_at_center,black_44%,transparent_78%)]" />
+            </div>
+          </div>
           <div className="text-sm font-semibold uppercase tracking-[0.16em] text-white/72">{dictionary.nav.grow}</div>
           <h2 className={`mt-3 text-2xl font-extrabold ${locale === "ar" ? "arabic-display" : ""}`}>{dictionary.grow.subtitle}</h2>
           <p className="mt-4 text-sm leading-8 text-white/82">{dictionary.grow.description}</p>
 
-          <div className="mt-5 space-y-3">
-            <div className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm font-medium text-white/84">
-              {dictionary.grow.laneService}
+          <div className="relative mt-5 space-y-3">
+            <div className="relative overflow-hidden rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm font-medium text-white/84 backdrop-blur-sm">
+              <div className="pointer-events-none absolute inset-y-0 end-0 w-[38%] opacity-[0.4]">
+                <Image src="/category-assets/vocational.png" alt="" fill sizes="160px" className="object-cover object-center" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(13,28,69,0.96)_0%,rgba(13,28,69,0.72)_48%,rgba(13,28,69,0.12)_100%)]" />
+              </div>
+              <div className="relative max-w-[70%]">{dictionary.grow.laneService}</div>
             </div>
-            <div className="rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm font-medium text-white/84">
-              {dictionary.grow.laneBusiness}
+            <div className="relative overflow-hidden rounded-[1.25rem] border border-white/12 bg-white/10 px-4 py-3 text-sm font-medium text-white/84 backdrop-blur-sm">
+              <div className="pointer-events-none absolute inset-y-0 end-0 w-[38%] opacity-[0.4]">
+                <Image src="/category-assets/home-based.png" alt="" fill sizes="160px" className="object-cover object-center" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(13,28,69,0.96)_0%,rgba(13,28,69,0.72)_48%,rgba(13,28,69,0.12)_100%)]" />
+              </div>
+              <div className="relative max-w-[70%]">{dictionary.grow.laneBusiness}</div>
             </div>
           </div>
 

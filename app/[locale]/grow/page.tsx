@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getDictionary, isLocale } from "@/lib/i18n";
 import { notFound } from "next/navigation";
@@ -79,6 +80,14 @@ export default async function GrowPage({ params }: GrowPageProps) {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <section className="surface-card gradient-frame rounded-[2rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.99),rgba(227,239,255,0.96)_58%,rgba(206,225,255,0.92))] p-6 text-[var(--ink)] shadow-[0_30px_70px_rgba(12,40,104,0.18)] sm:p-8">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem]">
+          <div className="absolute -right-16 top-0 h-48 w-48 opacity-[0.12] blur-[2px]">
+            <Image src="/category-assets/background-2.png" alt="" fill sizes="192px" className="object-cover object-center [mask-image:radial-gradient(circle_at_center,black_48%,transparent_78%)]" />
+          </div>
+          <div className="absolute -left-10 bottom-0 h-40 w-40 opacity-[0.09]">
+            <Image src="/category-assets/background-1.png" alt="" fill sizes="160px" className="object-cover object-center [mask-image:radial-gradient(circle_at_center,black_45%,transparent_78%)]" />
+          </div>
+        </div>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
           <div>
             <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--ink)]">{dictionary.nav.grow}</div>
@@ -90,10 +99,28 @@ export default async function GrowPage({ params }: GrowPageProps) {
           </div>
 
           <div className="rounded-[1.5rem] border border-[rgba(20,92,255,0.18)] bg-white p-5 shadow-[0_8px_24px_rgba(11,63,184,0.08)]">
-            <div className="text-sm font-bold text-[var(--navy)]">{dictionary.nav.providers}</div>
-            <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneService}</div>
-            <div className="mt-4 text-sm font-bold text-[var(--navy)]">{dictionary.nav.businesses}</div>
-            <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneBusiness}</div>
+            <div className="grid gap-3">
+              <div className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] p-3">
+                <div className="pointer-events-none absolute inset-y-0 end-0 w-[42%] opacity-[0.88]">
+                  <Image src="/category-assets/vocational.png" alt="" fill sizes="180px" className="object-cover object-center" />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,1)_0%,rgba(255,255,255,0.92)_44%,rgba(255,255,255,0.16)_100%)]" />
+                </div>
+                <div className="relative max-w-[62%]">
+                  <div className="text-sm font-bold text-[var(--navy)]">{dictionary.nav.providers}</div>
+                  <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneService}</div>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-[1.25rem] border border-[rgba(20,92,255,0.12)] bg-[var(--soft)] p-3">
+                <div className="pointer-events-none absolute inset-y-0 end-0 w-[42%] opacity-[0.86]">
+                  <Image src="/category-assets/home-based.png" alt="" fill sizes="180px" className="object-cover object-center" />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,1)_0%,rgba(255,255,255,0.92)_44%,rgba(255,255,255,0.18)_100%)]" />
+                </div>
+                <div className="relative max-w-[62%]">
+                  <div className="text-sm font-bold text-[var(--navy)]">{dictionary.nav.businesses}</div>
+                  <div className="mt-2 text-sm leading-7 text-[var(--ink)]">{dictionary.grow.laneBusiness}</div>
+                </div>
+              </div>
+            </div>
             <div className="mt-5 rounded-[1.25rem] border border-[rgba(20,92,255,0.16)] bg-[var(--soft)] px-4 py-4 text-sm font-semibold leading-7 text-[var(--navy)]">
               {dictionary.grow.academySoon}
             </div>
