@@ -5,6 +5,14 @@ import "./globals.css";
 
 const appUrl = getAppBaseUrl();
 
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  console.error("CRITICAL: SUPABASE_URL missing");
+}
+
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error("CRITICAL: SERVICE_ROLE_KEY missing");
+}
+
 export const metadata: Metadata = {
   title: "Hannini | هَنّيني",
   description: "Hannini is a clean bilingual marketplace MVP for booking trusted home-service providers in Algeria.",

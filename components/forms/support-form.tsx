@@ -50,6 +50,7 @@ type SupportFormProps = {
 export function SupportForm({ locale, defaultValues, labels }: SupportFormProps) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<SupportSubmissionResult | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
   const [selectedCategory, setSelectedCategory] = useState(defaultValues?.category ?? "general_support");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [bookingMode, setBookingMode] = useState(defaultValues?.bookingId ? "with_booking" : "without_booking");
@@ -85,9 +86,11 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
     e.preventDefault();
     setPending(true);
     setResult(null);
+    setFieldErrors({});
 
     try {
       const formData = new FormData(e.currentTarget);
+      formData.set("locale", locale);
       // Remove any empty browser file input values and replace with the
       // state-managed files from the styled uploader.
       formData.delete("attachments");
@@ -102,10 +105,12 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       const data = (await response.json()) as SupportSubmissionResult;
 
       if (!data.ok) {
-        // Always show a localized error regardless of what the API returned.
+        setFieldErrors(data.fields ?? {});
         setResult({
           ok: false,
-          message: labels.submitError,
+          message: data.message || labels.submitError,
+          code: data.code,
+          fields: data.fields,
         });
       } else {
         setResult(data);
@@ -160,6 +165,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       onSubmit={handleSubmit}
       className="surface-card flex flex-col gap-5 rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.99),rgba(231,240,255,0.94))] p-6"
     >
+      <input type="hidden" name="locale" value={locale} />
       <div>
         <h2 className={`text-3xl font-extrabold tracking-tight ${locale === "ar" ? "arabic-display" : ""}`}>{labels.title}</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">{labels.description}</p>
@@ -174,7 +180,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.actorLabel}</span>
-          <select name="actorRole" defaultValue={defaultValues?.actorRole ?? "customer"} className="input-base">
+          <select name="actorRole" defaultValue={defaultValues?.actorRole ?? "customer"} disabled={pending} className="input-base">
             <option value="customer">{labels.actorCustomer}</option>
             <option value="provider">{labels.actorProvider}</option>
           </select>
@@ -185,6 +191,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
             name="category"
             value={selectedCategory}
             onChange={(event) => setSelectedCategory(event.target.value)}
+            disabled={pending}
             className="input-base"
           >
             {Object.entries(labels.categories).map(([value, label]) => (
@@ -203,9 +210,11 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         <input
           name="subject"
           required
+          disabled={pending}
           className="input-base"
           placeholder={locale === "ar" ? "مثال: تواصل غير مناسب بعد الحجز" : "Exemple : contact inapproprié après réservation"}
         />
+        {fieldErrors.subject ? <p className="mt-1 text-xs text-rose-600">{fieldErrors.subject}</p> : null}
       </label>
 
       <label>
@@ -216,6 +225,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
           name="message"
           required
           rows={6}
+          disabled={pending}
           className="input-base min-h-36 resize-y"
           placeholder={
             locale === "ar"
@@ -223,6 +233,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
               : "Expliquez ce qui s'est passé, quand, avec qui, et ce que vous attendez de l'équipe maintenant."
           }
         />
+        {fieldErrors.message ? <p className="mt-1 text-xs text-rose-600">{fieldErrors.message}</p> : null}
       </label>
 
       <div className="rounded-[1.25rem] border border-[var(--line)] bg-[var(--soft)] px-4 py-4 text-sm leading-7 text-[var(--muted)]">
@@ -236,19 +247,22 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
             {locale === "ar" ? "اسمك الكامل" : "Votre nom"} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
           </span>
-          <input name="reporterName" required className="input-base" />
+          <input name="reporterName" required disabled={pending} className="input-base" />
+          {fieldErrors.reporterName ? <p className="mt-1 text-xs text-rose-600">{fieldErrors.reporterName}</p> : null}
         </label>
         <label>
           <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
             {labels.phoneLabel} <span className="text-[var(--navy)]">• {locale === "ar" ? "مطلوب" : "Obligatoire"}</span>
           </span>
-          <input name="phoneNumber" type="tel" required className="input-base" />
+          <input name="phoneNumber" type="tel" required disabled={pending} className="input-base" />
+          {fieldErrors.phoneNumber ? <p className="mt-1 text-xs text-rose-600">{fieldErrors.phoneNumber}</p> : null}
         </label>
       </div>
 
       <label>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.emailLabel}</span>
-        <input name="email" type="email" className="input-base" />
+        <input name="email" type="email" disabled={pending} className="input-base" />
+        {fieldErrors.email ? <p className="mt-1 text-xs text-rose-600">{fieldErrors.email}</p> : null}
       </label>
 
       <div className="rounded-[1.25rem] border border-[var(--line)] bg-white p-4">
@@ -275,18 +289,18 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
                 {locale === "ar" ? "رقم الحجز أو رقم الهاتف المستخدم" : "Référence ou téléphone utilisé"}
               </span>
-              <input name="bookingReference" defaultValue={defaultValues?.bookingId ?? ""} className="input-base" />
+              <input name="bookingReference" defaultValue={defaultValues?.bookingId ?? ""} disabled={pending} className="input-base" />
             </label>
             <label>
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.providerReferenceLabel}</span>
-              <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} className="input-base" />
+              <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} disabled={pending} className="input-base" />
             </label>
           </div>
         ) : (
           <div className="mt-4">
             <label>
               <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">{labels.providerReferenceLabel}</span>
-              <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} className="input-base" />
+              <input name="providerSlug" defaultValue={defaultValues?.providerSlug ?? ""} disabled={pending} className="input-base" />
             </label>
           </div>
         )}
@@ -311,7 +325,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
       <div className="grid gap-4 rounded-[1.5rem] border border-[rgba(15,95,255,0.14)] bg-[var(--soft)] p-5 md:grid-cols-2">
         <label className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
           <div className="flex items-start gap-3">
-            <input name="requestSafetyBlock" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <input name="blockContact" type="checkbox" disabled={pending} className="mt-1 h-4 w-4 accent-[var(--accent)]" />
             <div>
               <div className="text-sm font-semibold text-[var(--ink)]">{labels.safetyBlockLabel}</div>
               <div className="mt-1 text-xs leading-6 text-[var(--muted)]">{labels.safetyBlockHint}</div>
@@ -320,7 +334,7 @@ export function SupportForm({ locale, defaultValues, labels }: SupportFormProps)
         </label>
         <label className="rounded-[1.25rem] border border-[rgba(15,95,255,0.12)] bg-white px-4 py-4">
           <div className="flex items-start gap-3">
-            <input name="privacySensitive" type="checkbox" className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <input name="isSensitive" type="checkbox" disabled={pending} className="mt-1 h-4 w-4 accent-[var(--accent)]" />
             <div>
               <div className="text-sm font-semibold text-[var(--ink)]">{labels.privacySensitiveLabel}</div>
               <div className="mt-1 text-xs leading-6 text-[var(--muted)]">{labels.privacySensitiveHint}</div>

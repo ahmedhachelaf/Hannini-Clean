@@ -60,9 +60,30 @@ export function OTPInput({ length = 6, onComplete }: OTPInputProps) {
   }
 
   function handleKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Backspace" && !values[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
+    if (event.key === "Backspace") {
+      if (values[index]) {
+        updateValue(index, "");
+        return;
+      }
+      if (index > 0) {
+        updateValue(index - 1, "");
+        inputsRef.current[index - 1]?.focus();
+      }
     }
+  }
+
+  function handlePaste(event: React.ClipboardEvent<HTMLInputElement>) {
+    event.preventDefault();
+    const digits = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, length).split("");
+    if (!digits.length) return;
+    setValues((current) => {
+      const clone = [...current];
+      for (let index = 0; index < length; index += 1) {
+        clone[index] = digits[index] ?? "";
+      }
+      return clone;
+    });
+    inputsRef.current[Math.min(digits.length, length) - 1]?.focus();
   }
 
   return (
@@ -75,10 +96,13 @@ export function OTPInput({ length = 6, onComplete }: OTPInputProps) {
           }}
           type="text"
           inputMode="numeric"
+          maxLength={length}
           value={value}
           onChange={(event) => handleChange(index, event.target.value)}
           onKeyDown={(event) => handleKeyDown(index, event)}
-          className={`h-14 w-12 rounded-xl border border-sand-dark text-center text-lg font-bold text-[var(--ink)] shadow-sm focus:border-terracotta ${
+          onPaste={handlePaste}
+          dir="ltr"
+          className={`h-14 w-12 rounded-[10px] border-[1.5px] border-sand-dark text-center text-2xl font-bold text-[var(--ink)] shadow-sm outline-none transition focus:border-terracotta focus:ring-4 focus:ring-[rgba(196,97,42,0.15)] ${
             value ? "bg-terracotta-pale" : "bg-white"
           }`}
           aria-label={`OTP digit ${index + 1}`}

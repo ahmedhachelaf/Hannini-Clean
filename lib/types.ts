@@ -408,6 +408,8 @@ export type SupportSubmissionResult = {
   message: string;
   caseId?: string;
   demoMode?: boolean;
+  code?: string;
+  fields?: Partial<Record<string, string>>;
 };
 
 export type BusinessRequestSubmissionResult = {

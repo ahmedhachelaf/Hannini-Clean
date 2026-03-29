@@ -186,11 +186,15 @@ create table if not exists public.support_cases (
   privacy_sensitive boolean not null default false,
   subject text not null,
   message text not null,
+  reporter_name text,
+  reporter_phone text,
   phone_number text,
   email text,
   booking_id uuid references public.bookings(id) on delete set null,
   provider_id uuid references public.providers(id) on delete set null,
+  reported_provider_id uuid references public.providers(id) on delete set null,
   provider_slug text,
+  interaction_verified boolean not null default false,
   attachment_names text[] not null default '{}',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -239,6 +243,7 @@ create index if not exists reviews_interaction_verified_idx on public.reviews (i
 create index if not exists reviews_provider_reply_status_idx on public.reviews (provider_reply_status);
 create index if not exists support_cases_status_idx on public.support_cases (status);
 create index if not exists support_cases_provider_idx on public.support_cases (provider_id);
+create index if not exists support_cases_reported_provider_idx on public.support_cases (reported_provider_id);
 create index if not exists support_messages_case_idx on public.support_messages (support_case_id);
 create index if not exists business_requests_status_idx on public.business_requests (status);
 create index if not exists business_requests_category_idx on public.business_requests (category_slug);

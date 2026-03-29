@@ -266,7 +266,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("email");
-  const [emailVerificationMode, setEmailVerificationMode] = useState<EmailVerificationMode>("magic_link");
+  const [emailVerificationMode, setEmailVerificationMode] = useState<EmailVerificationMode>("otp");
   const [phoneOtpEnabled, setPhoneOtpEnabled] = useState(false);
   const [enabledPhoneChannels, setEnabledPhoneChannels] = useState<PhoneVerificationChannel[]>([]);
   const [phoneVerificationChannel, setPhoneVerificationChannel] = useState<PhoneVerificationChannel>("sms");

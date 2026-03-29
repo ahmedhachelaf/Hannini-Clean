@@ -21,6 +21,7 @@ type VerifyPayload = {
 };
 
 export async function POST(request: Request) {
+  console.log("[HANNINI DEBUG] Function called:", "provider-verification:verify", new Date().toISOString());
   const payload = (await request.json().catch(() => null)) as VerifyPayload | null;
   const locale = payload?.locale === "fr" ? "fr" : "ar";
   const method = payload?.method === "phone" ? "phone" : "email";
@@ -126,6 +127,12 @@ export async function POST(request: Request) {
     });
   }
 
+  console.log("[HANNINI DEBUG] Supabase call:", {
+    table: "auth",
+    operation: "verifyOtp",
+    payload_keys: method === "phone" ? ["phone", "token", "type"] : ["email", "token", "type"],
+  });
+
   const verifyResult =
     method === "phone"
       ? await supabase.auth.verifyOtp({
@@ -138,6 +145,13 @@ export async function POST(request: Request) {
           token: code,
           type: "email",
         });
+
+  console.log("[HANNINI DEBUG] Supabase result:", {
+    error: verifyResult.error?.message,
+    error_code: verifyResult.error?.code,
+    error_details: verifyResult.error?.message,
+    data_received: Boolean(verifyResult.data?.user?.id),
+  });
 
   if (verifyResult.error || !verifyResult.data.user?.id) {
     console.error("provider-verification:verify_failed", {

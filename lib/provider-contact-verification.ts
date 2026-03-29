@@ -3,6 +3,32 @@ import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 
+/*
+SUPABASE DASHBOARD CONFIGURATION REQUIRED:
+════════════════════════════════════════════
+
+1. Authentication → URL Configuration:
+   Site URL: https://your-vercel-url.vercel.app
+   Redirect URLs:
+   - https://your-vercel-url.vercel.app/**
+   - http://localhost:3000/**
+
+2. Authentication → Email Templates:
+   Use an OTP-capable template that contains {{ .Token }}
+   instead of {{ .ConfirmationURL }} when email OTP is enabled.
+
+3. Authentication → Sign In / Providers:
+   Email provider must be enabled.
+   Phone OTP requires a configured SMS provider (for example Twilio).
+
+4. Authentication → Rate Limits:
+   Increase limits temporarily while testing if sends are throttled.
+
+5. If phone OTP is not configured:
+   keep PROVIDER_PHONE_OTP_ENABLED=false so the UI does not imply that
+   phone verification is available.
+*/
+
 const PENDING_COOKIE = "hannini_provider_verification_pending";
 const VERIFIED_COOKIE = "hannini_provider_verification_verified";
 
@@ -89,7 +115,7 @@ export function isEmailVerificationAvailable() {
 }
 
 export function getEmailVerificationMode(): ProviderEmailVerificationMode {
-  const raw = (process.env.NEXT_PUBLIC_PROVIDER_EMAIL_VERIFICATION_MODE ?? process.env.PROVIDER_EMAIL_VERIFICATION_MODE ?? "magic_link")
+  const raw = (process.env.NEXT_PUBLIC_PROVIDER_EMAIL_VERIFICATION_MODE ?? process.env.PROVIDER_EMAIL_VERIFICATION_MODE ?? "otp")
     .trim()
     .toLowerCase();
 

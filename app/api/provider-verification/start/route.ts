@@ -26,6 +26,7 @@ type StartVerificationPayload = {
 };
 
 export async function POST(request: Request) {
+  console.log("[HANNINI DEBUG] Function called:", "provider-verification:start", new Date().toISOString());
   const payload = (await request.json().catch(() => null)) as StartVerificationPayload | null;
   const locale = payload?.locale === "fr" ? "fr" : "ar";
   const method = payload?.method === "phone" ? "phone" : "email";
@@ -110,19 +111,50 @@ export async function POST(request: Request) {
     });
   }
 
+  console.log("[HANNINI DEBUG] Supabase call:", {
+    table: "auth",
+    operation: "signInWithOtp",
+    payload_keys:
+      method === "phone"
+        ? ["phone", "options.shouldCreateUser", "options.channel"]
+        : emailVerificationMode === "otp"
+          ? ["email", "options.shouldCreateUser", "options.data"]
+          : ["email", "options.shouldCreateUser", "options.emailRedirectTo", "options.data"],
+  });
+
   const startResult =
     method === "phone"
       ? await supabase.auth.signInWithOtp({
           phone: target,
           options: { shouldCreateUser: true, channel: phoneChannel },
         })
-      : await supabase.auth.signInWithOtp({
-          email: target,
-          options: {
-            shouldCreateUser: true,
-            emailRedirectTo: callbackUrl.toString(),
-          },
-        });
+      : emailVerificationMode === "otp"
+        ? await supabase.auth.signInWithOtp({
+            email: target,
+            options: {
+              shouldCreateUser: true,
+              data: {
+                is_provider_signup: true,
+              },
+            },
+          })
+        : await supabase.auth.signInWithOtp({
+            email: target,
+            options: {
+              shouldCreateUser: true,
+              emailRedirectTo: callbackUrl.toString(),
+              data: {
+                is_provider_signup: true,
+              },
+            },
+          });
+
+  console.log("[HANNINI DEBUG] Supabase result:", {
+    error: startResult.error?.message,
+    error_code: startResult.error?.code,
+    error_details: startResult.error?.message,
+    data_received: Boolean(startResult.data),
+  });
 
   if (startResult.error) {
     console.error("provider-verification:start_failed", {
@@ -135,11 +167,17 @@ export async function POST(request: Request) {
       {
         ok: false,
         message:
-          locale === "ar"
-            ? "تعذر إرسال رمز التحقق الآن. حاول مرة أخرى بعد قليل."
-            : "Impossible d'envoyer le code de vérification pour le moment. Réessayez dans un instant.",
+          startResult.error.message.toLowerCase().includes("rate") || startResult.error.message.toLowerCase().includes("too many")
+            ? locale === "ar"
+              ? "لقد طلبت رموزاً كثيرة. انتظر دقيقة ثم حاول مجدداً."
+              : "Trop de demandes de code. Attendez une minute puis réessayez."
+            : startResult.error.message.toLowerCase().includes("phone") || startResult.error.message.toLowerCase().includes("sms")
+              ? getVerificationErrorMessage("unsupported_phone", locale)
+              : locale === "ar"
+                ? "تعذر إرسال رمز التحقق الآن. حاول مرة أخرى بعد قليل."
+                : "Impossible d'envoyer le code de vérification pour le moment. Réessayez dans un instant.",
       },
-      { status: 400 },
+      { status: startResult.error.message.toLowerCase().includes("rate") ? 429 : 400 },
     );
   }
 

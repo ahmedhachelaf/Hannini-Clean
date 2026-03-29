@@ -32,6 +32,7 @@ function redirectToJoin(locale: "ar" | "fr", status: "success" | "error", method
 }
 
 export async function GET(request: NextRequest) {
+  console.log("[HANNINI DEBUG] Function called:", "provider-verification:callback", new Date().toISOString());
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get("locale") === "fr" ? "fr" : "ar";
   const tokenHash = searchParams.get("token_hash");
@@ -46,9 +47,22 @@ export async function GET(request: NextRequest) {
     return redirectToJoin(locale, "error");
   }
 
+  console.log("[HANNINI DEBUG] Supabase call:", {
+    table: "auth",
+    operation: "verifyOtp",
+    payload_keys: ["token_hash", "type"],
+  });
+
   const verifyResult = await supabase.auth.verifyOtp({
     token_hash: tokenHash,
     type: rawType as EmailOtpType,
+  });
+
+  console.log("[HANNINI DEBUG] Supabase result:", {
+    error: verifyResult.error?.message,
+    error_code: verifyResult.error?.code,
+    error_details: verifyResult.error?.message,
+    data_received: Boolean(verifyResult.data.user?.id),
   });
 
   if (verifyResult.error || !verifyResult.data.user?.id) {

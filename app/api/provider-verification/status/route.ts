@@ -8,6 +8,7 @@ import {
 } from "@/lib/provider-contact-verification";
 
 export async function GET() {
+  console.log("[HANNINI DEBUG] Function called:", "provider-verification:status", new Date().toISOString());
   const [pending, verified] = await Promise.all([
     getPendingProviderVerification(),
     getVerifiedProviderContact(),
