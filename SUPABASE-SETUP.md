@@ -9,9 +9,9 @@ Set:
   - `http://localhost:3000/**`
 
 ## 2. Authentication → Email Templates
-The current Hannini provider signup now expects email verification by **6-digit code** by default.
+Hannini now expects email verification by **6-digit code**.
 
-Update the email template so it contains `{{ .Token }}` and not only `{{ .ConfirmationURL }}`.
+Update the template so it contains `{{ .Token }}` and does not rely on `{{ .ConfirmationURL }}` for the active verification flow.
 
 Suggested subject:
 
@@ -34,12 +34,17 @@ Suggested body:
 Email:
 
 - Enable Email provider: ON
-- If you want OTP-first behavior for this MVP, avoid relying on magic-link-only templates
+- Use code-based verification, not magic-link-only templates
 
 Phone:
 
 - Requires an SMS provider / Twilio-style setup in Supabase
 - If phone OTP is not configured, Hannini should use email verification instead
+
+WhatsApp:
+
+- Only expose WhatsApp OTP if your Twilio WhatsApp sender / Verify WhatsApp channel is fully configured
+- In code, keep `PROVIDER_PHONE_OTP_WHATSAPP_ENABLED=false` until that setup is confirmed
 
 ## 4. Authentication → Rate Limits
 If OTP sends fail intermittently:
@@ -55,6 +60,9 @@ These must exist in production:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_APP_URL`
 - `ADMIN_ACCESS_PASSWORD`
+- `PROVIDER_PHONE_OTP_ENABLED` when SMS OTP is really ready
+- `PROVIDER_PHONE_OTP_CHANNELS` such as `sms` or `sms,whatsapp`
+- `PROVIDER_PHONE_OTP_WHATSAPP_ENABLED` only when Twilio WhatsApp is truly configured
 
 Verify them quickly with:
 
@@ -80,6 +88,7 @@ create policy "support_cases_anon_insert"
 ```
 
 ## 7. OTP Verification Notes
-- If users still receive a **link** instead of a **6-digit code**, the Supabase email template is still link-oriented.
+- If users still receive a **link** instead of a **6-digit code**, the Supabase email template is still link-oriented and must be changed to `{{ .Token }}`.
 - If email verification redirects to the wrong domain, review Site URL and Redirect URLs.
 - If phone OTP fails, verify the phone auth provider is actually configured in Supabase.
+- If WhatsApp appears in the UI but cannot deliver codes, turn `PROVIDER_PHONE_OTP_WHATSAPP_ENABLED` back off until Twilio WhatsApp is confirmed.

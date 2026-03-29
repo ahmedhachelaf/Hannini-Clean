@@ -14,8 +14,9 @@ SUPABASE DASHBOARD CONFIGURATION REQUIRED:
    - http://localhost:3000/**
 
 2. Authentication → Email Templates:
-   Use an OTP-capable template that contains {{ .Token }}
-   instead of {{ .ConfirmationURL }} when email OTP is enabled.
+   The email template must contain {{ .Token }} and not rely on
+   {{ .ConfirmationURL }}. Hannini now expects 6-digit email codes,
+   not magic links, for the auth flow.
 
 3. Authentication → Sign In / Providers:
    Email provider must be enabled.
@@ -24,7 +25,16 @@ SUPABASE DASHBOARD CONFIGURATION REQUIRED:
 4. Authentication → Rate Limits:
    Increase limits temporarily while testing if sends are throttled.
 
-5. If phone OTP is not configured:
+5. Phone / SMS OTP:
+   Phone provider must be enabled in Supabase Auth Providers and backed
+   by a working SMS provider such as Twilio.
+
+6. WhatsApp OTP:
+   Only enable the WhatsApp channel if Twilio WhatsApp sender support is
+   fully configured. Keep it disabled in Hannini otherwise so users do
+   not see a channel that cannot deliver codes.
+
+7. If phone OTP is not configured:
    keep PROVIDER_PHONE_OTP_ENABLED=false so the UI does not imply that
    phone verification is available.
 */
@@ -39,7 +49,7 @@ const MAX_VERIFY_ATTEMPTS = 5;
 
 export type ProviderVerificationMethod = "phone" | "email";
 export type ProviderPhoneVerificationChannel = "sms" | "whatsapp";
-export type ProviderEmailVerificationMode = "magic_link" | "otp";
+export type ProviderEmailVerificationMode = "otp";
 
 export type PendingProviderVerification = {
   method: ProviderVerificationMethod;
@@ -115,11 +125,7 @@ export function isEmailVerificationAvailable() {
 }
 
 export function getEmailVerificationMode(): ProviderEmailVerificationMode {
-  const raw = (process.env.NEXT_PUBLIC_PROVIDER_EMAIL_VERIFICATION_MODE ?? process.env.PROVIDER_EMAIL_VERIFICATION_MODE ?? "otp")
-    .trim()
-    .toLowerCase();
-
-  return raw === "otp" ? "otp" : "magic_link";
+  return "otp";
 }
 
 export function isPhoneVerificationEnabled() {
@@ -132,12 +138,28 @@ export function getEnabledPhoneVerificationChannels(): ProviderPhoneVerification
   }
 
   const raw = process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_CHANNELS ?? process.env.PROVIDER_PHONE_OTP_CHANNELS ?? "sms";
-  const channels = raw
+  const requestedChannels = raw
     .split(",")
     .map((value) => value.trim().toLowerCase())
     .filter((value): value is ProviderPhoneVerificationChannel => value === "sms" || value === "whatsapp");
 
-  return channels.length > 0 ? Array.from(new Set(channels)) : ["sms"];
+  const uniqueChannels: ProviderPhoneVerificationChannel[] =
+    requestedChannels.length > 0 ? Array.from(new Set(requestedChannels)) : ["sms"];
+
+  return uniqueChannels.filter((channel) => {
+    if (channel === "whatsapp") {
+      return isWhatsAppVerificationExplicitlyEnabled();
+    }
+
+    return true;
+  });
+}
+
+function isWhatsAppVerificationExplicitlyEnabled() {
+  return (
+    process.env.PROVIDER_PHONE_OTP_WHATSAPP_ENABLED === "true" ||
+    process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_WHATSAPP_ENABLED === "true"
+  );
 }
 
 export function getDefaultPhoneVerificationChannel(): ProviderPhoneVerificationChannel {
@@ -316,12 +338,13 @@ export function getVerificationDeliveryLabel(
 }
 
 export function getVerificationErrorMessage(
-  code: "unsupported_phone" | "invalid_target" | "cooldown" | "expired" | "locked" | "missing_pending" | "not_verified",
+  code: "unsupported_phone" | "unsupported_whatsapp" | "invalid_target" | "cooldown" | "expired" | "locked" | "missing_pending" | "not_verified",
   locale: "ar" | "fr",
 ) {
   if (locale === "ar") {
     return {
       unsupported_phone: "التحقق عبر الهاتف غير مفعّل حالياً. استخدم البريد الإلكتروني أو فعّل مزود OTP في Supabase.",
+      unsupported_whatsapp: "التحقق عبر واتساب غير متاح حالياً. فعّل Twilio WhatsApp أولاً أو استخدم الرسالة النصية.",
       invalid_target: "تحقق من رقم الهاتف أو البريد الإلكتروني ثم أعد المحاولة.",
       cooldown: "تم إرسال رمز مؤخراً. انتظر قليلاً ثم أعد الإرسال.",
       expired: "انتهت صلاحية الرمز. اطلب رمزاً جديداً.",
@@ -333,6 +356,7 @@ export function getVerificationErrorMessage(
 
   return {
     unsupported_phone: "La vérification par téléphone n'est pas activée pour le moment. Utilisez l'e-mail ou activez un fournisseur OTP dans Supabase.",
+    unsupported_whatsapp: "La vérification WhatsApp n'est pas disponible pour le moment. Activez d'abord Twilio WhatsApp ou utilisez le SMS.",
     invalid_target: "Vérifiez le numéro ou l'e-mail puis réessayez.",
     cooldown: "Un code a déjà été envoyé récemment. Merci d'attendre avant de le renvoyer.",
     expired: "Le code a expiré. Demandez-en un nouveau.",
