@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import {
   clearPendingProviderVerification,
   createAnonSupabaseClient,
-  getEmailVerificationMode,
   getPendingProviderVerification,
   getVerificationConstants,
   getVerificationErrorMessage,
@@ -10,12 +9,10 @@ import {
   setVerifiedProviderContact,
   updatePendingProviderVerificationAttempts,
   validateVerificationTarget,
-  type ProviderVerificationMethod,
 } from "@/lib/provider-contact-verification";
 
 type VerifyPayload = {
   locale?: string;
-  method?: ProviderVerificationMethod;
   target?: string;
   code?: string;
 };
@@ -24,28 +21,26 @@ export async function POST(request: Request) {
   try {
     const payload = (await request.json().catch(() => null)) as VerifyPayload | null;
     const locale = payload?.locale === "fr" ? "fr" : "ar";
-    const method = payload?.method === "phone" ? "phone" : "email";
     const rawTarget = String(payload?.target ?? "");
-    const target = normalizeVerificationTarget(method, rawTarget);
+    const target = normalizeVerificationTarget("email", rawTarget);
     const code = String(payload?.code ?? "").trim();
     const constants = getVerificationConstants();
-    getEmailVerificationMode();
 
-    if (!validateVerificationTarget(method, rawTarget) || !/^\d{6}$/.test(code)) {
+    if (!validateVerificationTarget("email", rawTarget) || !/^\d{6}$/.test(code)) {
       return NextResponse.json(
         {
           ok: false,
           message:
             locale === "ar"
-              ? "أدخل رمزاً صحيحاً من 6 أرقام مع وسيلة تحقق صحيحة."
-              : "Saisissez un code valide à 6 chiffres avec une cible de vérification correcte.",
+              ? "أدخل بريداً إلكترونياً صالحاً ورمزاً صحيحاً من 6 أرقام."
+              : "Saisissez un e-mail valide et un code correct à 6 chiffres.",
         },
         { status: 400 },
       );
     }
 
     const pending = await getPendingProviderVerification();
-    if (!pending || pending.method !== method || pending.target !== target) {
+    if (!pending || pending.target !== target) {
       return NextResponse.json(
         { ok: false, message: getVerificationErrorMessage("missing_pending", locale) },
         { status: 400 },
@@ -69,8 +64,8 @@ export async function POST(request: Request) {
             ok: false,
             message:
               locale === "ar"
-                ? "خدمة التحقق غير مهيأة حالياً. أضف مفاتيح Supabase Auth إلى Vercel أولاً."
-                : "Le service de vérification n'est pas configuré pour le moment. Ajoutez d'abord les variables Supabase Auth dans Vercel.",
+                ? "خدمة التحقق عبر البريد الإلكتروني غير مهيأة حالياً. أضف مفاتيح Supabase Auth إلى Vercel أولاً."
+                : "Le service de vérification par e-mail n'est pas configuré pour le moment. Ajoutez d'abord les variables Supabase Auth dans Vercel.",
           },
           { status: 503 },
         );
@@ -95,10 +90,9 @@ export async function POST(request: Request) {
       }
 
       const verified = await setVerifiedProviderContact({
-        method,
+        method: "email",
         target,
-        channel: pending.channel,
-        authUserId: `demo-${method}-${target}`,
+        authUserId: `demo-email-${target}`,
       });
 
       await clearPendingProviderVerification();
@@ -108,28 +102,21 @@ export async function POST(request: Request) {
         demoMode: true,
         verified,
         message:
-          locale === "ar" ? "تم التحقق بنجاح. يمكنك الآن إرسال طلبك." : "Vérification réussie. Vous pouvez maintenant envoyer votre demande.",
+          locale === "ar" ? "تم التحقق من البريد الإلكتروني بنجاح. يمكنك الآن إرسال طلبك." : "L'e-mail a bien été vérifié. Vous pouvez maintenant envoyer votre demande.",
       });
     }
 
     console.log("[HANNINI DEBUG] Supabase call:", {
       table: "auth",
       operation: "verifyOtp",
-      payload_keys: method === "phone" ? ["phone", "token", "type"] : ["email", "token", "type"],
+      payload_keys: ["email", "token", "type"],
     });
 
-    const verifyResult =
-      method === "phone"
-        ? await supabase.auth.verifyOtp({
-            phone: target,
-            token: code,
-            type: "sms",
-          })
-        : await supabase.auth.verifyOtp({
-            email: target,
-            token: code,
-            type: "email",
-          });
+    const verifyResult = await supabase.auth.verifyOtp({
+      email: target,
+      token: code,
+      type: "email",
+    });
 
     console.log("[HANNINI DEBUG] Supabase result:", {
       error: verifyResult.error?.message,
@@ -140,9 +127,7 @@ export async function POST(request: Request) {
 
     if (verifyResult.error || !verifyResult.data.user?.id) {
       console.error("provider-verification:verify_failed", {
-        method,
         target,
-        channel: pending.channel,
         error: verifyResult.error,
       });
 
@@ -161,6 +146,7 @@ export async function POST(request: Request) {
       if (normalizedError.includes("expired")) {
         await clearPendingProviderVerification();
       }
+
       const message = normalizedError.includes("expired")
         ? getVerificationErrorMessage("expired", locale)
         : normalizedError.includes("invalid") || normalizedError.includes("token")
@@ -182,9 +168,8 @@ export async function POST(request: Request) {
     }
 
     const verified = await setVerifiedProviderContact({
-      method,
+      method: "email",
       target,
-      channel: pending.channel,
       authUserId: verifyResult.data.user.id,
     });
 
@@ -194,7 +179,7 @@ export async function POST(request: Request) {
       ok: true,
       verified,
       message:
-        locale === "ar" ? "تم التحقق بنجاح. يمكنك الآن إرسال طلبك." : "Vérification réussie. Vous pouvez maintenant envoyer votre demande.",
+        locale === "ar" ? "تم التحقق من البريد الإلكتروني بنجاح. يمكنك الآن إرسال طلبك." : "L'e-mail a bien été vérifié. Vous pouvez maintenant envoyer votre demande.",
     });
   } catch (error) {
     console.error("[HANNINI DEBUG] Caught error:", {

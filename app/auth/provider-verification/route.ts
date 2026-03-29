@@ -5,7 +5,6 @@ import {
   clearPendingProviderVerification,
   createAnonSupabaseClient,
   setVerifiedProviderContact,
-  type ProviderVerificationMethod,
 } from "@/lib/provider-contact-verification";
 
 const VALID_EMAIL_TYPES = new Set([
@@ -19,13 +18,11 @@ const VALID_EMAIL_TYPES = new Set([
   "email_change_new",
 ]);
 
-function redirectToJoin(locale: "ar" | "fr", status: "success" | "error", method?: ProviderVerificationMethod, target?: string) {
+function redirectToJoin(locale: "ar" | "fr", status: "success" | "error", target?: string) {
   const url = new URL(`/${locale}/join`, getAppBaseUrl());
   url.searchParams.set("verification", status === "success" ? "email-success" : "email-error");
-  if (method) {
-    url.searchParams.set("verifiedMethod", method);
-  }
   if (target) {
+    url.searchParams.set("verifiedMethod", "email");
     url.searchParams.set("verifiedTarget", target);
   }
   return NextResponse.redirect(url);
@@ -75,19 +72,18 @@ export async function GET(request: NextRequest) {
   }
 
   const user = verifyResult.data.user;
-  const method: ProviderVerificationMethod = user.email ? "email" : "phone";
-  const target = (user.email ?? user.phone ?? "").trim().toLowerCase();
+  const target = (user.email ?? "").trim().toLowerCase();
 
   if (!target) {
     return redirectToJoin(locale, "error");
   }
 
   await setVerifiedProviderContact({
-    method,
+    method: "email",
     target,
     authUserId: user.id,
   });
   await clearPendingProviderVerification();
 
-  return redirectToJoin(locale, "success", method, target);
+  return redirectToJoin(locale, "success", target);
 }

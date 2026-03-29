@@ -1,5 +1,9 @@
 # Supabase Configuration Required for Hannini
 
+Hannini now uses **email-only authentication** for provider verification and login preparation.
+
+There is **no SMS or WhatsApp OTP setup required** in the final free configuration.
+
 ## 1. Authentication → URL Configuration
 Set:
 
@@ -9,9 +13,9 @@ Set:
   - `http://localhost:3000/**`
 
 ## 2. Authentication → Email Templates
-Hannini now expects email verification by **6-digit code**.
+Hannini expects email verification by **6-digit code**.
 
-Update the template so it contains `{{ .Token }}` and does not rely on `{{ .ConfirmationURL }}` for the active verification flow.
+Update the relevant template so it contains `{{ .Token }}` and does not rely on `{{ .ConfirmationURL }}` for the verification flow.
 
 Suggested subject:
 
@@ -30,26 +34,29 @@ Suggested body:
 إذا لم تطلب هذا الرمز، تجاهل هذا البريد.
 ```
 
+Apply the same token-based approach to:
+
+- `Magic link`
+- `Confirm sign up`
+
 ## 3. Authentication → Sign In / Providers
 Email:
 
 - Enable Email provider: ON
-- Use code-based verification, not magic-link-only templates
 
 Phone:
 
-- Requires an SMS provider / Twilio-style setup in Supabase
-- If phone OTP is not configured, Hannini should use email verification instead
+- Leave phone auth disabled unless you intentionally choose a paid SMS provider later.
 
 WhatsApp:
 
-- Only expose WhatsApp OTP if your Twilio WhatsApp sender / Verify WhatsApp channel is fully configured
-- In code, keep `PROVIDER_PHONE_OTP_WHATSAPP_ENABLED=false` until that setup is confirmed
+- Do not configure WhatsApp for auth in the free Hannini setup.
+- WhatsApp stays a profile/contact channel only.
 
 ## 4. Authentication → Rate Limits
-If OTP sends fail intermittently:
+If email OTP sends fail intermittently:
 
-- review rate limits for email / phone auth
+- review rate limits for email auth
 - temporarily increase limits during testing
 
 ## 5. Vercel Environment Variables
@@ -60,9 +67,7 @@ These must exist in production:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `NEXT_PUBLIC_APP_URL`
 - `ADMIN_ACCESS_PASSWORD`
-- `PROVIDER_PHONE_OTP_ENABLED` when SMS OTP is really ready
-- `PROVIDER_PHONE_OTP_CHANNELS` such as `sms` or `sms,whatsapp`
-- `PROVIDER_PHONE_OTP_WHATSAPP_ENABLED` only when Twilio WhatsApp is truly configured
+- `PROVIDER_SESSION_SECRET`
 
 Verify them quickly with:
 
@@ -87,8 +92,7 @@ create policy "support_cases_anon_insert"
   on public.support_cases for insert to anon with check (true);
 ```
 
-## 7. OTP Verification Notes
+## 7. Email Verification Notes
 - If users still receive a **link** instead of a **6-digit code**, the Supabase email template is still link-oriented and must be changed to `{{ .Token }}`.
 - If email verification redirects to the wrong domain, review Site URL and Redirect URLs.
-- If phone OTP fails, verify the phone auth provider is actually configured in Supabase.
-- If WhatsApp appears in the UI but cannot deliver codes, turn `PROVIDER_PHONE_OTP_WHATSAPP_ENABLED` back off until Twilio WhatsApp is confirmed.
+- If email sends fail entirely, verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel.

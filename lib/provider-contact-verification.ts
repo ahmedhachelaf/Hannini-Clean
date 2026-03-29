@@ -1,7 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
-import { isValidAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 
 /*
 SUPABASE DASHBOARD CONFIGURATION REQUIRED:
@@ -20,23 +19,13 @@ SUPABASE DASHBOARD CONFIGURATION REQUIRED:
 
 3. Authentication → Sign In / Providers:
    Email provider must be enabled.
-   Phone OTP requires a configured SMS provider (for example Twilio).
 
 4. Authentication → Rate Limits:
    Increase limits temporarily while testing if sends are throttled.
 
-5. Phone / SMS OTP:
-   Phone provider must be enabled in Supabase Auth Providers and backed
-   by a working SMS provider such as Twilio.
-
-6. WhatsApp OTP:
-   Only enable the WhatsApp channel if Twilio WhatsApp sender support is
-   fully configured. Keep it disabled in Hannini otherwise so users do
-   not see a channel that cannot deliver codes.
-
-7. If phone OTP is not configured:
-   keep PROVIDER_PHONE_OTP_ENABLED=false so the UI does not imply that
-   phone verification is available.
+5. Hannini now uses EMAIL-ONLY verification:
+   Do not configure or advertise SMS / WhatsApp OTP here unless you
+   intentionally decide to bring paid phone infrastructure back later.
 */
 
 const PENDING_COOKIE = "hannini_provider_verification_pending";
@@ -47,14 +36,12 @@ const VERIFIED_TTL_SECONDS = 60 * 60;
 const RESEND_COOLDOWN_SECONDS = 60;
 const MAX_VERIFY_ATTEMPTS = 5;
 
-export type ProviderVerificationMethod = "phone" | "email";
-export type ProviderPhoneVerificationChannel = "sms" | "whatsapp";
+export type ProviderVerificationMethod = "email";
 export type ProviderEmailVerificationMode = "otp";
 
 export type PendingProviderVerification = {
   method: ProviderVerificationMethod;
   target: string;
-  channel?: ProviderPhoneVerificationChannel;
   startedAt: string;
   expiresAt: string;
   resendAvailableAt: string;
@@ -64,7 +51,6 @@ export type PendingProviderVerification = {
 export type VerifiedProviderContact = {
   method: ProviderVerificationMethod;
   target: string;
-  channel?: ProviderPhoneVerificationChannel;
   authUserId: string;
   verifiedAt: string;
   expiresAt: string;
@@ -116,8 +102,8 @@ function isExpired(iso: string | undefined) {
 }
 
 export function normalizeVerificationTarget(method: ProviderVerificationMethod, value: string) {
-  const trimmed = value.trim();
-  return method === "phone" ? normalizeAlgerianPhone(trimmed) : trimmed.toLowerCase();
+  void method;
+  return value.trim().toLowerCase();
 }
 
 export function isEmailVerificationAvailable() {
@@ -128,55 +114,9 @@ export function getEmailVerificationMode(): ProviderEmailVerificationMode {
   return "otp";
 }
 
-export function isPhoneVerificationEnabled() {
-  return process.env.PROVIDER_PHONE_OTP_ENABLED === "true" || process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_ENABLED === "true";
-}
-
-export function getEnabledPhoneVerificationChannels(): ProviderPhoneVerificationChannel[] {
-  if (!isPhoneVerificationEnabled()) {
-    return [];
-  }
-
-  const raw = process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_CHANNELS ?? process.env.PROVIDER_PHONE_OTP_CHANNELS ?? "sms";
-  const requestedChannels = raw
-    .split(",")
-    .map((value) => value.trim().toLowerCase())
-    .filter((value): value is ProviderPhoneVerificationChannel => value === "sms" || value === "whatsapp");
-
-  const uniqueChannels: ProviderPhoneVerificationChannel[] =
-    requestedChannels.length > 0 ? Array.from(new Set(requestedChannels)) : ["sms"];
-
-  return uniqueChannels.filter((channel) => {
-    if (channel === "whatsapp") {
-      return isWhatsAppVerificationExplicitlyEnabled();
-    }
-
-    return true;
-  });
-}
-
-function isWhatsAppVerificationExplicitlyEnabled() {
-  return (
-    process.env.PROVIDER_PHONE_OTP_WHATSAPP_ENABLED === "true" ||
-    process.env.NEXT_PUBLIC_PROVIDER_PHONE_OTP_WHATSAPP_ENABLED === "true"
-  );
-}
-
-export function getDefaultPhoneVerificationChannel(): ProviderPhoneVerificationChannel {
-  return getEnabledPhoneVerificationChannels()[0] ?? "sms";
-}
-
-export function isPhoneVerificationChannelEnabled(channel: ProviderPhoneVerificationChannel) {
-  return getEnabledPhoneVerificationChannels().includes(channel);
-}
-
 export function validateVerificationTarget(method: ProviderVerificationMethod, value: string) {
-  const normalized = normalizeVerificationTarget(method, value);
-
-  if (method === "phone") {
-    return isValidAlgerianPhone(normalized);
-  }
-
+  void method;
+  const normalized = normalizeVerificationTarget("email", value);
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
 }
 
@@ -221,14 +161,12 @@ export async function getVerifiedProviderContact() {
 export async function setPendingProviderVerification(input: {
   method: ProviderVerificationMethod;
   target: string;
-  channel?: ProviderPhoneVerificationChannel;
   attempts?: number;
 }) {
   const now = Date.now();
   const payload: PendingProviderVerification = {
     method: input.method,
     target: normalizeVerificationTarget(input.method, input.target),
-    channel: input.method === "phone" ? input.channel ?? "sms" : undefined,
     startedAt: new Date(now).toISOString(),
     expiresAt: new Date(now + VERIFICATION_TTL_SECONDS * 1000).toISOString(),
     resendAvailableAt: new Date(now + RESEND_COOLDOWN_SECONDS * 1000).toISOString(),
@@ -272,14 +210,12 @@ export async function updatePendingProviderVerificationAttempts(attempts: number
 export async function setVerifiedProviderContact(input: {
   method: ProviderVerificationMethod;
   target: string;
-  channel?: ProviderPhoneVerificationChannel;
   authUserId: string;
 }) {
   const now = Date.now();
   const payload: VerifiedProviderContact = {
     method: input.method,
     target: normalizeVerificationTarget(input.method, input.target),
-    channel: input.method === "phone" ? input.channel ?? "sms" : undefined,
     authUserId: input.authUserId,
     verifiedAt: new Date(now).toISOString(),
     expiresAt: new Date(now + VERIFIED_TTL_SECONDS * 1000).toISOString(),
@@ -321,47 +257,31 @@ export function getVerificationConstants() {
   };
 }
 
-export function getVerificationDeliveryLabel(
-  method: ProviderVerificationMethod,
-  locale: "ar" | "fr",
-  channel: ProviderPhoneVerificationChannel = "sms",
-) {
-  if (method === "phone") {
-    if (channel === "whatsapp") {
-      return locale === "ar" ? "واتساب" : "WhatsApp";
-    }
-
-    return locale === "ar" ? "رسالة نصية" : "SMS";
-  }
-
+export function getVerificationDeliveryLabel(locale: "ar" | "fr") {
   return locale === "ar" ? "البريد الإلكتروني" : "e-mail";
 }
 
 export function getVerificationErrorMessage(
-  code: "unsupported_phone" | "unsupported_whatsapp" | "invalid_target" | "cooldown" | "expired" | "locked" | "missing_pending" | "not_verified",
+  code: "invalid_target" | "cooldown" | "expired" | "locked" | "missing_pending" | "not_verified",
   locale: "ar" | "fr",
 ) {
   if (locale === "ar") {
     return {
-      unsupported_phone: "التحقق عبر الهاتف غير مفعّل حالياً. استخدم البريد الإلكتروني أو فعّل مزود OTP في Supabase.",
-      unsupported_whatsapp: "التحقق عبر واتساب غير متاح حالياً. فعّل Twilio WhatsApp أولاً أو استخدم الرسالة النصية.",
-      invalid_target: "تحقق من رقم الهاتف أو البريد الإلكتروني ثم أعد المحاولة.",
+      invalid_target: "تحقق من البريد الإلكتروني ثم أعد المحاولة.",
       cooldown: "تم إرسال رمز مؤخراً. انتظر قليلاً ثم أعد الإرسال.",
       expired: "انتهت صلاحية الرمز. اطلب رمزاً جديداً.",
       locked: "تم تجاوز عدد المحاولات المسموح. اطلب رمزاً جديداً.",
       missing_pending: "ابدأ خطوة التحقق أولاً قبل إدخال الرمز.",
-      not_verified: "أكمل التحقق من الهاتف أو البريد الإلكتروني قبل إرسال الطلب.",
+      not_verified: "أكمل التحقق من البريد الإلكتروني قبل إرسال الطلب.",
     }[code];
   }
 
   return {
-    unsupported_phone: "La vérification par téléphone n'est pas activée pour le moment. Utilisez l'e-mail ou activez un fournisseur OTP dans Supabase.",
-    unsupported_whatsapp: "La vérification WhatsApp n'est pas disponible pour le moment. Activez d'abord Twilio WhatsApp ou utilisez le SMS.",
-    invalid_target: "Vérifiez le numéro ou l'e-mail puis réessayez.",
+    invalid_target: "Vérifiez l'e-mail puis réessayez.",
     cooldown: "Un code a déjà été envoyé récemment. Merci d'attendre avant de le renvoyer.",
     expired: "Le code a expiré. Demandez-en un nouveau.",
     locked: "Nombre maximum d'essais atteint. Demandez un nouveau code.",
     missing_pending: "Commencez d'abord l'étape de vérification avant de saisir le code.",
-    not_verified: "Vérifiez votre téléphone ou votre e-mail avant d'envoyer la demande.",
+    not_verified: "Vérifiez votre e-mail avant d'envoyer la demande.",
   }[code];
 }

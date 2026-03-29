@@ -73,15 +73,11 @@ export async function POST(request: Request) {
       throw new Error(locale === "ar" ? "يرجى إدخال رقم هاتف جزائري صالح." : "Veuillez saisir un numéro algérien valide.");
     }
 
-    if (!verifiedContact) {
+    if (!verifiedContact || verifiedContact.method !== "email") {
       throw new Error(getVerificationErrorMessage("not_verified", locale));
     }
 
-    const verifiedTargetMatches =
-      (verifiedContact.method === "phone" &&
-        normalizeVerificationTarget("phone", normalizedPhone) === verifiedContact.target) ||
-      (verifiedContact.method === "email" &&
-        normalizeVerificationTarget("email", payload.email || "") === verifiedContact.target);
+    const verifiedTargetMatches = normalizeVerificationTarget("email", payload.email || "") === verifiedContact.target;
 
     if (!verifiedTargetMatches) {
       throw new Error(getVerificationErrorMessage("not_verified", locale));
@@ -94,7 +90,7 @@ export async function POST(request: Request) {
       throw new Error(locale === "ar" ? "يرجى إدخال رقم واتساب جزائري صالح." : "Veuillez saisir un numéro WhatsApp algérien valide.");
     }
 
-    const profileEmail = payload.email || (verifiedContact.method === "email" ? verifiedContact.target : "");
+    const profileEmail = payload.email || verifiedContact.target;
     const generatedSlug = `${slugify(payload.workshopName || payload.fullName)}-${Date.now().toString(36).slice(-5)}`;
     const zoneSlug = getZoneSlugForCommune(payload.wilayaCode, payload.commune);
     const primaryZone = seedZones.find((zone) => zone.slug === zoneSlug);
@@ -135,8 +131,8 @@ export async function POST(request: Request) {
         dashboardUrl: `/${locale}/dashboard`,
         message:
           locale === "ar"
-            ? "تم استلام طلبك بنجاح. يمكنك تسجيل الدخول لاحقاً ببريدك الإلكتروني أو رقمك وكلمة المرور لمتابعة حالة المراجعة."
-            : "Votre demande a bien été reçue. Vous pourrez vous reconnecter plus tard avec votre e-mail ou votre numéro et votre mot de passe pour suivre l’état de la revue.",
+            ? "تم استلام طلبك بنجاح. يمكنك تسجيل الدخول لاحقاً ببريدك الإلكتروني وكلمة المرور لمتابعة حالة المراجعة."
+            : "Votre demande a bien été reçue. Vous pourrez vous reconnecter plus tard avec votre e-mail et votre mot de passe pour suivre l’état de la revue.",
       });
     }
 
@@ -153,9 +149,7 @@ export async function POST(request: Request) {
     if (!String(verifiedContact.authUserId).startsWith("demo-")) {
       const authUpdate = await supabase.auth.admin.updateUserById(verifiedContact.authUserId, {
         password: payload.password,
-        ...(verifiedContact.method === "phone"
-          ? { phone: verifiedContact.target }
-          : { email: profileEmail || verifiedContact.target }),
+        email: profileEmail || verifiedContact.target,
         user_metadata: {
           providerProfile: {
             fullName: payload.fullName,
@@ -244,9 +238,9 @@ export async function POST(request: Request) {
         ...providerInsertBase,
         email: profileEmail || null,
         auth_user_id: verifiedContact.authUserId,
-        phone_verified: verifiedContact.method === "phone",
-        email_verified: verifiedContact.method === "email",
-        verification_method: verifiedContact.method,
+        phone_verified: false,
+        email_verified: true,
+        verification_method: "email",
         contact_verified_at: verifiedContact.verifiedAt,
         ...socialLinks,
       })
@@ -378,9 +372,9 @@ export async function POST(request: Request) {
       "",
       {
         accountEmail: profileEmail,
-        phoneVerified: verifiedContact.method === "phone",
-        emailVerified: verifiedContact.method === "email",
-        verificationMethod: verifiedContact.method,
+        phoneVerified: false,
+        emailVerified: true,
+        verificationMethod: "email",
         contactVerifiedAt: verifiedContact.verifiedAt,
         verifiedAuthUserId: verifiedContact.authUserId,
         ageConfirmed: payload.ageConfirmed,
@@ -438,8 +432,8 @@ export async function POST(request: Request) {
       dashboardUrl: `/${locale}/dashboard`,
       message:
         locale === "ar"
-          ? "تم استلام طلبك بنجاح. يمكنك تسجيل الدخول لاحقاً ببريدك الإلكتروني أو رقمك وكلمة المرور لمتابعة حالة المراجعة."
-          : "Votre demande a bien été reçue. Vous pourrez vous reconnecter plus tard avec votre e-mail ou votre numéro et votre mot de passe pour suivre l’état de la revue.",
+          ? "تم استلام طلبك بنجاح. يمكنك تسجيل الدخول لاحقاً ببريدك الإلكتروني وكلمة المرور لمتابعة حالة المراجعة."
+          : "Votre demande a bien été reçue. Vous pourrez vous reconnecter plus tard avec votre e-mail et votre mot de passe pour suivre l’état de la revue.",
     });
   } catch (error) {
     console.error("provider-signups:request_failed", formatSignupErrorForLog(error));
@@ -517,6 +511,12 @@ function localizeSignupError(error: unknown, locale: "ar" | "fr") {
 
     if (issue.path[0] === "fullName") {
       return locale === "ar" ? "يرجى إدخال الاسم أو اسم المشروع." : "Veuillez saisir votre nom ou le nom du projet.";
+    }
+
+    if (issue.path[0] === "email") {
+      return locale === "ar"
+        ? "يرجى إدخال بريد إلكتروني صالح لأن التسجيل والدخول يعتمدان على البريد الإلكتروني فقط."
+        : "Veuillez saisir un e-mail valide, car l'inscription et la connexion se font uniquement par e-mail.";
     }
   }
 

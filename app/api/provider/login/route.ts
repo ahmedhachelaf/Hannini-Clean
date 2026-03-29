@@ -38,8 +38,8 @@ export async function POST(request: Request) {
           ok: false,
           message:
             locale === "ar"
-              ? "أدخل البريد الإلكتروني أو رقم الهاتف مع كلمة المرور أو رمز الوصول الاحتياطي."
-              : "Saisissez votre e-mail ou téléphone avec le mot de passe, ou le code d'accès de secours.",
+              ? "أدخل بريدك الإلكتروني مع كلمة المرور أو رمز الوصول الاحتياطي."
+              : "Saisissez votre e-mail avec le mot de passe ou le code d'accès de secours.",
         },
         { status: 400 },
       );
@@ -47,6 +47,18 @@ export async function POST(request: Request) {
 
     const identifierLower = identifier.toLowerCase();
     const isEmailLike = identifier.includes("@");
+    if (!isEmailLike) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            locale === "ar"
+              ? "استخدم البريد الإلكتروني لتسجيل الدخول. الهاتف وواتساب للتواصل فقط."
+              : "Utilisez votre e-mail pour vous connecter. Le téléphone et WhatsApp servent uniquement au contact.",
+        },
+        { status: 400 },
+      );
+    }
     let provider = null;
 
     if (isEmailLike && payload.password?.trim() && hasSupabaseServerEnv()) {
@@ -90,8 +102,8 @@ export async function POST(request: Request) {
       if (!matched) {
         failMessage =
           locale === "ar"
-            ? "لا يوجد حساب بهذا البريد الإلكتروني أو الرقم. هل تريد التسجيل كمزوّد خدمة؟"
-            : "Aucun compte trouvé avec cet e-mail ou ce numéro. Souhaitez-vous vous inscrire ?";
+            ? "لا يوجد حساب بهذا البريد الإلكتروني. هل تريد التسجيل كمزوّد خدمة؟"
+            : "Aucun compte trouvé avec cet e-mail. Souhaitez-vous vous inscrire ?";
       } else if (["submitted", "under_review", "pending", "needs_more_info"].includes(matched.status)) {
         failMessage =
           locale === "ar"

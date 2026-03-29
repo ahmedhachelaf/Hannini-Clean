@@ -120,7 +120,7 @@ export const providerSignupSchema = z.object({
   conductAccepted: z.boolean().default(false),
   policyAccepted: z.boolean().default(false),
   workshopName: z.string().optional().default(""),
-  email: z.string().optional().or(z.literal("")).default(""),
+  email: z.string().email(),
   whatsappNumber: z.string().min(8),
   shortDescription: z.string().optional().or(z.literal("")).default(""),
   yearsExperience: z.number().min(0).optional().default(0),

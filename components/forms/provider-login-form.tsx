@@ -38,8 +38,8 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
         setMessage(
           data.message ??
             (locale === "ar"
-              ? "تعذر تسجيل الدخول حالياً. تحقق من الرقم وكلمة المرور أو استخدم رمز الوصول الاحتياطي."
-              : "Connexion impossible pour le moment. Vérifiez le numéro et le mot de passe, ou utilisez le code d’accès de secours."),
+              ? "تعذر تسجيل الدخول حالياً. تحقق من البريد الإلكتروني وكلمة المرور أو استخدم رمز الوصول الاحتياطي."
+              : "Connexion impossible pour le moment. Vérifiez l’e-mail et le mot de passe, ou utilisez le code d’accès de secours."),
         );
         return;
       }
@@ -65,16 +65,16 @@ export function ProviderLoginForm({ locale }: ProviderLoginFormProps) {
         </h1>
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
           {locale === "ar"
-            ? "ادخل ببريدك الإلكتروني وكلمة المرور التي اخترتها عند الانضمام. ما زال الهاتف أو واتساب يعملان كخيار احتياطي للحسابات الأقدم."
-            : "Connectez-vous avec l’e-mail et le mot de passe choisis à l’inscription. Le téléphone ou WhatsApp restent disponibles en secours pour les comptes plus anciens."}
+            ? "ادخل ببريدك الإلكتروني وكلمة المرور التي اخترتها عند الانضمام. الهاتف وواتساب مخصّصان للتواصل فقط وليسا وسيلة دخول."
+            : "Connectez-vous avec l’e-mail et le mot de passe choisis à l’inscription. Le téléphone et WhatsApp restent des coordonnées de contact, pas une méthode de connexion."}
         </p>
       </div>
 
       <label>
         <span className="mb-2 block text-sm font-semibold text-[var(--muted)]">
-          {locale === "ar" ? "البريد الإلكتروني أو الهاتف" : "E-mail ou téléphone"}
+          {locale === "ar" ? "البريد الإلكتروني" : "E-mail"}
         </span>
-        <input name="identifier" required className="input-base" />
+        <input name="identifier" type="email" required className="input-base" />
       </label>
 
       <label>
