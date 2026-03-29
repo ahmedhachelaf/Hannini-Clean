@@ -400,8 +400,7 @@ export function ProviderSignupForm({ locale, categories, labels, callbackState }
     verificationState.pending &&
     verificationState.pending.method === verificationMethod &&
     verificationState.pending.target === activeVerificationTarget &&
-    (verificationMethod !== "phone" || !verificationState.pending.channel || verificationState.pending.channel === phoneVerificationChannel) &&
-    Date.parse(verificationState.pending.expiresAt) > clock
+    (verificationMethod !== "phone" || !verificationState.pending.channel || verificationState.pending.channel === phoneVerificationChannel)
       ? verificationState.pending
       : null;
   const verifiedForCurrentTarget =

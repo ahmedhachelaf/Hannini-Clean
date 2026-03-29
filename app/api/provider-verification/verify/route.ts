@@ -52,14 +52,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (Date.parse(pending.expiresAt) <= Date.now()) {
-      await clearPendingProviderVerification();
-      return NextResponse.json(
-        { ok: false, message: getVerificationErrorMessage("expired", locale) },
-        { status: 400 },
-      );
-    }
-
     if (pending.attempts >= constants.maxAttempts) {
       await clearPendingProviderVerification();
       return NextResponse.json(
@@ -166,6 +158,9 @@ export async function POST(request: Request) {
       await updatePendingProviderVerificationAttempts(nextAttempts);
 
       const normalizedError = verifyResult.error?.message?.toLowerCase() ?? "";
+      if (normalizedError.includes("expired")) {
+        await clearPendingProviderVerification();
+      }
       const message = normalizedError.includes("expired")
         ? getVerificationErrorMessage("expired", locale)
         : normalizedError.includes("invalid") || normalizedError.includes("token")
